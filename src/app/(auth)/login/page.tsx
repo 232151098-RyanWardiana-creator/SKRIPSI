@@ -1,0 +1,2 @@
+import { AuthForm } from "@/components/forms/AuthForm";
+export default function LoginPage() { return <main className="grid min-h-screen place-items-center bg-[#f5f5f7] p-5"><section className="card w-full max-w-md"><div className="mb-8 text-center"><p className="text-sm font-semibold uppercase tracking-widest text-[#0066cc]">Selamat datang</p><h1 className="mt-2 text-4xl font-semibold">LKPD-AI</h1><p className="mt-2 text-[#414753]">Pembelajaran Bilangan Bulat yang tepat untuk setiap siswa.</p></div><AuthForm /></section></main>; }

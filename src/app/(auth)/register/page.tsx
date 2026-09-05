@@ -1,0 +1,2 @@
+import { AuthForm } from "@/components/forms/AuthForm";
+export default function RegisterPage() { return <main className="grid min-h-screen place-items-center bg-[#f5f5f7] p-5 py-16"><section className="card w-full max-w-md"><div className="mb-7 text-center"><p className="text-sm font-semibold uppercase tracking-widest text-[#0066cc]">Mulai belajar</p><h1 className="mt-2 text-3xl font-semibold">Daftar LKPD-AI</h1><p className="mt-2 text-[#414753]">Buat akun guru atau siswa SMP.</p></div><AuthForm mode="register" /></section></main>; }
