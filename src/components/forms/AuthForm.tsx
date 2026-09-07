@@ -4,8 +4,21 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import type { Role } from "@/types";
-import { Button } from "@/components/ui/Button";
-import { LogIn, UserPlus, AlertCircle, CheckCircle2, Eye, EyeOff, Loader2, ArrowRight } from "lucide-react";
+import {
+  LogIn,
+  UserPlus,
+  AlertCircle,
+  CheckCircle2,
+  Eye,
+  EyeOff,
+  Loader2,
+  ArrowRight,
+  GraduationCap,
+  Users,
+  Sparkles,
+  KeyRound,
+  ShieldCheck,
+} from "lucide-react";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { saveStoredTeacherProfile, getStoredTeacherProfile } from "@/lib/teacher-profile";
 
@@ -75,48 +88,86 @@ export function AuthForm({ mode = "login" }: { mode?: "login" | "register" }) {
 
   return (
     <form className="space-y-4" onSubmit={handleSubmit}>
-      {/* Pemilih peran */}
-      <div className="flex rounded-xl bg-[#e1e2eb]/70 p-1">
-        {(["guru", "siswa"] as Role[]).map((item) => (
-          <button
-            className={`flex-1 rounded-lg py-2 text-sm font-medium capitalize transition-all ${
-              role === item
-                ? "bg-white text-slate-900 shadow-xs font-semibold"
-                : "text-slate-600 hover:text-slate-900"
-            }`}
-            key={item}
-            onClick={() => setRole(item)}
-            type="button"
-          >
-            Portal {item}
-          </button>
-        ))}
+      {/* Pemilih Peran Interaktif */}
+      <div className="grid grid-cols-2 gap-1.5 rounded-2xl bg-slate-100/90 p-1.5 border border-slate-200/80">
+        <button
+          className={`flex items-center justify-center gap-2 rounded-xl py-2.5 text-xs sm:text-sm font-black transition-all ${
+            role === "guru"
+              ? "bg-[#1E1B4B] text-white shadow-md shadow-indigo-950/20 scale-[1.01]"
+              : "text-slate-600 hover:text-[#1E1B4B] hover:bg-white/60"
+          }`}
+          onClick={() => setRole("guru")}
+          type="button"
+        >
+          <GraduationCap className="h-4 w-4" />
+          Portal Guru
+        </button>
+        <button
+          className={`flex items-center justify-center gap-2 rounded-xl py-2.5 text-xs sm:text-sm font-black transition-all ${
+            role === "siswa"
+              ? "bg-[#2563EB] text-white shadow-md shadow-blue-600/25 scale-[1.01]"
+              : "text-slate-600 hover:text-[#2563EB] hover:bg-white/60"
+          }`}
+          onClick={() => setRole("siswa")}
+          type="button"
+        >
+          <Users className="h-4 w-4" />
+          Portal Siswa
+        </button>
       </div>
 
       {role === "siswa" ? (
-        <div className="space-y-3 rounded-xl border border-blue-200 bg-blue-50/70 p-4 text-xs text-blue-900">
-          <p className="font-semibold text-sm">Siswa tidak perlu email dan kata sandi.</p>
-          <p className="leading-relaxed">
-            Masuk memakai <strong>kode kelas</strong> dari guru, pilih namamu, lalu buat atau isi{" "}
-            <strong>PIN 4 angka</strong> milikmu sendiri. PIN itu yang menjaga agar tidak ada teman lain
-            yang bisa mengerjakan atas namamu.
-          </p>
-          <Button className="w-full" type="button" onClick={() => router.push("/dashboard-siswa")}>
-            Lanjut ke Portal Siswa
+        <div className="space-y-4 rounded-2xl border-2 border-blue-200/80 bg-gradient-to-br from-blue-50/90 via-indigo-50/50 to-purple-50/60 p-5 shadow-xs">
+          <div className="flex items-center gap-2.5">
+            <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#2563EB] text-white shadow-sm">
+              <Sparkles className="h-4 w-4" />
+            </div>
+            <div>
+              <h3 className="text-sm font-black text-[#1E1B4B]">Masuk Tanpa Password</h3>
+              <p className="text-[11px] font-medium text-slate-600">Mudah, cepat, dan aman dengan PIN pribadi</p>
+            </div>
+          </div>
+
+          <div className="grid gap-2 text-xs font-medium text-slate-700 pt-1">
+            <div className="flex items-center gap-2.5 rounded-xl bg-white/90 px-3.5 py-2.5 border border-blue-100 shadow-2xs">
+              <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-blue-100 text-[11px] font-black text-[#2563EB]">1</span>
+              <span>Ketik <strong>Kode Kelas</strong> dari gurumu</span>
+            </div>
+            <div className="flex items-center gap-2.5 rounded-xl bg-white/90 px-3.5 py-2.5 border border-blue-100 shadow-2xs">
+              <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-indigo-100 text-[11px] font-black text-indigo-700">2</span>
+              <span>Pilih <strong>Namamu</strong> dari daftar rombel</span>
+            </div>
+            <div className="flex items-center gap-2.5 rounded-xl bg-white/90 px-3.5 py-2.5 border border-blue-100 shadow-2xs">
+              <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-purple-100 text-[11px] font-black text-purple-700">3</span>
+              <span>Masukkan <strong>PIN 4 Angka</strong> milikmu</span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-1.5 text-[11px] text-slate-500 px-1">
+            <ShieldCheck className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+            <span>PIN menjaga agar siswa lain tidak dapat mengisi atas namamu.</span>
+          </div>
+
+          <button
+            className="flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#2563EB] to-[#7C3AED] px-6 py-3.5 text-sm font-black text-white shadow-lg shadow-blue-500/25 transition-all hover:opacity-95 hover:shadow-xl hover:-translate-y-0.5 active:scale-95 cursor-pointer"
+            onClick={() => router.push("/dashboard-siswa")}
+            type="button"
+          >
+            Buka Portal Siswa
             <ArrowRight className="h-4 w-4" />
-          </Button>
+          </button>
         </div>
       ) : (
         <>
           {errorMsg && (
-            <div className="flex items-start gap-2.5 rounded-xl border border-red-200 bg-red-50/90 p-3.5 text-xs text-red-700">
-              <AlertCircle className="h-4 w-4 shrink-0 text-red-600 mt-0.5" />
-              <p className="leading-relaxed">{errorMsg}</p>
+            <div className="flex items-start gap-2.5 rounded-2xl border border-rose-200 bg-rose-50/95 p-3.5 text-xs text-rose-800">
+              <AlertCircle className="h-4 w-4 shrink-0 text-rose-600 mt-0.5" />
+              <p className="leading-relaxed font-medium">{errorMsg}</p>
             </div>
           )}
 
           {successMsg && (
-            <div className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50/90 p-3.5 text-xs text-emerald-800">
+            <div className="flex items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50/95 p-3.5 text-xs text-emerald-800 font-medium">
               <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600" />
               <p>{successMsg}</p>
             </div>
@@ -124,66 +175,78 @@ export function AuthForm({ mode = "login" }: { mode?: "login" | "register" }) {
 
           {mode === "register" && (
             <>
-              <label className="block text-xs font-semibold text-slate-700">
-                Nama Lengkap *
+              <div>
+                <label className="block text-xs font-black text-[#1E1B4B] uppercase tracking-wider mb-1.5">
+                  Nama Lengkap <span className="text-rose-500">*</span>
+                </label>
                 <input
-                  className="input mt-1.5 w-full text-sm"
-                  required
-                  value={nama}
+                  className="w-full rounded-xl border-2 border-slate-200 bg-slate-50/70 px-4 py-3 text-sm font-medium text-slate-900 transition-all focus:border-[#2563EB] focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10"
                   onChange={(e) => setNama(e.target.value)}
                   placeholder="Contoh: Ryan Wardiana, S.Pd."
-                />
-              </label>
-
-              <label className="block text-xs font-semibold text-slate-700">
-                Nama Sekolah / Instansi *
-                <input
-                  className="input mt-1.5 w-full text-sm"
                   required
-                  value={sekolah}
+                  value={nama}
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-black text-[#1E1B4B] uppercase tracking-wider mb-1.5">
+                  Nama Sekolah / Instansi <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  className="w-full rounded-xl border-2 border-slate-200 bg-slate-50/70 px-4 py-3 text-sm font-medium text-slate-900 transition-all focus:border-[#2563EB] focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10"
                   onChange={(e) => setSekolah(e.target.value)}
                   placeholder="Contoh: SMP Negeri 3 Tasikmalaya"
+                  required
+                  value={sekolah}
                 />
-              </label>
+              </div>
             </>
           )}
 
-          <label className="block text-xs font-semibold text-slate-700">
-            Email Dinas / Belajar.id *
+          <div>
+            <label className="block text-xs font-black text-[#1E1B4B] uppercase tracking-wider mb-1.5">
+              Email Guru / Belajar.id <span className="text-rose-500">*</span>
+            </label>
             <input
-              className="input mt-1.5 w-full text-sm"
+              className="w-full rounded-xl border-2 border-slate-200 bg-slate-50/70 px-4 py-3 text-sm font-medium text-slate-900 transition-all focus:border-[#2563EB] focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10"
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="guru@sekolah.sch.id"
               required
               type="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="guru@sekolah.sch.id"
             />
-          </label>
+          </div>
 
-          <label className="block text-xs font-semibold text-slate-700">
-            Kata Sandi *
-            <div className="relative mt-1.5">
+          <div>
+            <label className="block text-xs font-black text-[#1E1B4B] uppercase tracking-wider mb-1.5">
+              Kata Sandi <span className="text-rose-500">*</span>
+            </label>
+            <div className="relative">
               <input
-                className="input w-full pr-10 text-sm"
+                className="w-full rounded-xl border-2 border-slate-200 bg-slate-50/70 px-4 py-3 pr-11 text-sm font-medium text-slate-900 transition-all focus:border-[#2563EB] focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10"
                 minLength={6}
-                required
-                value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                type={show ? "text" : "password"}
                 placeholder="Minimal 6 karakter"
+                required
+                type={show ? "text" : "password"}
+                value={password}
               />
               <button
-                className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-700"
+                aria-label={show ? "Sembunyikan sandi" : "Lihat sandi"}
+                className="absolute right-3.5 top-3.5 text-slate-400 hover:text-[#1E1B4B]"
                 onClick={() => setShow(!show)}
                 type="button"
-                aria-label={show ? "Sembunyikan sandi" : "Lihat sandi"}
               >
                 {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
-          </label>
+          </div>
 
-          <Button className="w-full mt-2" type="submit" disabled={loading}>
+          <button
+            className="w-full mt-2 flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#1E1B4B] via-[#2563EB] to-[#7C3AED] py-3.5 text-sm font-black text-white shadow-lg shadow-indigo-950/20 transition-all hover:opacity-95 hover:shadow-xl hover:-translate-y-0.5 active:scale-95 disabled:opacity-50 cursor-pointer"
+            disabled={loading}
+            type="submit"
+          >
             {loading ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -192,7 +255,7 @@ export function AuthForm({ mode = "login" }: { mode?: "login" | "register" }) {
             ) : mode === "login" ? (
               <>
                 <LogIn className="h-4 w-4" />
-                Masuk ke Portal Guru
+                Masuk ke Akun Guru
               </>
             ) : (
               <>
@@ -200,12 +263,12 @@ export function AuthForm({ mode = "login" }: { mode?: "login" | "register" }) {
                 Daftar Akun Guru
               </>
             )}
-          </Button>
+          </button>
 
-          <p className="pt-2 text-center text-xs text-slate-500">
-            {mode === "login" ? "Belum memiliki akun?" : "Sudah memiliki akun?"}{" "}
+          <p className="pt-2 text-center text-xs font-semibold text-slate-500">
+            {mode === "login" ? "Belum memiliki akun guru?" : "Sudah memiliki akun?"}{" "}
             <Link
-              className="font-semibold text-blue-600 hover:underline"
+              className="font-bold text-[#2563EB] hover:underline"
               href={mode === "login" ? "/register" : "/login"}
             >
               {mode === "login" ? "Daftar sekarang" : "Masuk di sini"}
