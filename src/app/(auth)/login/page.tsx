@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft, BookOpenCheck, Brain, Compass, Sparkles, TrendingUp } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { AuthForm } from "@/components/forms/AuthForm";
 
 export default function LoginPage() {
@@ -9,30 +9,6 @@ export default function LoginPage() {
       <div className="pointer-events-none absolute -top-32 -left-20 h-96 w-96 rounded-full bg-gradient-to-br from-blue-400/30 to-indigo-500/30 blur-3xl animate-pulse" />
       <div className="pointer-events-none absolute -bottom-32 -right-20 h-96 w-96 rounded-full bg-gradient-to-tl from-purple-400/30 to-pink-500/30 blur-3xl" />
       <div className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[600px] w-[600px] rounded-full bg-indigo-300/15 blur-3xl" />
-
-      {/* Floating Interactive Math Tags (Left Side) */}
-      <aside aria-label="Aksen Matematika Kiri" className="pointer-events-none absolute left-8 top-1/4 hidden 2xl:flex flex-col gap-4">
-        <div className="flex items-center gap-2 rounded-2xl border border-rose-200 bg-white/90 px-4 py-2.5 text-xs font-black text-rose-600 shadow-lg shadow-rose-500/10 backdrop-blur-md -rotate-6">
-          <span className="grid h-6 w-6 place-items-center rounded-lg bg-rose-100 text-rose-600">±</span>
-          <span>Level Dasar • (-3) - 4 = -7</span>
-        </div>
-        <div className="flex items-center gap-2 rounded-2xl border border-blue-200 bg-white/90 px-4 py-2.5 text-xs font-black text-[#2563EB] shadow-lg shadow-blue-500/10 backdrop-blur-md rotate-3">
-          <Brain className="h-4 w-4 text-[#2563EB]" />
-          <span>TaRL Berdiferensiasi</span>
-        </div>
-      </aside>
-
-      {/* Floating Interactive Math Tags (Right Side) */}
-      <aside aria-label="Aksen Matematika Kanan" className="pointer-events-none absolute right-8 bottom-1/4 hidden 2xl:flex flex-col gap-4">
-        <div className="flex items-center gap-2 rounded-2xl border border-amber-200 bg-white/90 px-4 py-2.5 text-xs font-black text-amber-600 shadow-lg shadow-amber-500/10 backdrop-blur-md rotate-6">
-          <span className="grid h-6 w-6 place-items-center rounded-lg bg-amber-100 text-amber-700 font-mono">×</span>
-          <span>Level Menengah • (-14) + 20 = 6</span>
-        </div>
-        <div className="flex items-center gap-2 rounded-2xl border border-purple-200 bg-white/90 px-4 py-2.5 text-xs font-black text-purple-700 shadow-lg shadow-purple-500/10 backdrop-blur-md -rotate-3">
-          <Sparkles className="h-4 w-4 text-purple-600" />
-          <span>HOTS • Masalah Kontekstual</span>
-        </div>
-      </aside>
 
       {/* Header Navigation Bar */}
       <div className="w-full max-w-md mb-4 flex justify-between items-center z-10">
