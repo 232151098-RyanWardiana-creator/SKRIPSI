@@ -215,15 +215,15 @@ export default function Home() {
           <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
             <Link
               href="/login"
-              className="flex items-center gap-2 rounded-full bg-[#7C3AED] px-8 py-3.5 text-sm font-black text-white shadow-lg shadow-[#7C3AED]/30 transition-all hover:bg-[#6D28D9] hover:shadow-xl hover:-translate-y-0.5 active:scale-95"
+              className="flex items-center justify-center rounded-full bg-[#7C3AED] px-8 py-3.5 text-sm font-black text-white shadow-lg shadow-[#7C3AED]/30 transition-all hover:bg-[#6D28D9] hover:shadow-xl hover:-translate-y-0.5 active:scale-95"
             >
-              <Rocket className="h-4 w-4" /> Masuk Portal
+              Masuk Portal
             </Link>
             <Link
               href="/generator"
-              className="flex items-center gap-2 rounded-full border-2 border-slate-200 bg-white px-7 py-3.5 text-sm font-black text-slate-800 shadow-xs transition-all hover:border-[#2563EB] hover:text-[#2563EB] hover:-translate-y-0.5 active:scale-95"
+              className="flex items-center justify-center rounded-full border-2 border-slate-200 bg-white px-7 py-3.5 text-sm font-black text-slate-800 shadow-xs transition-all hover:border-[#2563EB] hover:text-[#2563EB] hover:-translate-y-0.5 active:scale-95"
             >
-              <Sparkles className="h-4 w-4 text-[#EC4899]" /> Generator LKPD
+              Generator LKPD
             </Link>
           </div>
 
@@ -556,9 +556,8 @@ export default function Home() {
             </div>
             <Link
               href="/login"
-              className="flex shrink-0 items-center gap-2 rounded-full bg-white px-8 py-3.5 text-sm font-black text-[#2563EB] shadow-lg transition-all hover:bg-slate-50 hover:shadow-xl hover:scale-105 active:scale-95"
+              className="flex shrink-0 items-center justify-center rounded-full bg-white px-8 py-3.5 text-sm font-black text-[#2563EB] shadow-lg transition-all hover:bg-slate-50 hover:shadow-xl hover:scale-105 active:scale-95"
             >
-              <Rocket className="h-4 w-4 text-[#7C3AED]" />
               Masuk Portal
             </Link>
           </div>
