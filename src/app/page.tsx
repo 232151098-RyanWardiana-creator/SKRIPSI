@@ -152,25 +152,23 @@ export default function Home() {
 
           {/* Scrollspy Navigation Pills */}
           {[
-            { id: "home", label: "Beranda", icon: HomeIcon },
-            { id: "keunggulan", label: "Keunggulan", icon: Sparkles },
-            { id: "simulasi", label: "Simulasi TaRL", icon: Sliders },
-            { id: "alur", label: "Alur Guru", icon: Rocket },
+            { id: "home", label: "Beranda" },
+            { id: "keunggulan", label: "Keunggulan" },
+            { id: "simulasi", label: "Simulasi TaRL" },
+            { id: "alur", label: "Alur Guru" },
           ].map((item) => {
-            const Icon = item.icon;
             const isActive = activeSection === item.id;
             return (
               <a
                 key={item.id}
                 href={`#${item.id}`}
-                className={`flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all ${
+                className={`flex items-center rounded-full px-3.5 py-1.5 text-xs font-bold transition-all ${
                   isActive
                     ? "bg-[#2563EB] text-white shadow-md"
                     : "text-[#1E1B4B]/70 hover:bg-[#1E1B4B]/5 hover:text-[#1E1B4B]"
                 }`}
               >
-                <Icon className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">{item.label}</span>
+                <span>{item.label}</span>
               </a>
             );
           })}
@@ -180,7 +178,7 @@ export default function Home() {
             href="/login"
             className="flex items-center gap-1.5 rounded-full bg-[#1E1B4B] px-4 py-1.5 text-xs font-black text-white shadow-sm transition hover:bg-[#2563EB] active:scale-95"
           >
-            <LogIn className="h-3.5 w-3.5" /> Portal Guru
+            <LogIn className="h-3.5 w-3.5" /> Masuk Portal
           </Link>
         </nav>
       </header>
@@ -219,7 +217,7 @@ export default function Home() {
               href="/login"
               className="flex items-center gap-2 rounded-full bg-[#7C3AED] px-8 py-3.5 text-sm font-black text-white shadow-lg shadow-[#7C3AED]/30 transition-all hover:bg-[#6D28D9] hover:shadow-xl hover:-translate-y-0.5 active:scale-95"
             >
-              <Rocket className="h-4 w-4" /> Masuk Portal Guru
+              <Rocket className="h-4 w-4" /> Masuk Portal
             </Link>
             <Link
               href="/generator"
@@ -561,7 +559,7 @@ export default function Home() {
               className="flex shrink-0 items-center gap-2 rounded-full bg-white px-8 py-3.5 text-sm font-black text-[#2563EB] shadow-lg transition-all hover:bg-slate-50 hover:shadow-xl hover:scale-105 active:scale-95"
             >
               <Rocket className="h-4 w-4 text-[#7C3AED]" />
-              Masuk Portal Guru
+              Masuk Portal
             </Link>
           </div>
         </div>
