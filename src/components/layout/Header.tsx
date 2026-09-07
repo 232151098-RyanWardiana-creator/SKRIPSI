@@ -1,28 +1,20 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Menu } from "lucide-react";
 import { GeneratorLogo } from "@/components/ui/GeneratorLogo";
 import { useDrawer } from "./DrawerContext";
-import { getStoredTeacherProfile } from "@/lib/teacher-profile";
+import { useTeacherProfile } from "@/lib/teacher-profile";
+import { useSesiSiswa } from "@/lib/student-session";
 import { initials } from "@/lib/utils";
 
 export function Header({ role = "Guru" }: { role?: "Guru" | "Siswa" }) {
   const { open } = useDrawer();
-  const [teacherName, setTeacherName] = useState("Ryan Wardiana");
+  const profile = useTeacherProfile();
+  const sesi = useSesiSiswa();
 
-  useEffect(() => {
-    const update = () => {
-      const p = getStoredTeacherProfile();
-      setTeacherName(p.nama);
-    };
-    update();
-    window.addEventListener("teacher_profile_updated", update);
-    return () => window.removeEventListener("teacher_profile_updated", update);
-  }, []);
-
-  const displayName = role === "Guru" ? teacherName : "Siswa";
+  const displayName =
+    role === "Guru" ? profile.nama || "Guru" : sesi?.nama || "Siswa";
   const profileHref = role === "Guru" ? "/pengaturan" : "/dashboard-siswa";
 
   return (

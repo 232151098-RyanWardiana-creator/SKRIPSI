@@ -1,5 +1,11 @@
+"use client";
+
+import { useEffect, useSyncExternalStore } from "react";
+import { isSupabaseConfigured, supabase } from "@/lib/supabase";
+import { ensureUUID, isUUID } from "@/lib/utils";
 import type { Level } from "@/types";
 
+/** Riwayat LKPD hasil generate AI. Sumber data: tabel `lkpd_documents`. */
 export interface LkpdHistoryEntry {
   id: string;
   judul: string;
@@ -14,13 +20,21 @@ export interface LkpdHistoryEntry {
   model: string;
   validatedAt?: string | null;
   isFallback?: boolean;
+  dibagikan?: boolean;
   source?: "online" | "mock";
 }
 
-export const HISTORY_STORAGE_KEY = "lkpd_history_entries_v1";
+export const HISTORY_UPDATED_EVENT = "lkpd_history_updated";
 
-const LEVELS: Level[] = ["dasar", "menengah", "mahir"];
-const STATUSES: LkpdHistoryEntry["status"][] = ["Tervalidasi", "Draf"];
+const EMPTY: LkpdHistoryEntry[] = [];
+let cache = EMPTY;
+
+const emit = () => window.dispatchEvent(new Event(HISTORY_UPDATED_EVENT));
+
+function subscribe(listener: () => void) {
+  window.addEventListener(HISTORY_UPDATED_EVENT, listener);
+  return () => window.removeEventListener(HISTORY_UPDATED_EVENT, listener);
+}
 
 export function normalizePlainText(value: unknown): string {
   if (typeof value !== "string") return "";
@@ -40,83 +54,99 @@ export function sanitizeFilename(value: unknown): string {
   return normalized || "LKPD";
 }
 
-function parseHistoryEntry(value: unknown): LkpdHistoryEntry | null {
-  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
-  const item = value as Record<string, unknown>;
-  if (
-    typeof item.id !== "string" || !item.id.trim() ||
-    typeof item.content !== "string" ||
-    typeof item.dibuat_pada !== "string" ||
-    typeof item.model !== "string" ||
-    !LEVELS.includes(item.level as Level) ||
-    !STATUSES.includes(item.status as LkpdHistoryEntry["status"]) ||
-    (item.validatedAt !== undefined && item.validatedAt !== null && typeof item.validatedAt !== "string")
-  ) return null;
+const tanggalId = (iso: string) =>
+  new Date(iso).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
 
-  return {
-    id: normalizePlainText(item.id),
-    judul: normalizePlainText(item.judul),
-    topik: normalizePlainText(item.topik),
-    level: item.level as Level,
-    kelas: normalizePlainText(item.kelas),
-    kelasId: typeof item.kelasId === "string" ? normalizePlainText(item.kelasId) : undefined,
-    tanggal: normalizePlainText(item.tanggal),
-    dibuat_pada: item.dibuat_pada,
-    status: item.status as LkpdHistoryEntry["status"],
-    content: item.content.replace(/\u0000/g, ""),
-    model: normalizePlainText(item.model),
-    validatedAt: item.validatedAt as string | null | undefined,
-    isFallback: typeof item.isFallback === "boolean" ? item.isFallback : undefined,
-    source: item.source === "online" || item.source === "mock" ? item.source : undefined,
-  };
+export function getStoredHistory() {
+  return cache;
 }
 
-export function getStoredHistory(): LkpdHistoryEntry[] {
-  if (typeof window === "undefined") return [];
-  try {
-    const raw = localStorage.getItem(HISTORY_STORAGE_KEY);
-    if (raw) {
-      const parsed: unknown = JSON.parse(raw);
-      if (Array.isArray(parsed)) {
-        return parsed.flatMap(item => {
-          const valid = parseHistoryEntry(item);
-          return valid ? [valid] : [];
-        });
-      }
-    }
-  } catch {
-    // A corrupt or unavailable store must produce a clean slate.
+export async function refreshHistory(): Promise<LkpdHistoryEntry[]> {
+  if (!isSupabaseConfigured) return cache;
+  const { data, error } = await supabase
+    .from("lkpd_documents")
+    .select("*")
+    .order("dibuat_pada", { ascending: false });
+  if (error || !data) {
+    if (error) console.warn("Supabase refreshHistory error:", error);
+    return cache;
   }
-  return [];
+  cache = data.map((row) => ({
+    id: row.id,
+    judul: row.judul,
+    topik: row.materi ?? "",
+    level: row.level as Level,
+    kelas: row.kelas_nama ?? "",
+    kelasId: row.kelas_id ?? undefined,
+    tanggal: tanggalId(row.dibuat_pada),
+    dibuat_pada: row.dibuat_pada,
+    status: row.status === "validated" ? "Tervalidasi" : "Draf",
+    content: row.konten ?? "",
+    model: row.model ?? "",
+    validatedAt: row.divalidasi_pada ?? null,
+    isFallback: Boolean(row.is_fallback),
+    dibagikan: Boolean(row.dibagikan),
+    source: row.is_fallback ? "mock" : "online",
+  }));
+  emit();
+  return cache;
 }
 
-export function saveHistoryEntry(entry: LkpdHistoryEntry): void {
-  if (typeof window === "undefined") return;
-  try {
-    const current = getStoredHistory();
-    const existingIndex = current.findIndex(item => item.id === entry.id);
-    let updated: LkpdHistoryEntry[];
-    if (existingIndex >= 0) {
-      updated = [...current];
-      updated[existingIndex] = entry;
-    } else {
-      updated = [entry, ...current];
-    }
-    localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(updated));
-    window.dispatchEvent(new Event("lkpd_history_updated"));
-  } catch {
-    // ignore
-  }
+export async function saveHistoryEntry(entry: LkpdHistoryEntry): Promise<boolean> {
+  if (!isSupabaseConfigured) return false;
+  const { error } = await supabase.from("lkpd_documents").upsert({
+    id: ensureUUID(entry.id),
+    judul: entry.judul,
+    kelas_id: isUUID(entry.kelasId) ? entry.kelasId : entry.kelasId ? ensureUUID(entry.kelasId) : null,
+    kelas_nama: entry.kelas,
+    materi: entry.topik,
+    level: entry.level,
+    konten: entry.content,
+    status: entry.status === "Tervalidasi" ? "validated" : "draft",
+    model: entry.model,
+    is_fallback: entry.isFallback ?? false,
+    divalidasi_pada: entry.validatedAt ?? null,
+    dibuat_pada: entry.dibuat_pada,
+  });
+  if (error) return console.error("Gagal menyimpan riwayat LKPD:", error), false;
+  await refreshHistory();
+  return true;
 }
 
-export function deleteHistoryEntry(id: string): void {
-  if (typeof window === "undefined") return;
-  try {
-    const current = getStoredHistory();
-    const updated = current.filter(item => item.id !== id);
-    localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(updated));
-    window.dispatchEvent(new Event("lkpd_history_updated"));
-  } catch {
-    // ignore
-  }
+export async function deleteHistoryEntry(id: string): Promise<boolean> {
+  if (!isSupabaseConfigured) return false;
+  const { error } = await supabase.from("lkpd_documents").delete().eq("id", ensureUUID(id));
+  if (error) return console.error("Gagal menghapus riwayat LKPD:", error), false;
+  await refreshHistory();
+  return true;
+}
+
+/** Menandai LKPD dibagikan / ditarik dari siswa. */
+export async function setLkpdDibagikan(id: string, dibagikan: boolean): Promise<boolean> {
+  if (!isSupabaseConfigured) return false;
+  const { error } = await supabase
+    .from("lkpd_documents")
+    .update({ dibagikan })
+    .eq("id", ensureUUID(id));
+  if (error) return console.error("Gagal mengubah status bagikan:", error), false;
+  await refreshHistory();
+  return true;
+}
+
+export function useHistoryStore() {
+  const history = useSyncExternalStore(subscribe, getStoredHistory, () => EMPTY);
+  useEffect(() => {
+    void refreshHistory();
+    if (!isSupabaseConfigured) return;
+    const channel = supabase
+      .channel(`history-store-${Math.random().toString(36).slice(2, 9)}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "lkpd_documents" }, () =>
+        void refreshHistory()
+      )
+      .subscribe();
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, []);
+  return { history };
 }

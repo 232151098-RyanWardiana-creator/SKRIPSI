@@ -24,3 +24,8 @@ export interface HasilAsesmen { id: string; siswa_id: string; asesmen_id: string
 export interface AssessmentSubmission extends HasilAsesmen { jawaban: Record<string, AnswerKey>; selesai: boolean; diperbarui_pada: string }
 export interface LKPD { id: string; judul: string; asesmen_id: string; level: Level; konten: string; status: "draft" | "validated"; dibuat_pada: string; kelas?: string; materi?: string }
 export interface Siswa { id: string; nama: string; no_absen?: number; nisn?: string; bergabung: string }
+
+/** Kelas + siswa sebagaimana dipakai layar guru. Nama historis dari fase mock. */
+export interface KelasMock extends Kelas { wali_kelas: string }
+export interface SiswaMock extends Siswa { kelas_id: string; no_absen: number; gaya_belajar: GayaBelajar; level?: Level; punya_pin?: boolean }
+

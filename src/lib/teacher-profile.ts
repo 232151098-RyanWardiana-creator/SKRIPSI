@@ -1,3 +1,8 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { isSupabaseConfigured, supabase } from "@/lib/supabase";
+
 export interface TeacherProfile {
   nama: string;
   gelar: string;
@@ -13,14 +18,15 @@ export interface TeacherProfile {
   exportFormat: "word" | "pdf";
 }
 
+/** Kosong, bukan data contoh: profil nyata diisi guru lewat halaman Pengaturan. */
 export const DEFAULT_TEACHER_PROFILE: TeacherProfile = {
-  nama: "Ryan Wardiana",
-  gelar: "S.Pd.",
-  nip: "19980809 202401 1 002",
-  email: "ryan.wardiana@guru.smp.belajar.id",
-  noHp: "0812-3456-7890",
-  sekolah: "SMP Negeri 7 Nusantara",
-  alamatSekolah: "Jl. Pendidikan No. 45, Kota Bandung",
+  nama: "",
+  gelar: "",
+  nip: "",
+  email: "",
+  noHp: "",
+  sekolah: "",
+  alamatSekolah: "",
   mataPelajaran: "Matematika",
   faseJenjang: "Fase D (SMP Kelas VII)",
   kurikulum: "Kurikulum Merdeka",
@@ -28,27 +34,78 @@ export const DEFAULT_TEACHER_PROFILE: TeacherProfile = {
   exportFormat: "word",
 };
 
-export const PROFILE_STORAGE_KEY = "lkpd_teacher_profile_v1";
+export const PROFILE_UPDATED_EVENT = "teacher_profile_updated";
 
-export function getStoredTeacherProfile(): TeacherProfile {
-  if (typeof window === "undefined") return DEFAULT_TEACHER_PROFILE;
-  try {
-    const raw = localStorage.getItem(PROFILE_STORAGE_KEY);
-    if (raw) {
-      return { ...DEFAULT_TEACHER_PROFILE, ...JSON.parse(raw) };
-    }
-  } catch {
-    // fallback
-  }
-  return DEFAULT_TEACHER_PROFILE;
+let cache: TeacherProfile = DEFAULT_TEACHER_PROFILE;
+
+const rowToProfile = (row: Record<string, unknown>): TeacherProfile => ({
+  nama: (row.nama as string) ?? "",
+  gelar: (row.gelar as string) ?? "",
+  nip: (row.nip as string) ?? "",
+  email: (row.email as string) ?? "",
+  noHp: (row.no_hp as string) ?? "",
+  sekolah: (row.sekolah as string) ?? "",
+  alamatSekolah: (row.alamat_sekolah as string) ?? "",
+  mataPelajaran: (row.mata_pelajaran as string) ?? DEFAULT_TEACHER_PROFILE.mataPelajaran,
+  faseJenjang: (row.fase_jenjang as string) ?? DEFAULT_TEACHER_PROFILE.faseJenjang,
+  kurikulum: (row.kurikulum as string) ?? DEFAULT_TEACHER_PROFILE.kurikulum,
+  modelAi: (row.model_ai as string) ?? DEFAULT_TEACHER_PROFILE.modelAi,
+  exportFormat: row.export_format === "pdf" ? "pdf" : "word",
+});
+
+export function getStoredTeacherProfile() {
+  return cache;
 }
 
-export function saveStoredTeacherProfile(profile: TeacherProfile): void {
-  if (typeof window === "undefined") return;
-  try {
-    localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(profile));
-    window.dispatchEvent(new Event("teacher_profile_updated"));
-  } catch {
-    // ignore
+/** Profil guru yang sedang login (tabel `profiles`, kunci = id Supabase Auth). */
+export async function refreshTeacherProfile(): Promise<TeacherProfile> {
+  if (!isSupabaseConfigured) return cache;
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return cache;
+  const { data } = await supabase.from("profiles").select("*").eq("id", user.id).maybeSingle();
+  if (data) {
+    cache = rowToProfile(data);
+    window.dispatchEvent(new Event(PROFILE_UPDATED_EVENT));
   }
+  return cache;
+}
+
+export async function saveStoredTeacherProfile(profile: TeacherProfile): Promise<boolean> {
+  if (!isSupabaseConfigured) return false;
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return false;
+  const { error } = await supabase.from("profiles").upsert({
+    id: user.id,
+    email: profile.email || user.email,
+    nama: profile.nama,
+    gelar: profile.gelar,
+    nip: profile.nip,
+    no_hp: profile.noHp,
+    sekolah: profile.sekolah,
+    alamat_sekolah: profile.alamatSekolah,
+    mata_pelajaran: profile.mataPelajaran,
+    fase_jenjang: profile.faseJenjang,
+    kurikulum: profile.kurikulum,
+    model_ai: profile.modelAi,
+    export_format: profile.exportFormat,
+  });
+  if (error) return console.error("Gagal menyimpan profil guru:", error), false;
+  cache = profile;
+  window.dispatchEvent(new Event(PROFILE_UPDATED_EVENT));
+  return true;
+}
+
+export function useTeacherProfile() {
+  const [profile, setProfile] = useState<TeacherProfile>(cache);
+  useEffect(() => {
+    const sync = () => setProfile(getStoredTeacherProfile());
+    void refreshTeacherProfile().then(sync);
+    window.addEventListener(PROFILE_UPDATED_EVENT, sync);
+    return () => window.removeEventListener(PROFILE_UPDATED_EVENT, sync);
+  }, []);
+  return profile;
 }

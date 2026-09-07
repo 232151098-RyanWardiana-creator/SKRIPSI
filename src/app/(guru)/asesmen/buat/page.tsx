@@ -19,7 +19,7 @@ export default function BuatAsesmenPage() {
   const kelasSelected = classes.find(({ kelas }) => kelas.id === selectedClassId) ?? classes[0];
   const handleDraftChange = useCallback((next: AsesmenDraft) => setDraft(next), []);
 
-  const handlePublish = () => {
+  const handlePublish = async () => {
     if (!draft || !kelasSelected || !draft.judul.trim() || draft.soal.length === 0) return;
     const id = generateUUID();
     const now = new Date().toISOString();
@@ -46,7 +46,7 @@ export default function BuatAsesmenPage() {
         indikator: item.indikator,
       })),
     };
-    if (upsertAssessment(assessment)) setPublished(assessment);
+    if (await upsertAssessment(assessment)) setPublished(assessment);
   };
 
   const portalLink = published ? `${window.location.origin}/asesmen-saya` : "";

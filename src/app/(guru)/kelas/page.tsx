@@ -1,14 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { type SiswaMock, type KelasMock } from "@/lib/mock-data";
-import { useClassStore } from "@/lib/class-store";
-import { loadDemoData, resetAllData } from "@/lib/app-data";
+import { type SiswaMock, type KelasMock } from "@/types";
+import { useClassStore, resetStudentPin } from "@/lib/class-store";
 import { Button } from "@/components/ui/Button";
 import { ProgresAlur } from "@/components/ui/ProgresAlur";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
+import { DemoDataPanel } from "@/components/forms/DemoDataPanel";
 import { initials, generateUUID } from "@/lib/utils";
-import { Edit2, Plus, Printer, Trash2, UserPlus, X, Check, Copy } from "lucide-react";
+import { Edit2, KeyRound, Plus, Printer, Trash2, UserPlus, X, Check, Copy } from "lucide-react";
 
 export default function KelasPage() {
   const { classes: dataStore, updateClasses: setDataStore } = useClassStore();
@@ -17,17 +17,9 @@ export default function KelasPage() {
   const [modalTambahSiswa, setModalTambahSiswa] = useState(false);
   const [modalCetakKode, setModalCetakKode] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [dataMessage, setDataMessage] = useState("");
-  const [resetOpen, setResetOpen] = useState(false);
   const [pendingStudent, setPendingStudent] = useState<{ id: string; nama: string; kelasId: string; kelasNama: string } | null>(null);
+  const [pendingReset, setPendingReset] = useState<{ id: string; nama: string } | null>(null);
 
-  const muatDemo = () => {
-    if (loadDemoData()) setDataMessage("Data simulasi berhasil dimuat!");
-  };
-  const resetMurni = () => {
-    if (resetAllData()) { setActiveId(""); setDataMessage("Seluruh data berhasil dikosongkan."); }
-    setResetOpen(false);
-  };
 
   // Edit form state
   const [formNamaKelas, setFormNamaKelas] = useState("");
@@ -44,11 +36,11 @@ export default function KelasPage() {
   const activeKelas = activeStore?.kelas;
   const siswaList = activeStore?.siswa ?? [];
 
-  const dataControls = <div className="mb-6 rounded-2xl border border-dashed border-[#b8c6d9] bg-white p-4"><div className="flex flex-wrap gap-2"><Button variant="secondary" onClick={muatDemo}>Muat Data Simulasi (60 Siswa)</Button><Button variant="ghost" className="text-red-700" onClick={() => setResetOpen(true)}>Kosongkan Seluruh Data</Button></div>{dataMessage && <p role="status" className="mt-3 font-semibold text-green-700">{dataMessage}</p>}</div>;
+  const dataControls = <DemoDataPanel />;
 
   if (!activeKelas) {
     const initialId = generateUUID();
-    return <div><ProgresAlur current={0} />{dataControls}<div className="card text-center"><h1 className="text-2xl font-semibold">Belum ada kelas</h1><p className="mt-2 text-[#6b7280]">Data masih kosong. Buat kelas baru atau muat data simulasi untuk memulai.</p><Button className="mt-4" onClick={() => setDataStore([{ kelas: { id: initialId, nama: "VII-A", wali_kelas: "Guru Pengampu, S.Pd.", tahun_ajaran: "2026/2027", kode_undangan: `VIIA-K${Math.floor(100 + Math.random() * 900)}`, guru_id: "", jumlah_siswa: 0 }, siswa: [] }])}><Plus className="h-4 w-4" />Tambah Kelas Baru</Button></div><ConfirmModal isOpen={resetOpen} title="Kosongkan seluruh data?" description="Seluruh data kelas, asesmen, hasil, riwayat LKPD, dan sesi siswa akan dihapus. Tindakan ini tidak dapat dibatalkan." confirmText="Kosongkan Data" variant="danger" onConfirm={resetMurni} onCancel={() => setResetOpen(false)} /></div>;
+    return <div><ProgresAlur current={0} />{dataControls}<div className="card text-center"><h1 className="text-2xl font-semibold">Belum ada kelas</h1><p className="mt-2 text-[#6b7280]">Data masih kosong. Buat kelas baru untuk memulai.</p><Button className="mt-4" onClick={() => setDataStore([{ kelas: { id: initialId, nama: "VII-A", wali_kelas: "Guru Pengampu, S.Pd.", tahun_ajaran: "2026/2027", kode_undangan: `VIIA-K${Math.floor(100 + Math.random() * 900)}`, guru_id: "", jumlah_siswa: 0 }, siswa: [] }])}><Plus className="h-4 w-4" />Tambah Kelas Baru</Button></div></div>;
   }
 
   const bukaEditKelas = () => {
@@ -157,7 +149,7 @@ export default function KelasPage() {
   return (
     <div>
       <ProgresAlur current={0} />
-      {dataControls}
+      <div className="mb-6">{dataControls}</div>
       <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-sm font-semibold uppercase tracking-widest text-[#0066cc]">Administrasi Rombel</p>
@@ -234,6 +226,7 @@ export default function KelasPage() {
                   <th className="pb-3">Nama Peserta Didik</th>
                   <th className="pb-3">NISN</th>
                   <th className="pb-3">Gaya Belajar</th>
+                  <th className="pb-3">PIN</th>
                   <th className="pb-3">Bergabung</th>
                   <th className="pb-3 text-right">Aksi</th>
                 </tr>
@@ -262,8 +255,24 @@ export default function KelasPage() {
                         <span className="text-xs text-[#9ca3af]">Belum asesmen</span>
                       )}
                     </td>
+                    <td className="py-4">
+                      {item.punya_pin ? (
+                        <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-medium text-emerald-800">Terkunci</span>
+                      ) : (
+                        <span className="text-xs text-[#9ca3af]">Belum dibuat</span>
+                      )}
+                    </td>
                     <td className="py-4 text-xs text-[#6b7280]">{item.bergabung}</td>
                     <td className="py-4 text-right">
+                      {item.punya_pin && (
+                        <button
+                          onClick={() => setPendingReset({ id: item.id, nama: item.nama })}
+                          className="mr-1 rounded-lg p-1.5 text-amber-600 hover:bg-amber-50 hover:text-amber-800"
+                          title="Reset PIN siswa (lupa PIN)"
+                        >
+                          <KeyRound className="h-4 w-4" />
+                        </button>
+                      )}
                       <button
                         onClick={() => setPendingStudent({ id: item.id, nama: item.nama, kelasId: activeKelas.id, kelasNama: activeKelas.nama })}
                         className="rounded-lg p-1.5 text-red-500 hover:bg-red-50 hover:text-red-700"
@@ -405,8 +414,18 @@ export default function KelasPage() {
       )}
 
       {/* Modal Cetak Kode Undangan Kelas */}
-      <ConfirmModal isOpen={resetOpen} title="Kosongkan seluruh data?" description="Seluruh data kelas, asesmen, hasil, riwayat LKPD, dan sesi siswa akan dihapus. Tindakan ini tidak dapat dibatalkan." confirmText="Kosongkan Data" variant="danger" onConfirm={resetMurni} onCancel={() => setResetOpen(false)} />
       <ConfirmModal isOpen={pendingStudent !== null} title="Hapus siswa?" description={pendingStudent ? `Hapus ${pendingStudent.nama} dari daftar kelas ${pendingStudent.kelasNama}?` : ""} confirmText="Hapus Siswa" variant="danger" onConfirm={hapusSiswa} onCancel={() => setPendingStudent(null)} />
+      <ConfirmModal
+        isOpen={pendingReset !== null}
+        title="Reset PIN siswa?"
+        description={pendingReset ? `PIN ${pendingReset.nama} akan dihapus. Saat login berikutnya, ia membuat PIN baru sendiri. Jawaban dan hasil asesmennya tidak terpengaruh.` : ""}
+        confirmText="Reset PIN"
+        onConfirm={async () => {
+          if (pendingReset) await resetStudentPin(pendingReset.id);
+          setPendingReset(null);
+        }}
+        onCancel={() => setPendingReset(null)}
+      />
 
       {modalCetakKode && (
         <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 p-4">

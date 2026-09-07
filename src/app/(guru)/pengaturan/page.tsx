@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import {
   DEFAULT_TEACHER_PROFILE,
-  getStoredTeacherProfile,
+  refreshTeacherProfile,
   saveStoredTeacherProfile,
   type TeacherProfile,
 } from "@/lib/teacher-profile";
@@ -14,12 +14,10 @@ import { CheckCircle2, Save, School, Settings, User, Cpu } from "lucide-react";
 export default function PengaturanPage() {
   const [profile, setProfile] = useState<TeacherProfile>(DEFAULT_TEACHER_PROFILE);
   const [savedSuccess, setSavedSuccess] = useState(false);
+  const [saveError, setSaveError] = useState("");
 
   useEffect(() => {
-    const frame = window.requestAnimationFrame(() => {
-      setProfile(getStoredTeacherProfile());
-    });
-    return () => window.cancelAnimationFrame(frame);
+    void refreshTeacherProfile().then(setProfile);
   }, []);
 
   const handleChange = (field: keyof TeacherProfile, value: string) => {
@@ -27,11 +25,12 @@ export default function PengaturanPage() {
     setSavedSuccess(false);
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    saveStoredTeacherProfile(profile);
-    setSavedSuccess(true);
-    setTimeout(() => setSavedSuccess(false), 4000);
+    const ok = await saveStoredTeacherProfile(profile);
+    setSaveError(ok ? "" : "Gagal menyimpan. Pastikan Anda sudah login sebagai guru.");
+    setSavedSuccess(ok);
+    if (ok) setTimeout(() => setSavedSuccess(false), 4000);
   };
 
   return (
@@ -51,6 +50,9 @@ export default function PengaturanPage() {
             <CheckCircle2 className="h-4 w-4" />
             Pengaturan Berhasil Disimpan!
           </div>
+        )}
+        {saveError && (
+          <p role="alert" className="rounded-xl bg-red-50 px-4 py-2 text-sm font-semibold text-red-700">{saveError}</p>
         )}
       </div>
 
@@ -208,7 +210,7 @@ export default function PengaturanPage() {
         {/* Action Button */}
         <div className="flex flex-wrap items-center justify-between gap-4 border-t pt-4">
           <p className="text-xs text-[#6b7280]">
-            Perubahan disimpan ke memori lokal browser dan langsung diterapkan ke seluruh sistem.
+            Perubahan disimpan ke database Supabase dan langsung diterapkan ke seluruh sistem.
           </p>
           <Button type="submit" className="min-w-40">
             <Save className="h-4 w-4" />

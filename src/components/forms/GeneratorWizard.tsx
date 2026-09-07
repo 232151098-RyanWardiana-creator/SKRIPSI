@@ -13,7 +13,6 @@ import { useSubmissionStore } from "@/lib/submission-store";
 import type { GayaBelajar, Level } from "@/types";
 import { downloadDocx } from "@/lib/docx-client";
 import { getStoredHistory, saveHistoryEntry } from "@/lib/lkpd-history";
-import { loadDemoData } from "@/lib/app-data";
 import { ArrowLeft, ArrowRight, CheckCircle, Download, Edit3, FileText, Loader2, Printer, RefreshCw, Sparkles, X } from "lucide-react";
 
 interface GeneratedLKPD { level: Level; status: "success" | "fallback" | "error"; content: string; source: "online" | "mock"; model: string; isFallback: boolean; error: string | null }
@@ -240,17 +239,6 @@ export function GeneratorWizard() {
                 className="w-full rounded-lg bg-blue-600 py-1.5 text-xs font-semibold text-white hover:bg-blue-700 transition"
               >
                 ✨ Aktifkan Mode Tamu (28 Siswa)
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  if (loadDemoData()) {
-                    setIsGuestMode(false);
-                  }
-                }}
-                className="w-full rounded-lg border border-amber-300 bg-white py-1.5 text-xs font-medium text-amber-900 hover:bg-amber-100 transition"
-              >
-                Muat Data Lengkap (60 Siswa)
               </button>
             </div>
           </div>

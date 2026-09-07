@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -9,27 +9,21 @@ import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { LkpdDocument } from "@/components/LkpdDocument";
 import {
   deleteHistoryEntry,
-  getStoredHistory,
   sanitizeFilename,
+  setLkpdDibagikan,
+  useHistoryStore,
   type LkpdHistoryEntry,
 } from "@/lib/lkpd-history";
 import { downloadDocx } from "@/lib/docx-client";
 import type { Level } from "@/types";
-import { Download, Eye, FileText, History, Printer, Trash2, X } from "lucide-react";
+import { Download, Eye, FileText, History, Printer, Share2, Trash2, X } from "lucide-react";
 
 export default function RiwayatPage() {
-  const [history, setHistory] = useState<LkpdHistoryEntry[]>([]);
+  const { history } = useHistoryStore();
   const [selectedLevel, setSelectedLevel] = useState<string>("semua");
   const [selectedStatus, setSelectedStatus] = useState<string>("semua");
   const [activeItem, setActiveItem] = useState<LkpdHistoryEntry | null>(null);
   const [pendingDelete, setPendingDelete] = useState<{ id: string; judul: string } | null>(null);
-
-  useEffect(() => {
-    const update = () => setHistory(getStoredHistory());
-    update();
-    window.addEventListener("lkpd_history_updated", update);
-    return () => window.removeEventListener("lkpd_history_updated", update);
-  }, []);
 
   const filtered = history.filter(item => {
     const matchLevel = selectedLevel === "semua" || item.level === selectedLevel;
@@ -39,7 +33,7 @@ export default function RiwayatPage() {
 
   const handleDelete = () => {
     if (!pendingDelete) return;
-    deleteHistoryEntry(pendingDelete.id);
+    void deleteHistoryEntry(pendingDelete.id);
     if (activeItem?.id === pendingDelete.id) setActiveItem(null);
     setPendingDelete(null);
   };
@@ -122,6 +116,7 @@ export default function RiwayatPage() {
                 <th className="pb-3">Kelas</th>
                 <th className="pb-3">Tanggal Dibuat</th>
                 <th className="pb-3">Status</th>
+                <th className="pb-3">Dibagikan</th>
                 <th className="pb-3 text-right">Aksi</th>
               </tr>
             </thead>
@@ -147,6 +142,26 @@ export default function RiwayatPage() {
                     >
                       {item.status}
                     </span>
+                  </td>
+                  <td className="py-4">
+                    <button
+                      aria-pressed={Boolean(item.dibagikan)}
+                      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold transition ${
+                        item.dibagikan
+                          ? "bg-emerald-100 text-emerald-800 hover:bg-emerald-200"
+                          : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                      }`}
+                      onClick={() => void setLkpdDibagikan(item.id, !item.dibagikan)}
+                      title={
+                        item.dibagikan
+                          ? "Sedang dibagikan. Klik untuk menariknya dari siswa."
+                          : "Belum dibagikan. Klik agar siswa bisa mengisi LKPD ini."
+                      }
+                      type="button"
+                    >
+                      <Share2 className="h-3.5 w-3.5" aria-hidden />
+                      {item.dibagikan ? "Dibagikan" : "Bagikan ke Siswa"}
+                    </button>
                   </td>
                   <td className="py-4 text-right">
                     <div className="flex items-center justify-end gap-1.5">
