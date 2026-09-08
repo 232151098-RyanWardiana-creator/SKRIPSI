@@ -512,32 +512,56 @@ export default function KelasPage() {
       {modalCetakKode && (
         <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 p-4">
           <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl">
-            <div className="flex items-center justify-between border-b pb-3">
-              <h2 className="text-lg font-semibold">Kartu Akses Kode Kelas</h2>
-              <button onClick={() => setModalCetakKode(false)} className="rounded-full p-1 hover:bg-black/5">
+            <div className="relative flex items-center justify-center border-b pb-3">
+              <h2 className="text-lg font-bold text-slate-900 text-center">Kartu Akses Kode Kelas</h2>
+              <button
+                onClick={() => setModalCetakKode(false)}
+                className="absolute right-0 rounded-full p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors"
+                type="button"
+                aria-label="Tutup modal"
+              >
                 <X className="h-5 w-5" />
               </button>
             </div>
-            
-            <div className="my-6 rounded-2xl border-2 border-dashed border-[#0066cc] bg-blue-50/60 p-6 text-center">
-              <p className="text-xs font-bold uppercase tracking-widest text-[#0066cc]">
-                Aplikasi LKPD-AI Matematika
-              </p>
-              <h3 className="mt-2 text-2xl font-extrabold text-[#172033]">Kelas {activeKelas.nama}</h3>
-              <p className="mt-1 text-xs text-[#526174]">Tahun Ajaran {activeKelas.tahun_ajaran} • Wali Kelas: {activeKelas.wali_kelas}</p>
-              
-              <div className="my-5 inline-block rounded-2xl bg-white p-4 shadow-sm border">
-                <p className="text-xs font-semibold text-[#6b7280]">KODE UNDANGAN BERGABUNG</p>
-                <div className="mt-1 text-3xl font-black tracking-wider text-[#0066cc] font-mono">
+
+            <div className="my-5 rounded-2xl border-2 border-dashed border-[#2563EB] bg-blue-50/50 p-5 sm:p-6 text-center">
+              <h3 className="text-2xl font-black text-[#1E1B4B] tracking-tight">Kelas {activeKelas.nama}</h3>
+
+              <div className="my-4 inline-block rounded-2xl bg-white p-4 shadow-sm border border-blue-100">
+                <p className="text-[11px] font-bold tracking-wider text-slate-500 uppercase">Kode Undangan Bergabung</p>
+                <div className="mt-1 text-3xl sm:text-4xl font-black tracking-widest text-[#2563EB] font-mono">
                   {activeKelas.kode_undangan}
                 </div>
               </div>
 
-              <div className="text-left text-xs text-[#414753] space-y-1.5 rounded-xl bg-white/80 p-3.5 border">
-                <strong className="block text-sm text-[#172033]">Petunjuk untuk Siswa:</strong>
-                <p>1. Buka browser dan masuk ke portal siswa LKPD-AI.</p>
-                <p>2. Masukkan <strong>Kode Kelas di atas</strong> ({activeKelas.kode_undangan}).</p>
-                <p>3. Pilih nomor absen atau ketikkan namamu untuk memulai asesmen diagnostik.</p>
+              <div className="space-y-2 text-left pt-1">
+                <p className="text-[11px] font-bold uppercase tracking-wider text-slate-600 px-1">
+                  Petunjuk untuk Siswa:
+                </p>
+                <div className="flex items-center gap-3 rounded-xl border border-blue-100 bg-white/90 p-2.5 sm:p-3 text-xs shadow-2xs">
+                  <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-[#2563EB] text-white font-black text-xs">
+                    1
+                  </span>
+                  <span className="text-slate-700">
+                    Buka portal siswa lalu ketik <strong>Kode Kelas: {activeKelas.kode_undangan}</strong>
+                  </span>
+                </div>
+                <div className="flex items-center gap-3 rounded-xl border border-indigo-100 bg-white/90 p-2.5 sm:p-3 text-xs shadow-2xs">
+                  <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-indigo-600 text-white font-black text-xs">
+                    2
+                  </span>
+                  <span className="text-slate-700">
+                    Pilih <strong>Namamu</strong> lalu masukkan <strong>PIN 4 Angka</strong> milikmu
+                  </span>
+                </div>
+                <div className="flex items-center gap-3 rounded-xl border border-purple-100 bg-white/90 p-2.5 sm:p-3 text-xs shadow-2xs">
+                  <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-purple-600 text-white font-black text-xs">
+                    3
+                  </span>
+                  <span className="text-slate-700">
+                    Kerjakan <strong>Asesmen Diagnostik</strong> dan lembar <strong>LKPD Berdiferensiasi</strong>
+                  </span>
+                </div>
               </div>
             </div>
 
