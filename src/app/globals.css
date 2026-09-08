@@ -142,7 +142,10 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
   body * { visibility:hidden !important; }
   body[data-print-level="dasar"] [data-print-id="dasar"],body[data-print-level="dasar"] [data-print-id="dasar"] *,
   body[data-print-level="menengah"] [data-print-id="menengah"],body[data-print-level="menengah"] [data-print-id="menengah"] *,
-  body[data-print-level="mahir"] [data-print-id="mahir"],body[data-print-level="mahir"] [data-print-id="mahir"] * { visibility:visible !important; }
+  body[data-print-level="mahir"] [data-print-id="mahir"],body[data-print-level="mahir"] [data-print-id="mahir"] *,
+  body[data-print-level="kunci-dasar"] [data-print-id="kunci-dasar"],body[data-print-level="kunci-dasar"] [data-print-id="kunci-dasar"] *,
+  body[data-print-level="kunci-menengah"] [data-print-id="kunci-menengah"],body[data-print-level="kunci-menengah"] [data-print-id="kunci-menengah"] *,
+  body[data-print-level="kunci-mahir"] [data-print-id="kunci-mahir"],body[data-print-level="kunci-mahir"] [data-print-id="kunci-mahir"] * { visibility:visible !important; }
   body[data-print-level] .lkpd-preview-container:has(> [data-print-id]) { display:block !important; position:static !important; overflow:visible !important; margin:0 !important; padding:0 !important; border:0 !important; background:none !important; }
   [data-print-id] { position:absolute !important; top:0 !important; left:0 !important; width:100% !important; max-width:none !important; min-height:auto !important; margin:0 !important; padding:0 !important; border:0 !important; border-radius:0 !important; box-shadow:none !important; background:#fff !important; }
   .lkpd-markdown table,.lkpd-markdown blockquote,.lkpd-markdown pre,.lkpd-markdown .katex-display,.lkpd-markdown tr,.lkpd-markdown li { break-inside:avoid !important; page-break-inside:avoid !important; }

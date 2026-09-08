@@ -110,7 +110,20 @@ function sanitizePreview(value: unknown): string {
 function mockContent(kind: "lkpd" | "asesmen", context: string): string {
   if (kind === "asesmen") return "[]";
 
-  return `# LKPD Matematika: ${context}
+  const n1 = Math.floor(Math.random() * 4) + 2;
+  const n2 = n1 + Math.floor(Math.random() * 3) + 2;
+  const multiplier = Math.floor(Math.random() * 5) + 3;
+  const totalWeight = (n1 + n2) * multiplier * 50;
+  const partA = n1 * multiplier * 50;
+  const partB = n2 * multiplier * 50;
+
+  const kmPerLiter = Math.floor(Math.random() * 4) + 12;
+  const distance1 = kmPerLiter * (Math.floor(Math.random() * 3) + 4);
+  const liters1 = distance1 / kmPerLiter;
+  const liters2 = liters1 + Math.floor(Math.random() * 4) + 3;
+  const distance2 = liters2 * kmPerLiter;
+
+  return `# LEMBAR KERJA PESERTA DIDIK (LKPD)
 
 ## A. Identitas Peserta Didik
 | Komponen | Keterangan |
@@ -120,8 +133,8 @@ function mockContent(kind: "lkpd" | "asesmen", context: string): string {
 | **Hari / Tanggal** | .................................................... |
 
 ## B. Tujuan Pembelajaran
-1. Peserta didik dapat memahami konsep ${context} melalui permasalahan kontekstual kehidupan sehari-hari.
-2. Peserta didik dapat menyelesaikan masalah perbandingan dengan langkah pemecahan yang terstruktur dan logis.
+1. Peserta didik dapat memahami dan memodelkan konsep ${context} melalui permasalahan kontekstual kehidupan sehari-hari.
+2. Peserta didik dapat menyelesaikan masalah perbandingan secara sistematis, kritis, dan logis.
 
 ## C. Petunjuk Pengerjaan
 1. Berdoalah sebelum memulai kegiatan belajar.
@@ -130,37 +143,45 @@ function mockContent(kind: "lkpd" | "asesmen", context: string): string {
 
 ## D. Kegiatan Pembelajaran
 ### Aktivitas 1: Eksplorasi Rasio Kontekstual (target: IK-01)
-Ibu menyiapkan bahan untuk membuat kue bolu. Rasio antara tepung terigu dan gula pasir yang digunakan adalah $3 : 2$. Jika Ibu menggunakan $600\\text{ gram}$ tepung terigu, berapakah gram gula pasir yang harus ditambahkan?
+Seorang peracik minuman menyiapkan bahan minuman herbal. Rasio antara sari jahe dan madu murni yang digunakan adalah $${n1} : ${n2}$ dengan total volume racikan $${totalWeight}\\text{ ml}$. Berapakah mililiter sari jahe yang harus dituangkan?
 
 > **Ruang Jawaban:**
+> - Jumlah bagian perbandingan = $\\dots\\dots\\dots\\dots$
 > - Nilai 1 bagian = $\\dots\\dots\\dots\\dots$
-> - Berat gula pasir = $\\dots\\dots\\dots\\dots$
+> - Volume sari jahe = $\\dots\\dots\\dots\\dots$
 
 ### Aktivitas 2: Penerapan Perbandingan Senilai (target: IK-03)
-Sebuah kendaraan menempuh jarak $90\\text{ km}$ dan menghabiskan $6\\text{ liter}$ bensin. Berapakah liter bensin yang diperlukan jika kendaraan tersebut hendak menempuh jarak $150\\text{ km}$?
+Sebuah kendaraan operasional menempuh jarak $${distance1}\\text{ km}$ dengan menghabiskan $${liters1}\\text{ liter}$ bensin. Berapakah kilometer jarak yang dapat ditempuh kendaraan tersebut jika diisi $${liters2}\\text{ liter}$ bensin dengan kondisi laju yang sama?
 
 > **Ruang Jawaban:**
-> - Efisiensi laju bahan bakar = $\\dots\\dots\\dots\\dots$
-> - Kebutuhan bensin untuk $150\\text{ km}$ = $\\dots\\dots\\dots\\dots$
+> - Rasio konsumsi bahan bakar (jarak per liter) = $\\dots\\dots\\dots\\dots$
+> - Jarak yang ditempuh untuk $${liters2}\\text{ liter}$ = $\\dots\\dots\\dots\\dots$
 
 ## E. Refleksi Diri Siswa
-- Hal baru apa yang kamu pelajari dari aktivitas perbandingan di atas?
-- Bagian mana yang menurutmu paling menantang untuk diselesaikan?
+- Konsep perbandingan apa yang paling membantu dalam menyelesaikan masalah di atas?
+- Langkah mana yang menurutmu perlu diperhatikan lebih teliti agar tidak keliru?
 
-## F. Kunci Jawaban & Panduan Guru (Catatan Pegangan)
-> ### Pembahasan & Kunci Jawaban Resmi:
-> 1. **Aktivitas 1:**
->    - Rasio tepung : gula = $3 : 2$.
->    - Nilai 1 bagian = $600\\text{ gram} \\div 3 = 200\\text{ gram}$.
->    - Kebutuhan gula pasir = $2 \\times 200\\text{ gram} = \\mathbf{400\\text{ gram}}$.
-> 2. **Aktivitas 2:**
->    - Konsumsi per liter = $90\\text{ km} \\div 6\\text{ liter} = 15\\text{ km/liter}$.
->    - Bensin yang dibutuhkan = $150\\text{ km} \\div 15\\text{ km/liter} = \\mathbf{10\\text{ liter}}$.
-> 
-> **Rubrik Penilaian Singkat:**
-> - Skor 4: Langkah pemodelan rasio benar, perhitungan tepat, satuan lengkap.
-> - Skor 2: Konsep perbandingan benar namun terdapat kekeliruan perhitungan aritmetika.
-> - Skor 1: Mencoba menuliskan informasi yang diketahui dari soal.`;
+<!-- PEMISAH_KUNCI_GURU -->
+
+# KUNCI JAWABAN & PANDUAN GURU (CATATAN PEGANGAN)
+
+## A. Pembahasan & Kunci Jawaban Resmi
+1. **Aktivitas 1:**
+   - Total bagian perbandingan = $${n1} + ${n2} = ${n1 + n2}$ bagian.
+   - Nilai 1 bagian = $${totalWeight}\\text{ ml} \\div ${n1 + n2} = ${multiplier * 50}\\text{ ml}$.
+   - Kebutuhan sari jahe = $${n1} \\times ${multiplier * 50}\\text{ ml} = \\mathbf{${partA}\\text{ ml}}$.
+   *(Sebagai pelengkap, madu murni = $${n2} \\times ${multiplier * 50}\\text{ ml} = ${partB}\\text{ ml}$)*.
+2. **Aktivitas 2:**
+   - Efisiensi konsumsi = $${distance1}\\text{ km} \\div ${liters1}\\text{ liter} = ${kmPerLiter}\\text{ km/liter}$.
+   - Jarak tempuh baru = $${liters2}\\text{ liter} \\times ${kmPerLiter}\\text{ km/liter} = \\mathbf{${distance2}\\text{ km}}$.
+
+## B. Pedoman & Rubrik Penskoran
+| Kriteria | Keterangan Rubrik | Skor Maks |
+|---|---|:---:|
+| **Pemodelan Rasio** | Mampu menuliskan bentuk matematis rasio dan bagian yang diketahui secara tepat | 30 |
+| **Kalkulasi & Langkah** | Langkah perhitungan runtut, tidak melewatkan tahapan nilai per satuan | 40 |
+| **Jawaban & Kesimpulan** | Jawaban akhir tepat beserta satuan besaran yang sesuai | 30 |
+| **Total Skor Maksimum** | | **100** |`;
 }
 
 async function requestCompletion(
@@ -243,43 +264,60 @@ async function chatCompletion(
 }
 
 export async function generateLKPD(params: GenerateLKPDParams): Promise<AIResult> {
+  const seed = Math.floor(Math.random() * 1000000);
+  const contexts = [
+    "resep kuliner nusantara, takaran bahan kue, dan racikan sirup tradisional",
+    "jarak tempuh kendaraan bermotor, konsumsi bahan bakar bensin, dan peta perjalanan",
+    "arsitektur bangunan, perancangan denah rumah impian, dan skala miniatur gedung",
+    "ekonomi pasar tradisional, paket grosir vs eceran, dan rasio harga satuan",
+    "komposisi campuran cat tembok, takaran pupuk pertanian hidroponik, dan nutrisi tanaman",
+    "pembagian modal usaha kecil, bagi hasil keuntungan panen, dan rasio investasi",
+    "kecepatan laju sepeda santai, waktu tempuh lari estafet, dan rasio peralatan tim olahraga",
+  ];
+  const randomContext = contexts[Math.floor(Math.random() * contexts.length)];
+
   const levelKeterangan: Record<Level, string> = {
-    dasar: "scaffolding penuh, langkah detail, contoh konkret, dan bahasa sederhana",
-    menengah: "latihan penguatan konsep, scaffolding minimal, dan variasi soal sedang",
-    mahir: "soal HOTS, pemecahan masalah kompleks, dan tantangan matematika",
+    dasar: "scaffolding penuh, langkah detail berurutan dengan panduan eksplisit, contoh konkret, dan bahasa sederhana",
+    menengah: "latihan penguatan konsep, scaffolding minimal, dan variasi kontekstual sedang",
+    mahir: "tantangan kontekstual analitis, soal HOTS, pemecahan masalah kompleks, dan penalaran matematika mendalam",
   };
   const gayaKeterangan = params.gayaBelajar ? {
-    visual: "gunakan tabel, diagram, garis bilangan, dan representasi visual",
-    auditory: "gunakan instruksi verbal, pertanyaan refleksi, dan diskusi",
-    kinestetik: "gunakan eksplorasi bertahap dan aktivitas hands-on",
+    visual: "gunakan representasi visual, tabel data terstruktur, diagram teks, dan perbandingan grafis",
+    auditory: "gunakan kalimat instruksi dialogis naratif, pertanyaan refleksi kritis, dan elaborasi konseptual",
+    kinestetik: "gunakan simulasi eksperimen bertahap, manipulasi angka konkret, dan aktivitas hands-on",
   }[params.gayaBelajar] : "tanpa penyesuaian VAK khusus";
   const indikator = params.indikatorLemah.length ? params.indikatorLemah.join(", ") : "pengayaan seluruh indikator";
 
   const messages: ChatMessage[] = [
     {
       role: "system",
-      content: "Kamu ahli pendidikan matematika SMP Kurikulum Merdeka. Buat dokumen Lembar Kerja Peserta Didik (LKPD) lengkap, sistematis, ramah cetak, dan dalam Markdown bersih. Jangan bungkus jawaban dalam fenced code block utama. Gunakan $...$ untuk matematika inline dan $$...$$ untuk matematika blok. Gunakan tanda kurung bulat standar seperti (-3), (-4), (+2). JANGAN gunakan tanda kurung siku campuran, simbol garis vertikal yang memotong angka, atau perintah \\left dan \
-ight. Hindari environment LaTeX (align, equation, array) dan perintah yang tidak didukung KaTeX. Gunakan tabel Markdown bila perlu.",
+      content: `Kamu adalah pakar penyusun instrumen Lembar Kerja Peserta Didik (LKPD) matematika SMP Kurikulum Merdeka.
+TUGAS UTAMA: Susun dokumen LKPD berdiferensiasi kontekstual kehidupan nyata yang KREATIF, SEGAR, dan BERBEDA di setiap generasi untuk materi "${params.materi}".
+HINDARI pengulangan angka, narasi cerita, atau studi kasus klise yang sama dengan generasi sebelumnya. Gunakan variasi skenario kehidupan nyata yang unik (terinspirasi dari konteks: ${randomContext}).
+Dokumen harus dalam format Markdown bersih, ramah cetak A4, dan rumus matematika ditulis menggunakan $...$ (inline) atau $$...$$ (blok). JANGAN gunakan fenced code block untuk seluruh isi dokumen.
+
+PENTING — STRUKTUR DOKUMEN WAJIB MENGGUNAKAN PEMISAH RESMI BERIKUT:
+# LEMBAR KERJA PESERTA DIDIK (LKPD)
+## A. Identitas Peserta Didik (tabel Nama Siswa, Kelas/No. Absen, Hari/Tanggal dengan titik-titik ruang kosong)
+## B. Tujuan Pembelajaran (2-3 butir mengacu pada indikator target)
+## C. Petunjuk Pengerjaan
+## D. Kegiatan Pembelajaran (aktivitas kontekstual 1 sampai ${params.jumlahAktivitas} yang segar dan berbeda, setiap nomor mencantumkan target indikator dalam tanda kurung misal "(target: IK-01)", diikuti ruang pengerjaan berformat blockquote atau garis titik-titik)
+## E. Refleksi Diri Siswa (2 pertanyaan refleksi singkat pemahaman konsep)
+
+<!-- PEMISAH_KUNCI_GURU -->
+
+# KUNCI JAWABAN & PANDUAN GURU (CATATAN PEGANGAN)
+## A. Pembahasan & Kunci Jawaban Resmi (langkah matematis runtut dan jawaban akhir tebal untuk setiap aktivitas)
+## B. Pedoman & Rubrik Penskoran (tabel kriteria penilaian, deskripsi rubrik, dan skor maksimum)`,
     },
     {
       role: "user",
-      content: `Buat LKPD tentang "${params.materi}" untuk level ${params.level}. Karakter level: ${levelKeterangan[params.level]}. Penyesuaian penyajian VAK: ${gayaKeterangan}. Indikator target: ${indikator}.
-Buat tepat ${params.jumlahAktivitas} aktivitas kontekstual kehidupan nyata. SETIAP aktivitas wajib mencantumkan target indikator dalam tanda kurung, misalnya "(target: IK-01)".
-Untuk level dasar: scaffolding penuh, langkah detail berurutan, contoh konkret.
-Untuk level menengah: latihan penguatan konsep, scaffolding minimal.
-Untuk level mahir: tantangan kontekstual analitis, HOTS, pemecahan masalah mendalam.
-Instruksi tambahan: ${params.promptTambahan || "tidak ada"}.
-
-STRUKTUR DOKUMEN WAJIB DAN LENGKAP:
-# LEMBAR KERJA PESERTA DIDIK (LKPD)
-## A. Identitas Peserta Didik (tabel Markdown berisi Nama Siswa, Kelas/No. Absen, Hari/Tanggal dengan titik-titik ruang kosong)
-## B. Tujuan Pembelajaran (2-3 poin yang jelas sesuai indikator target)
-## C. Petunjuk Pengerjaan
-## D. Kegiatan Pembelajaran (aktivitas kontekstual 1 sampai ${params.jumlahAktivitas} dengan narasi realistis, diikuti ruang pengerjaan berformat blockquote atau garis titik-titik untuk diisi siswa)
-## E. Refleksi Diri Siswa (2 pertanyaan refleksi singkat mengenai pemahaman konsep)
-## F. Kunci Jawaban & Panduan Guru (BAGIAN PENTING CATATAN GURU: sertakan kunci jawaban lengkap setiap aktivitas, langkah-langkah penyelesaian matematis yang runtut, hasil akhir yang tebal, dan rubrik penilaian singkat sebagai pegangan guru).
-
-Pastikan Markdown valid, rumus matematis rapi dengan delimiter, dan langsung hasilkan dokumen tanpa teks sapaan pembuka/penutup.`,
+      content: `Buat LKPD BARU dan BERBEDA (Variasi Token #${seed}) tentang "${params.materi}" untuk tingkat ${params.level}.
+Karakteristik level: ${levelKeterangan[params.level]}.
+Penyesuaian VAK: ${gayaKeterangan}.
+Indikator target: ${indikator}.
+Buat tepat ${params.jumlahAktivitas} aktivitas kontekstual unik. Instruksi tambahan: ${params.promptTambahan || "tidak ada"}.
+Sertakan tanda pembatas <!-- PEMISAH_KUNCI_GURU --> tepat sebelum bagian Kunci Jawaban Guru. Keluarkan langsung teks Markdown tanpa sapaan pembuka/penutup.`,
     },
   ];
 

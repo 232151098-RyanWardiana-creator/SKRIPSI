@@ -15,7 +15,24 @@ import { downloadDocx } from "@/lib/docx-client";
 import { getStoredHistory, saveHistoryEntry } from "@/lib/lkpd-history";
 import { AI_PROVIDERS } from "@/constants/ai-providers";
 import { ModalGenerateAI } from "@/components/forms/ModalGenerateAI";
-import { ArrowLeft, ArrowRight, CheckCircle, Download, Edit3, FileText, Loader2, Printer, RefreshCw, Sparkles, X, Cpu } from "lucide-react";
+import { splitLkpdContent } from "@/lib/lkpd-utils";
+import { cn } from "@/lib/utils";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Check,
+  CheckCircle,
+  Copy,
+  Download,
+  Edit3,
+  FileText,
+  KeyRound,
+  Loader2,
+  Printer,
+  RefreshCw,
+  Sparkles,
+  X
+} from "lucide-react";
 
 interface GeneratedLKPD {
   level: Level;
@@ -36,7 +53,7 @@ interface DocumentState extends GeneratedLKPD {
 const levels: Level[] = ["dasar", "menengah", "mahir"];
 const labels: Record<Level, string> = { dasar: "Dasar", menengah: "Menengah", mahir: "Mahir" };
 const STORAGE_KEY = "lkpd_generator_saved_state";
-const STORAGE_VERSION = 2;
+const STORAGE_VERSION = 3;
 
 function isLevel(value: unknown): value is Level {
   return levels.includes(value as Level);
@@ -91,7 +108,7 @@ export function GeneratorWizard() {
   const [gaya, setGaya] = useState("Gunakan konteks resep masakan, denah/skala peta, dan perbandingan harga satuan.");
   const [pertimbangkanGaya, setPertimbangkanGaya] = useState(true);
 
-  // AI Provider & Model selection
+  // AI Provider & Model selection (active in Step 2 / modal)
   const [aiProvider, setAiProvider] = useState("xkiro");
   const [aiModel, setAiModel] = useState("deepseek/deepseek-v4-flash");
   const [modalAIOpen, setModalAIOpen] = useState(false);
@@ -99,6 +116,7 @@ export function GeneratorWizard() {
   const [documents, setDocuments] = useState<Record<Level, DocumentState | undefined>>(emptyDocuments);
   const documentsRef = useRef<Record<Level, DocumentState | undefined>>(emptyDocuments());
   const [active, setActive] = useState<Level>("dasar");
+  const [docType, setDocType] = useState<"siswa" | "kunci">("siswa");
 
   const [loadingLevels, setLoadingLevels] = useState<Level[]>([]);
   const [error, setError] = useState("");
@@ -107,6 +125,7 @@ export function GeneratorWizard() {
   const [storageMessage, setStorageMessage] = useState("");
   const [saved, setSaved] = useState(false);
   const [resetOpen, setResetOpen] = useState(false);
+  const [copiedKey, setCopiedKey] = useState(false);
   const hydrated = useRef(false);
 
   const kelasId = classes.some((item) => item.kelas.id === selectedClassId) ? selectedClassId : classes[0]?.kelas.id ?? "";
@@ -352,16 +371,17 @@ export function GeneratorWizard() {
     updateDocument(level, current ? { ...current, ...values } : undefined);
   }
 
-  function print(level: Level) {
+  function print(level: Level, docType: "siswa" | "kunci" = "siswa") {
+    const printId = docType === "siswa" ? level : `kunci-${level}`;
     const clearPrintSelection = () => delete document.body.dataset.printLevel;
-    document.body.dataset.printLevel = level;
+    document.body.dataset.printLevel = printId;
     window.addEventListener("afterprint", clearPrintSelection, { once: true });
     window.print();
   }
 
-  async function downloadWord(item: DocumentState) {
+  async function downloadWordDoc(content: string, filename: string) {
     try {
-      await downloadDocx(item.content, `LKPD-${sanitizeFilename(topik)}-${item.level}`);
+      await downloadDocx(content, filename);
     } catch {
       setError("Gagal mengekspor dokumen Word.");
     }
@@ -369,6 +389,9 @@ export function GeneratorWizard() {
 
   const vakLabel = vak.dominant[0].toUpperCase() + vak.dominant.slice(1);
   const current = documents[active];
+
+  // Split current document into student LKPD and teacher answer key
+  const { studentContent, teacherKeyContent } = splitLkpdContent(current?.content || "");
 
   if (!dataKelas) {
     return (
@@ -390,23 +413,12 @@ export function GeneratorWizard() {
             Generator LKPD
           </h1>
 
-          <div className="mt-2.5 flex flex-wrap items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setModalAIOpen(true)}
-              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-800 hover:bg-slate-100 transition shadow-2xs cursor-pointer"
-            >
-              <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span>
-                Engine AI: <strong className="text-[#1E1B4B]">{providerName}</strong> · <span className="text-[#2563EB]">{modelLabel}</span>
-              </span>
-              <span className="text-[10px] text-blue-600 underline ml-1">Ubah</span>
-            </button>
-            {saved && <span className="text-xs font-medium text-emerald-700">· Tersimpan</span>}
+          <div className="mt-2 flex flex-wrap items-center gap-2">
+            {saved && <span className="text-xs font-medium text-emerald-700">Tersimpan otomatis</span>}
           </div>
 
           {storageMessage && <p role="alert" className="mt-2 text-sm text-amber-700">{storageMessage}</p>}
-          <Button className="mt-3" variant="ghost" onClick={() => setResetOpen(true)}>
+          <Button className="mt-2" variant="ghost" onClick={() => setResetOpen(true)}>
             <RefreshCw className="h-4 w-4" />Reset / Buat Baru
           </Button>
         </div>
@@ -448,14 +460,8 @@ export function GeneratorWizard() {
                   </div>
 
                   {assessmentSubmissions.length === 0 && (
-                    <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900 space-y-1.5">
-                      <p className="font-bold text-amber-950">Belum ada data pengerjaan siswa (0 submission)</p>
-                      <p className="text-amber-800 leading-relaxed">
-                        Jika ingin mendemokan diferensiasi 3 level secara instan, Anda dapat memuat <strong>Data Simulasi</strong> pada menu Manajemen Kelas.
-                      </p>
-                      <Button href="/kelas" variant="ghost" className="mt-1 text-xs text-amber-900 underline">
-                        Buka Manajemen Kelas →
-                      </Button>
+                    <div className="rounded-xl border border-amber-200 bg-amber-50/80 p-3 text-xs text-amber-950 font-bold">
+                      Belum ada data pengerjaan siswa (0 submission)
                     </div>
                   )}
                 </div>
@@ -508,8 +514,8 @@ export function GeneratorWizard() {
                 <p><strong>Gaya Belajar:</strong> {pertimbangkanGaya ? `${vakLabel} (${vak.percent(vak.dominant)}%)` : "Nonaktif"}</p>
               </div>
 
-              {/* Chosen AI engine summary card */}
-              <div className="flex items-center justify-between rounded-xl bg-blue-50/70 border border-blue-200/80 p-3">
+              {/* Chosen AI engine summary card with change button */}
+              <div className="flex items-center justify-between rounded-xl bg-blue-50/70 border border-blue-200/80 p-3.5">
                 <div>
                   <span className="text-[10px] font-bold uppercase tracking-wider text-slate-600 block">Engine AI Terpilih:</span>
                   <span className="text-xs font-black text-[#1E1B4B]">{providerName} — {modelLabel}</span>
@@ -517,9 +523,9 @@ export function GeneratorWizard() {
                 <button
                   type="button"
                   onClick={() => setModalAIOpen(true)}
-                  className="rounded-lg bg-white border border-blue-200 px-2.5 py-1 text-xs font-bold text-blue-700 hover:bg-blue-50 transition cursor-pointer shadow-2xs"
+                  className="rounded-lg bg-white border border-blue-200 px-3 py-1.5 text-xs font-bold text-blue-700 hover:bg-blue-50 transition cursor-pointer shadow-2xs"
                 >
-                  Ganti
+                  Ganti Model
                 </button>
               </div>
             </div>
@@ -527,8 +533,8 @@ export function GeneratorWizard() {
 
           {step === 3 && (
             <div className="space-y-2 text-xs text-[#414753]">
-              <p>Dokumen LKPD lengkap mencakup <strong>Tujuan, Petunjuk, Kegiatan Siswa, Refleksi, dan Kunci Jawaban & Panduan Guru</strong>.</p>
-              <p>Klik tombol <strong>Validasi</strong> untuk menandatangani draf ini sebagai dokumen resmi.</p>
+              <p>Dokumen siswa bebas kunci jawaban. Kunci jawaban dan pedoman penskoran berada pada kartu catatan guru di bawah.</p>
+              <p>Klik tombol <strong>Validasi LKPD</strong> untuk menandatangani draf ini sebagai dokumen resmi.</p>
             </div>
           )}
 
@@ -542,7 +548,7 @@ export function GeneratorWizard() {
             )}
             {step < 2 && (
               <Button
-                disabled={!topik.trim()}
+                disabled={!topik.trim() || (step === 0 && (!assessment || assessmentSubmissions.length === 0))}
                 onClick={() => setStep(step + 1)}
               >
                 Lanjut<ArrowRight className="h-4 w-4" />
@@ -567,41 +573,90 @@ export function GeneratorWizard() {
 
         <main className="min-w-0">
           {step < 3 ? (
-            <div className="card grid min-h-96 place-items-center text-center text-[#6b7280]">
-              <div>
-                <p className="font-semibold text-slate-700">Lengkapi konfigurasi di samping</p>
-                <p className="text-xs mt-1 text-slate-500">Sistem akan menyusun 3 dokumen LKPD diferensiasi (Dasar, Menengah, Mahir) beserta Kunci Jawaban & Panduan Guru.</p>
-              </div>
+            <div className="card grid min-h-96 place-items-center text-center text-slate-600">
+              <p className="font-semibold text-slate-700">Lengkapi konfigurasi di samping</p>
             </div>
           ) : (
             <>
-              <div className="mb-4 grid grid-cols-3 gap-2" role="tablist">
-                {levels.map((level) => (
-                  <button
-                    role="tab"
-                    aria-selected={active === level}
-                    type="button"
-                    onClick={() => setActive(level)}
-                    className={`rounded-xl border p-3 text-sm font-semibold transition cursor-pointer ${
-                      active === level ? "border-[#2563EB] bg-blue-50 text-[#1E1B4B] shadow-2xs" : "border-slate-200 bg-white hover:bg-slate-50"
-                    }`}
-                    key={level}
-                  >
-                    {loadingLevels.includes(level) ? (
-                      <Loader2 className="mx-auto h-4 w-4 animate-spin" />
-                    ) : (
-                      labels[level]
-                    )}
-                    {documents[level]?.validatedAt && <span className="block text-xs text-green-700">Tervalidasi</span>}
-                  </button>
-                ))}
+              {/* Dual-Row Navigation Tabs: Row 1 LKPD Siswa, Row 2 Kunci Jawaban Guru */}
+              <div className="space-y-2 mb-5">
+                <div>
+                  <span className="text-[11px] font-black uppercase tracking-wider text-[#1E1B4B] block mb-1.5">
+                    1. Dokumen LKPD Siswa (Siap Cetak / Bagikan)
+                  </span>
+                  <div className="grid grid-cols-3 gap-2" role="tablist">
+                    {levels.map((level) => {
+                      const isSelected = active === level && docType === "siswa";
+                      return (
+                        <button
+                          role="tab"
+                          aria-selected={isSelected}
+                          type="button"
+                          onClick={() => { setActive(level); setDocType("siswa"); }}
+                          className={cn(
+                            "rounded-xl border p-3 text-xs sm:text-sm font-black transition-all cursor-pointer text-left",
+                            isSelected
+                              ? "border-[#2563EB] bg-blue-50/90 text-[#1E1B4B] shadow-sm ring-2 ring-[#2563EB]/80"
+                              : "border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50"
+                          )}
+                          key={`siswa-${level}`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <span>LKPD {labels[level]}</span>
+                            {documents[level]?.validatedAt && <span className="text-[10px] text-emerald-700 font-bold">✓ Tervalidasi</span>}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div className="pt-1.5">
+                  <span className="text-[11px] font-black uppercase tracking-wider text-amber-900 block mb-1.5">
+                    2. Kunci Jawaban & Panduan Guru (Catatan Pegangan Khusus Guru)
+                  </span>
+                  <div className="grid grid-cols-3 gap-2" role="tablist">
+                    {levels.map((level) => {
+                      const isSelected = active === level && docType === "kunci";
+                      return (
+                        <button
+                          role="tab"
+                          aria-selected={isSelected}
+                          type="button"
+                          onClick={() => { setActive(level); setDocType("kunci"); }}
+                          className={cn(
+                            "rounded-xl border p-3 text-xs sm:text-sm font-black transition-all cursor-pointer text-left",
+                            isSelected
+                              ? "border-amber-500 bg-amber-100 text-amber-950 shadow-sm ring-2 ring-amber-500/80"
+                              : "border-amber-200 bg-amber-50/50 text-amber-900 hover:border-amber-300 hover:bg-amber-100/50"
+                          )}
+                          key={`kunci-${level}`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <span>Kunci Jawaban {labels[level]}</span>
+                            <span className="text-[10px] text-amber-700 font-bold">Pegangan</span>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
 
               {current ? (
-                <article className="space-y-4">
+                <article className="space-y-5">
+                  {/* Status Card */}
                   <div className="card flex flex-wrap items-center justify-between gap-3">
                     <div>
-                      <Badge level={active}>{labels[active]}</Badge>
+                      <div className="flex items-center gap-2">
+                        <Badge level={active}>{labels[active]}</Badge>
+                        <span className={cn(
+                          "rounded-full px-2.5 py-0.5 text-[11px] font-bold uppercase",
+                          docType === "siswa" ? "bg-blue-100 text-[#2563EB]" : "bg-amber-100 text-amber-900"
+                        )}>
+                          {docType === "siswa" ? "Dokumen Peserta Didik" : "Kunci & Panduan Guru"}
+                        </span>
+                      </div>
                       {current.isFallback && (
                         <p className="mt-2 inline-block rounded-full bg-yellow-100 px-3 py-1 text-xs font-semibold text-yellow-800">
                           Disimulasikan dalam Mode Offline
@@ -618,48 +673,143 @@ export function GeneratorWizard() {
                       )}
                     </div>
                     <Button variant="ghost" disabled={loadingLevels.includes(active)} onClick={() => generate(active)}>
-                      <RefreshCw className="h-4 w-4" />Regenerasi
+                      <RefreshCw className="h-4 w-4" />Regenerasi Level Ini
                     </Button>
                   </div>
 
-                  {current.editing ? (
-                    <div className="card">
-                      <textarea
-                        aria-label={`Editor LKPD ${labels[active]}`}
-                        className="input min-h-[520px] font-mono text-sm"
-                        value={current.draft}
-                        onChange={(e) => patch(active, { draft: e.target.value, validatedAt: null })}
-                      />
-                      <div className="mt-3 flex gap-2">
-                        <Button disabled={!current.draft.trim()} onClick={() => patch(active, { content: current.draft, editing: false, validatedAt: null })}>
-                          <FileText className="h-4 w-4" />Simpan
+                  {/* KONDISI TAMPILAN BERDASARKAN TAB AKTIF: DOKUMEN SISWA ATAU KUNCI JAWABAN */}
+                  {docType === "siswa" ? (
+                    /* CARD 1: Dokumen LKPD Siswa (Bebas Kunci Jawaban) */
+                    <div className="card space-y-4 border-2 border-blue-100 shadow-sm">
+                      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+                        <div>
+                          <h3 className="text-base font-black text-[#1E1B4B]">
+                            Dokumen LKPD Siswa (Level {labels[active]})
+                          </h3>
+                          <p className="text-xs text-slate-500">
+                            Format resmi untuk dibagikan ke siswa (bebas kunci jawaban).
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setDocType("kunci")}
+                          className="flex items-center gap-1.5 rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs font-bold text-amber-900 hover:bg-amber-100 transition cursor-pointer"
+                        >
+                          <KeyRound className="h-3.5 w-3.5 text-amber-700" />
+                          Buka Kunci Jawaban →
+                        </button>
+                      </div>
+
+                      {current.editing ? (
+                        <div>
+                          <textarea
+                            aria-label={`Editor LKPD ${labels[active]}`}
+                            className="input min-h-[460px] font-mono text-sm"
+                            value={current.draft}
+                            onChange={(e) => patch(active, { draft: e.target.value, validatedAt: null })}
+                          />
+                          <div className="mt-3 flex gap-2">
+                            <Button disabled={!current.draft.trim()} onClick={() => patch(active, { content: current.draft, editing: false, validatedAt: null })}>
+                              <FileText className="h-4 w-4" />Simpan Perubahan
+                            </Button>
+                            <Button variant="ghost" onClick={() => patch(active, { draft: current.content, editing: false })}>
+                              <X className="h-4 w-4" />Batal
+                            </Button>
+                          </div>
+                        </div>
+                      ) : studentContent ? (
+                        <LkpdDocument content={studentContent} level={labels[active]} topic={topik} printId={active} />
+                      ) : (
+                        <div className="text-sm text-red-700 p-4">Dokumen kosong. Gunakan Regenerasi untuk mencoba level ini lagi.</div>
+                      )}
+
+                      <div className="flex flex-wrap items-center gap-2 border-t border-slate-100 pt-4">
+                        <Button variant="ghost" disabled={!current.content} onClick={() => patch(active, { draft: current.content, editing: true })}>
+                          <Edit3 className="h-4 w-4" />Edit Draf
                         </Button>
-                        <Button variant="ghost" onClick={() => patch(active, { draft: current.content, editing: false })}>
-                          <X className="h-4 w-4" />Batal
+                        <Button variant="secondary" disabled={!current.content.trim() || current.editing} onClick={() => setValidationLevel(active)}>
+                          <CheckCircle className="h-4 w-4" />{current.validatedAt ? "Validasi Ulang" : "Validasi LKPD"}
+                        </Button>
+                        <Button disabled={!studentContent} onClick={() => print(active, "siswa")}>
+                          <Printer className="h-4 w-4" />Print / PDF LKPD Siswa
+                        </Button>
+                        <Button disabled={!studentContent} onClick={() => downloadWordDoc(studentContent, `LKPD-${sanitizeFilename(topik)}-${active}`)}>
+                          <Download className="h-4 w-4" />Unduh Word (.docx)
                         </Button>
                       </div>
                     </div>
-                  ) : current.content ? (
-                    <LkpdDocument content={current.content} level={labels[active]} topic={topik} printId={active} />
                   ) : (
-                    <div className="card text-red-700">Dokumen kosong. Gunakan Regenerasi untuk mencoba level ini lagi.</div>
-                  )}
+                    /* CARD 2: Kunci Jawaban & Panduan Guru (Catatan Pegangan Khusus Guru) */
+                    <div className="card space-y-4 border-2 border-amber-200 bg-amber-50/40 shadow-sm">
+                      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-amber-200/80 pb-3">
+                        <div className="flex items-center gap-2.5">
+                          <span className="grid h-8 w-8 place-items-center rounded-xl bg-amber-100 text-amber-900 border border-amber-300/80">
+                            <KeyRound className="h-4 w-4" />
+                          </span>
+                          <div>
+                            <h3 className="text-base font-black text-amber-950">
+                              Kunci Jawaban & Panduan Guru (Level {labels[active]})
+                            </h3>
+                            <p className="text-xs text-amber-800">
+                              Catatan khusus pegangan guru: pembahasan langkah matematis dan rubrik penskoran.
+                            </p>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setDocType("siswa")}
+                          className="flex items-center gap-1.5 rounded-lg border border-blue-200 bg-white px-2.5 py-1 text-xs font-bold text-[#2563EB] hover:bg-blue-50 transition cursor-pointer"
+                        >
+                          <FileText className="h-3.5 w-3.5" />
+                          Kembali ke LKPD Siswa →
+                        </button>
+                      </div>
 
-                  <div className="card flex flex-wrap gap-2">
-                    <Button variant="ghost" disabled={!current.content} onClick={() => patch(active, { draft: current.content, editing: true })}>
-                      <Edit3 className="h-4 w-4" />Edit
-                    </Button>
-                    <Button variant="secondary" disabled={!current.content.trim() || current.editing} onClick={() => setValidationLevel(active)}>
-                      <CheckCircle className="h-4 w-4" />{current.validatedAt ? "Validasi Ulang" : "Validasi"}
-                    </Button>
-                    <Button disabled={!current.content} onClick={() => print(active)}>
-                      <Printer className="h-4 w-4" />Print / PDF
-                    </Button>
-                    <Button disabled={!current.content} onClick={() => downloadWord(current)}>
-                      <Download className="h-4 w-4" />Unduh Word (.docx)
-                    </Button>
-                    <p className="print-browser-hint no-print">Agar PDF bersih tanpa URL, tanggal, dan nomor halaman, nonaktifkan “Headers and footers” di dialog cetak browser.</p>
-                  </div>
+                      {teacherKeyContent ? (
+                        <LkpdDocument
+                          content={teacherKeyContent}
+                          level={labels[active]}
+                          topic={topik}
+                          printId={`kunci-${active}`}
+                          docTitle="KUNCI JAWABAN & PANDUAN GURU"
+                          docBadge="Catatan Pegangan Guru · Pembelajaran Berdiferensiasi (TaRL)"
+                        />
+                      ) : (
+                        <div className="p-4 rounded-xl bg-white border border-amber-200 text-xs text-amber-900">
+                          Bagian kunci jawaban guru akan otomatis dibuat saat Anda men-generate LKPD.
+                        </div>
+                      )}
+
+                      <div className="flex flex-wrap items-center gap-2 border-t border-amber-200/80 pt-4">
+                        <Button
+                          disabled={!teacherKeyContent}
+                          onClick={() => print(active, "kunci")}
+                          variant="secondary"
+                        >
+                          <Printer className="h-4 w-4" />Print / PDF Kunci Jawaban
+                        </Button>
+                        <Button
+                          disabled={!teacherKeyContent}
+                          onClick={() => downloadWordDoc(teacherKeyContent, `Kunci-Jawaban-${sanitizeFilename(topik)}-${active}`)}
+                          variant="secondary"
+                        >
+                          <Download className="h-4 w-4" />Unduh Word Kunci (.docx)
+                        </Button>
+                        <Button
+                          disabled={!teacherKeyContent}
+                          variant="ghost"
+                          onClick={() => {
+                            navigator.clipboard.writeText(teacherKeyContent);
+                            setCopiedKey(true);
+                            setTimeout(() => setCopiedKey(false), 2000);
+                          }}
+                        >
+                          {copiedKey ? <Check className="h-4 w-4 text-emerald-600" /> : <Copy className="h-4 w-4" />}
+                          {copiedKey ? "Tersalin!" : "Salin Teks Kunci"}
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                 </article>
               ) : (
                 <div className="card text-center">

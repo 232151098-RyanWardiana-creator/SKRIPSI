@@ -12,6 +12,8 @@ interface LkpdDocumentProps {
   level: string;
   topic: string;
   printId?: string;
+  docTitle?: string;
+  docBadge?: string;
 }
 
 function safeUrl(url: string): string {
@@ -20,7 +22,7 @@ function safeUrl(url: string): string {
   return "";
 }
 
-export function LkpdDocument({ content, level, topic, printId }: LkpdDocumentProps) {
+export function LkpdDocument({ content, level, topic, printId, docTitle, docBadge }: LkpdDocumentProps) {
   const paperRef = useRef<HTMLElement>(null);
   const safeTopic = normalizePlainText(topic);
   const safeLevel = normalizePlainText(level);
@@ -50,8 +52,8 @@ export function LkpdDocument({ content, level, topic, printId }: LkpdDocumentPro
       <section ref={paperRef} className="lkpd-paper" data-print-id={printId}>
         <header className="lkpd-document-header">
           <div>
-            <span className="title">LEMBAR KERJA PESERTA DIDIK (LKPD)</span>
-            <div className="materi-badge">Kurikulum Merdeka · Pembelajaran Berdiferensiasi (TaRL)</div>
+            <span className="title">{docTitle || "LEMBAR KERJA PESERTA DIDIK (LKPD)"}</span>
+            <div className="materi-badge">{docBadge || "Kurikulum Merdeka · Pembelajaran Berdiferensiasi (TaRL)"}</div>
           </div>
           <div className="subtitle">
             <strong>{safeTopic}</strong>
