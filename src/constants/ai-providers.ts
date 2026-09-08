@@ -40,15 +40,9 @@ export const AI_PROVIDERS: AIProviderOption[] = [
         label: "Gemini 3.7 Flash",
         badge: "Gratis",
       },
-    ],
-  },
-  {
-    id: "xkiro",
-    name: "Xkiro",
-    models: [
       {
         id: "xkiro/z-ai/glm-5.3",
-        label: "GLM 5.3 Free",
+        label: "GLM 5.3",
         badge: "Gratis",
       },
       {
@@ -56,25 +50,30 @@ export const AI_PROVIDERS: AIProviderOption[] = [
         label: "DeepSeek V4 Pro",
         badge: "Gratis",
       },
-    ],
-  },
-  {
-    id: "bai",
-    name: "B.ai",
-    models: [
-      {
-        id: "B.ai/gemini-3.8-flash",
-        label: "Gemini 3.8 Flash",
-        badge: "Gratis",
-      },
       {
         id: "B.ai/qwen3.8-max",
         label: "Qwen 3.8 Max",
         badge: "Gratis",
       },
+    ],
+  },
+  {
+    id: "xkiro",
+    name: "Xkiro",
+    models: [
       {
-        id: "B.ai/deepseek-v4-flash",
-        label: "DeepSeek V4 Flash",
+        id: "z-ai/glm-5.3",
+        label: "GLM 5.3",
+        badge: "Gratis",
+      },
+      {
+        id: "deepseek/deepseek-v4-pro",
+        label: "DeepSeek V4 Pro",
+        badge: "Gratis",
+      },
+      {
+        id: "moonshotai/kimi-k2.5",
+        label: "Kimi K2.5",
         badge: "Gratis",
       },
     ],

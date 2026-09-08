@@ -75,12 +75,12 @@ export function ModalGenerateAI({
 
         {/* Form Body */}
         <div className="mt-5 space-y-4">
-          {/* Provider Selector Tabs (9Router, Xkiro, B.ai) */}
+          {/* Provider Selector Tabs (9Router & Xkiro) */}
           <div>
             <label className="block text-xs font-black uppercase tracking-wider text-slate-600 mb-2">
               Pilih Provider AI
             </label>
-            <div className="grid grid-cols-3 gap-1.5 p-1 rounded-2xl bg-slate-100/90 border border-slate-200/80">
+            <div className="grid grid-cols-2 gap-1.5 p-1 rounded-2xl bg-slate-100/90 border border-slate-200/80">
               {AI_PROVIDERS.map((provider) => {
                 const isSelected = selectedProviderId === provider.id;
                 return (

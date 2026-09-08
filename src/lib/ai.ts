@@ -323,9 +323,17 @@ Pastikan tepat satu jawaban benar, angka realistis, dan JSON dapat diproses lang
     },
   ];
 
+  let baseUrl: string | undefined = params.customBaseUrl;
+  let apiKey: string | undefined = params.customApiKey;
+
+  if (params.provider === "xkiro") {
+    baseUrl = process.env.XKIRO_BASE_URL || "https://api.xkiro.com/v1";
+    apiKey = process.env.XKIRO_API_KEY || "";
+  }
+
   const aiOptions = {
-    baseUrl: params.customBaseUrl || undefined,
-    apiKey: params.customApiKey || undefined,
+    baseUrl,
+    apiKey,
     model: params.model,
   };
 
