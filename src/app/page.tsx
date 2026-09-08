@@ -142,17 +142,16 @@ export default function Home() {
         <div className="h-2 w-2 rounded-full bg-emerald-500" />
       </div>
 
-      {/* 1. Floating Pill Navbar (Desktop & Mobile) */}
-      <header className="fixed inset-x-0 top-3 sm:top-4 z-40 flex justify-center px-3 sm:px-6 transition-all">
-        <nav className="flex w-full max-w-5xl items-center justify-between md:w-auto md:justify-center gap-1.5 sm:gap-2 rounded-full border-2 border-[#1E1B4B]/10 bg-white/95 px-3.5 sm:px-4 py-2 shadow-xl shadow-indigo-950/5 backdrop-blur-md">
-          <Link href="/" className="px-2 text-base sm:text-lg font-black tracking-tight text-[#1E1B4B] hover:scale-105 transition-transform">
+      {/* 1. Desktop Floating Pill Navbar (Komputer Saja) */}
+      <header className="fixed inset-x-0 top-4 z-40 hidden md:flex justify-center px-4 transition-all">
+        <nav className="flex items-center gap-1.5 rounded-full border-2 border-[#1E1B4B]/10 bg-white/90 p-2 shadow-xl backdrop-blur-md">
+          <Link href="/" className="px-3 text-lg font-black tracking-tight text-[#1E1B4B] hover:scale-105 transition-transform">
             LKPD<span className="text-[#EC4899]">.</span>
           </Link>
+          <div className="mx-1 h-5 w-[1px] bg-[#1E1B4B]/15" />
 
-          <div className="hidden md:block mx-1 h-5 w-[1px] bg-[#1E1B4B]/15" />
-
-          {/* Scrollspy Navigation Pills (Desktop Only) */}
-          <div className="hidden md:flex items-center gap-1">
+          {/* Scrollspy Navigation Pills */}
+          <div className="flex items-center gap-1">
             {[
               { id: "home", label: "Beranda" },
               { id: "keunggulan", label: "Keunggulan" },
@@ -176,16 +175,26 @@ export default function Home() {
             })}
           </div>
 
-          <div className="hidden md:block mx-1 h-5 w-[1px] bg-[#1E1B4B]/15" />
+          <div className="mx-1 h-5 w-[1px] bg-[#1E1B4B]/15" />
 
           <Link
             href="/login"
-            className="flex items-center gap-1.5 rounded-full bg-[#1E1B4B] px-3.5 sm:px-4 py-1.5 sm:py-2 text-xs font-black text-white shadow-sm transition hover:bg-[#2563EB] active:scale-95 whitespace-nowrap"
+            className="flex items-center gap-1.5 rounded-full bg-[#1E1B4B] px-4 py-1.5 text-xs font-black text-white shadow-sm transition hover:bg-[#2563EB] active:scale-95 whitespace-nowrap"
           >
             <LogIn className="h-3.5 w-3.5" /> Masuk Portal
           </Link>
         </nav>
       </header>
+
+      {/* 📱 Mobile Top Right: Tombol Melayang Masuk Portal Saja di Ujung Kanan */}
+      <div className="fixed top-4 right-4 z-40 md:hidden">
+        <Link
+          href="/login"
+          className="flex items-center gap-1.5 rounded-full bg-[#1E1B4B] px-4 py-2 text-xs font-black text-white shadow-xl shadow-indigo-950/20 backdrop-blur-md transition hover:bg-[#2563EB] active:scale-95 border border-white/20"
+        >
+          <LogIn className="h-3.5 w-3.5" /> Masuk Portal
+        </Link>
+      </div>
 
       {/* 📱 Floating Mobile Navigation Bar (Melayang Khusus Layar HP) */}
       <nav
