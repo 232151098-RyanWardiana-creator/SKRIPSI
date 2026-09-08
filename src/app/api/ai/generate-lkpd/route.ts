@@ -6,7 +6,13 @@ export const runtime = "nodejs";
 const levels: Level[] = ["dasar", "menengah", "mahir"];
 const gayaBelajar = new Set<Exclude<GayaBelajar, null>>(["visual", "auditory", "kinestetik"]);
 
-type RequestBody = Omit<GenerateLKPDParams, "level"> & { level?: Level };
+type RequestBody = Omit<GenerateLKPDParams, "level"> & {
+  level?: Level;
+  provider?: string;
+  model?: string;
+  customApiKey?: string;
+  customBaseUrl?: string;
+};
 
 function validBody(value: unknown): value is RequestBody {
   if (!value || typeof value !== "object") return false;
@@ -38,6 +44,10 @@ export async function POST(request: Request) {
     gayaBelajar: body.gayaBelajar,
     indikatorLemah: body.indikatorLemah.map((item) => item.trim()),
     promptTambahan: body.promptTambahan?.trim(),
+    provider: typeof body.provider === "string" ? body.provider : undefined,
+    model: typeof body.model === "string" ? body.model : undefined,
+    customApiKey: typeof body.customApiKey === "string" ? body.customApiKey : undefined,
+    customBaseUrl: typeof body.customBaseUrl === "string" ? body.customBaseUrl : undefined,
   };
   const requestedLevels = body.level ? [body.level] : levels;
   const aiConnected = (await getAIStatus()).connected;

@@ -15,9 +15,11 @@ interface ModalGenerateAIProps {
   }) => Promise<void>;
   loading: boolean;
   materi: string;
-  jumlah: number;
-  indikator: string;
-  tingkat: string;
+  jumlah?: number;
+  indikator?: string;
+  tingkat?: string;
+  targetInfo?: string;
+  actionText?: string;
 }
 
 export function ModalGenerateAI({
@@ -29,13 +31,15 @@ export function ModalGenerateAI({
   jumlah,
   indikator,
   tingkat,
+  targetInfo,
+  actionText = "Mulai Generate",
 }: ModalGenerateAIProps) {
-  const [selectedProviderId, setSelectedProviderId] = useState("9router");
+  const [selectedProviderId, setSelectedProviderId] = useState("xkiro");
   const currentProvider =
     AI_PROVIDERS.find((p) => p.id === selectedProviderId) || AI_PROVIDERS[0];
 
   const [selectedModelId, setSelectedModelId] = useState<string>(
-    currentProvider.models[0]?.id || "INTELLIGENCE-SKRIPSI"
+    currentProvider.models[0]?.id || "deepseek/deepseek-v4-flash"
   );
 
   if (!isOpen) return null;
@@ -168,13 +172,17 @@ export function ModalGenerateAI({
               <span className="text-slate-400 font-bold uppercase text-[10px] block">Topik Materi:</span>
               <span className="font-bold text-slate-900">{materi || "Matematika"}</span>
             </div>
-            <div>
-              <span className="text-slate-400 font-bold uppercase text-[10px] block">Indikator:</span>
-              <span className="font-bold text-slate-900">{indikator === "SEMUA" ? "Rata (IK-01–05)" : indikator}</span>
-            </div>
+            {indikator && (
+              <div>
+                <span className="text-slate-400 font-bold uppercase text-[10px] block">Indikator:</span>
+                <span className="font-bold text-slate-900">{indikator === "SEMUA" ? "Rata (IK-01–05)" : indikator}</span>
+              </div>
+            )}
             <div>
               <span className="text-slate-400 font-bold uppercase text-[10px] block">Target:</span>
-              <span className="font-bold text-[#2563EB]">{jumlah} Butir • {tingkat}</span>
+              <span className="font-bold text-[#2563EB]">
+                {targetInfo || `${jumlah || 3} Butir • ${tingkat || "sedang"}`}
+              </span>
             </div>
           </div>
         </div>
@@ -192,10 +200,10 @@ export function ModalGenerateAI({
             {loading ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin mr-1.5" />
-                Memproses Soal...
+                Memproses...
               </>
             ) : (
-              "Mulai Generate"
+              actionText
             )}
           </Button>
         </div>

@@ -56,6 +56,10 @@ export interface GenerateLKPDParams {
   materi: string;
   jumlahAktivitas: number;
   promptTambahan?: string;
+  provider?: string;
+  model?: string;
+  customApiKey?: string;
+  customBaseUrl?: string;
 }
 
 export interface GenerateSoalAsesmenParams {
@@ -106,7 +110,57 @@ function sanitizePreview(value: unknown): string {
 function mockContent(kind: "lkpd" | "asesmen", context: string): string {
   if (kind === "asesmen") return "[]";
 
-  return `# LKPD Matematika — ${context}\n\n## Tujuan Pembelajaran\nMemahami dan menerapkan konsep melalui aktivitas sesuai tingkat kemampuan awal.\n\n## Petunjuk\nKerjakan setiap aktivitas secara runtut dan tuliskan alasan jawaban.\n\n## Aktivitas\nKonten contoh digunakan karena 9Router sedang tidak tersedia.\n\n## Refleksi\nTuliskan konsep yang sudah dipahami dan bagian yang masih perlu dilatih.`;
+  return `# LKPD Matematika: ${context}
+
+## A. Identitas Peserta Didik
+| Komponen | Keterangan |
+|---|---|
+| **Nama Siswa** | .................................................... |
+| **Kelas / No. Absen** | VII-.... / ....... |
+| **Hari / Tanggal** | .................................................... |
+
+## B. Tujuan Pembelajaran
+1. Peserta didik dapat memahami konsep ${context} melalui permasalahan kontekstual kehidupan sehari-hari.
+2. Peserta didik dapat menyelesaikan masalah perbandingan dengan langkah pemecahan yang terstruktur dan logis.
+
+## C. Petunjuk Pengerjaan
+1. Berdoalah sebelum memulai kegiatan belajar.
+2. Bacalah setiap narasi masalah dan cermati informasi besaran yang diberikan.
+3. Kerjakan setiap aktivitas secara bertahap pada ruang jawaban yang telah disediakan.
+
+## D. Kegiatan Pembelajaran
+### Aktivitas 1: Eksplorasi Rasio Kontekstual (target: IK-01)
+Ibu menyiapkan bahan untuk membuat kue bolu. Rasio antara tepung terigu dan gula pasir yang digunakan adalah $3 : 2$. Jika Ibu menggunakan $600\\text{ gram}$ tepung terigu, berapakah gram gula pasir yang harus ditambahkan?
+
+> **Ruang Jawaban:**
+> - Nilai 1 bagian = $\\dots\\dots\\dots\\dots$
+> - Berat gula pasir = $\\dots\\dots\\dots\\dots$
+
+### Aktivitas 2: Penerapan Perbandingan Senilai (target: IK-03)
+Sebuah kendaraan menempuh jarak $90\\text{ km}$ dan menghabiskan $6\\text{ liter}$ bensin. Berapakah liter bensin yang diperlukan jika kendaraan tersebut hendak menempuh jarak $150\\text{ km}$?
+
+> **Ruang Jawaban:**
+> - Efisiensi laju bahan bakar = $\\dots\\dots\\dots\\dots$
+> - Kebutuhan bensin untuk $150\\text{ km}$ = $\\dots\\dots\\dots\\dots$
+
+## E. Refleksi Diri Siswa
+- Hal baru apa yang kamu pelajari dari aktivitas perbandingan di atas?
+- Bagian mana yang menurutmu paling menantang untuk diselesaikan?
+
+## F. Kunci Jawaban & Panduan Guru (Catatan Pegangan)
+> ### Pembahasan & Kunci Jawaban Resmi:
+> 1. **Aktivitas 1:**
+>    - Rasio tepung : gula = $3 : 2$.
+>    - Nilai 1 bagian = $600\\text{ gram} \\div 3 = 200\\text{ gram}$.
+>    - Kebutuhan gula pasir = $2 \\times 200\\text{ gram} = \\mathbf{400\\text{ gram}}$.
+> 2. **Aktivitas 2:**
+>    - Konsumsi per liter = $90\\text{ km} \\div 6\\text{ liter} = 15\\text{ km/liter}$.
+>    - Bensin yang dibutuhkan = $150\\text{ km} \\div 15\\text{ km/liter} = \\mathbf{10\\text{ liter}}$.
+> 
+> **Rubrik Penilaian Singkat:**
+> - Skor 4: Langkah pemodelan rasio benar, perhitungan tepat, satuan lengkap.
+> - Skor 2: Konsep perbandingan benar namun terdapat kekeliruan perhitungan aritmetika.
+> - Skor 1: Mencoba menuliskan informasi yang diketahui dari soal.`;
 }
 
 async function requestCompletion(
@@ -204,15 +258,49 @@ export async function generateLKPD(params: GenerateLKPDParams): Promise<AIResult
   const messages: ChatMessage[] = [
     {
       role: "system",
-      content: "Kamu ahli pendidikan matematika SMP. Buat LKPD Kurikulum Merdeka Kelas VII dalam Bahasa Indonesia dan Markdown bersih. Jangan bungkus jawaban dalam fenced code block. Gunakan $...$ untuk matematika inline dan $$...$$ untuk matematika blok. Gunakan tanda kurung bulat standar seperti (-3), (-4), (+2). JANGAN gunakan tanda kurung siku campuran, kurung kurawal salah tempat, simbol garis vertikal yang memotong angka, atau perintah \\left dan \\right. Hindari environment LaTeX (align, equation, array) dan perintah yang tidak didukung KaTeX. Gunakan tabel GFM bila perlu.",
+      content: "Kamu ahli pendidikan matematika SMP Kurikulum Merdeka. Buat dokumen Lembar Kerja Peserta Didik (LKPD) lengkap, sistematis, ramah cetak, dan dalam Markdown bersih. Jangan bungkus jawaban dalam fenced code block utama. Gunakan $...$ untuk matematika inline dan $$...$$ untuk matematika blok. Gunakan tanda kurung bulat standar seperti (-3), (-4), (+2). JANGAN gunakan tanda kurung siku campuran, simbol garis vertikal yang memotong angka, atau perintah \\left dan \
+ight. Hindari environment LaTeX (align, equation, array) dan perintah yang tidak didukung KaTeX. Gunakan tabel Markdown bila perlu.",
     },
     {
       role: "user",
-      content: `Buat LKPD tentang "${params.materi}" untuk level ${params.level}. Karakter level: ${levelKeterangan[params.level]}. Penyesuaian penyajian: ${gayaKeterangan}. Indikator lemah yang wajib menjadi target eksplisit kegiatan dan remediasi: ${indikator}. Buat ${params.jumlahAktivitas} aktivitas. SETIAP aktivitas harus mencantumkan indikator target dalam tanda kurung, misalnya "(target: IK-01)". Untuk level dasar, kegiatan berfokus pada remediasi indikator prerequisite (IK-01, IK-02) dengan scaffolding penuh sebelum naik ke indikator lain. Untuk level menengah, kegiatan memperkuat indikator lemah yang belum dikuasai. Untuk level mahir, kegiatan berupa pengayaan/penguatan seluruh indikator, tetap menantang pada indikator yang belum dikuasai bila ada. Instruksi tambahan: ${params.promptTambahan || "tidak ada"}. Struktur wajib dan konsisten: # Judul LKPD; ## A. Identitas (tabel Nama, Kelas, Tanggal dengan ruang kosong); ## B. Tujuan Pembelajaran (2-3 butir, mengacu pada indikator target); ## C. Petunjuk; ## D. Kegiatan (aktivitas kontekstual bernomor, ruang jawaban berupa garis kosong atau blockquote); ## E. Refleksi. VAK hanya memengaruhi penyajian, bukan tingkat kesulitan. Pastikan Markdown valid, rumus memakai delimiter matematika, dan jangan keluarkan teks sebelum/sesudah dokumen.`,
+      content: `Buat LKPD tentang "${params.materi}" untuk level ${params.level}. Karakter level: ${levelKeterangan[params.level]}. Penyesuaian penyajian VAK: ${gayaKeterangan}. Indikator target: ${indikator}.
+Buat tepat ${params.jumlahAktivitas} aktivitas kontekstual kehidupan nyata. SETIAP aktivitas wajib mencantumkan target indikator dalam tanda kurung, misalnya "(target: IK-01)".
+Untuk level dasar: scaffolding penuh, langkah detail berurutan, contoh konkret.
+Untuk level menengah: latihan penguatan konsep, scaffolding minimal.
+Untuk level mahir: tantangan kontekstual analitis, HOTS, pemecahan masalah mendalam.
+Instruksi tambahan: ${params.promptTambahan || "tidak ada"}.
+
+STRUKTUR DOKUMEN WAJIB DAN LENGKAP:
+# LEMBAR KERJA PESERTA DIDIK (LKPD)
+## A. Identitas Peserta Didik (tabel Markdown berisi Nama Siswa, Kelas/No. Absen, Hari/Tanggal dengan titik-titik ruang kosong)
+## B. Tujuan Pembelajaran (2-3 poin yang jelas sesuai indikator target)
+## C. Petunjuk Pengerjaan
+## D. Kegiatan Pembelajaran (aktivitas kontekstual 1 sampai ${params.jumlahAktivitas} dengan narasi realistis, diikuti ruang pengerjaan berformat blockquote atau garis titik-titik untuk diisi siswa)
+## E. Refleksi Diri Siswa (2 pertanyaan refleksi singkat mengenai pemahaman konsep)
+## F. Kunci Jawaban & Panduan Guru (BAGIAN PENTING CATATAN GURU: sertakan kunci jawaban lengkap setiap aktivitas, langkah-langkah penyelesaian matematis yang runtut, hasil akhir yang tebal, dan rubrik penilaian singkat sebagai pegangan guru).
+
+Pastikan Markdown valid, rumus matematis rapi dengan delimiter, dan langsung hasilkan dokumen tanpa teks sapaan pembuka/penutup.`,
     },
   ];
 
-  return chatCompletion(messages, mockContent("lkpd", `${params.materi} (${params.level})`));
+  let baseUrl: string | undefined = params.customBaseUrl;
+  let apiKey: string | undefined = params.customApiKey;
+  let backupApiKey: string | undefined = undefined;
+
+  if (params.provider === "xkiro") {
+    baseUrl = process.env.XKIRO_BASE_URL || "https://api.xkiro.com/v1";
+    apiKey = process.env.XKIRO_API_KEY || "";
+    backupApiKey = process.env.XKIRO_API_KEY_BACKUP || "";
+  }
+
+  const aiOptions = {
+    baseUrl,
+    apiKey,
+    backupApiKey,
+    model: params.model,
+  };
+
+  return chatCompletion(messages, mockContent("lkpd", `${params.materi} (${params.level})`), aiOptions);
 }
 
 export interface GeneratedQuestion {
