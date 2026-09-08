@@ -134,39 +134,55 @@ export function AuthForm({ mode = "login" }: { mode?: "login" | "register" }) {
       </div>
 
       {role === "siswa" ? (
-        <div className="space-y-4 rounded-2xl border-2 border-blue-200/80 bg-gradient-to-br from-blue-50/90 via-indigo-50/50 to-purple-50/60 p-5 shadow-xs">
-          <div className="flex items-center gap-2.5">
-            <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#2563EB] text-white shadow-sm">
-              <Sparkles className="h-4 w-4" />
+        <div className="relative overflow-hidden space-y-4 rounded-2xl border border-white/15 bg-gradient-to-b from-slate-900/95 via-[#0B0F19]/95 to-slate-950/95 p-5 shadow-[0_12px_32px_rgba(0,0,0,0.4),inset_0_1px_1px_rgba(255,255,255,0.15)] backdrop-blur-2xl text-white">
+          {/* Subtle Ambient Glass Glows */}
+          <div className="pointer-events-none absolute -top-12 -left-12 h-32 w-32 rounded-full bg-blue-500/20 blur-2xl" />
+          <div className="pointer-events-none absolute -bottom-12 -right-12 h-32 w-32 rounded-full bg-purple-500/20 blur-2xl" />
+
+          {/* Header: Pure Words, No Icon, Subtitle Removed */}
+          <div className="border-b border-white/10 pb-2.5">
+            <span className="inline-block text-[10px] font-black uppercase tracking-widest text-blue-400 mb-0.5">
+              Akses Cepat Siswa
+            </span>
+            <h3 className="text-base font-black text-white tracking-tight">
+              Masuk Tanpa Password
+            </h3>
+          </div>
+
+          <div className="grid gap-2.5 text-xs font-medium pt-0.5">
+            <div className="flex items-center gap-3 rounded-xl bg-white/[0.05] hover:bg-white/[0.08] px-3.5 py-2.5 border border-white/10 shadow-xs backdrop-blur-md transition-colors">
+              <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-blue-500/25 border border-blue-400/40 text-[11px] font-black text-blue-300">
+                1
+              </span>
+              <span className="text-slate-200">
+                Ketik <strong className="font-bold text-white">Kode Kelas</strong> dari gurumu
+              </span>
             </div>
-            <div>
-              <h3 className="text-sm font-black text-[#1E1B4B]">Masuk Tanpa Password</h3>
-              <p className="text-[11px] font-medium text-slate-600">Mudah, cepat, dan aman dengan PIN pribadi</p>
+            <div className="flex items-center gap-3 rounded-xl bg-white/[0.05] hover:bg-white/[0.08] px-3.5 py-2.5 border border-white/10 shadow-xs backdrop-blur-md transition-colors">
+              <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-indigo-500/25 border border-indigo-400/40 text-[11px] font-black text-indigo-300">
+                2
+              </span>
+              <span className="text-slate-200">
+                Pilih <strong className="font-bold text-white">Namamu</strong> dari daftar rombel
+              </span>
+            </div>
+            <div className="flex items-center gap-3 rounded-xl bg-white/[0.05] hover:bg-white/[0.08] px-3.5 py-2.5 border border-white/10 shadow-xs backdrop-blur-md transition-colors">
+              <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-purple-500/25 border border-purple-400/40 text-[11px] font-black text-purple-300">
+                3
+              </span>
+              <span className="text-slate-200">
+                Masukkan <strong className="font-bold text-white">PIN 4 Angka</strong> milikmu
+              </span>
             </div>
           </div>
 
-          <div className="grid gap-2 text-xs font-medium text-slate-700 pt-1">
-            <div className="flex items-center gap-2.5 rounded-xl bg-white/90 px-3.5 py-2.5 border border-blue-100 shadow-2xs">
-              <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-blue-100 text-[11px] font-black text-[#2563EB]">1</span>
-              <span>Ketik <strong>Kode Kelas</strong> dari gurumu</span>
-            </div>
-            <div className="flex items-center gap-2.5 rounded-xl bg-white/90 px-3.5 py-2.5 border border-blue-100 shadow-2xs">
-              <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-indigo-100 text-[11px] font-black text-indigo-700">2</span>
-              <span>Pilih <strong>Namamu</strong> dari daftar rombel</span>
-            </div>
-            <div className="flex items-center gap-2.5 rounded-xl bg-white/90 px-3.5 py-2.5 border border-blue-100 shadow-2xs">
-              <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-purple-100 text-[11px] font-black text-purple-700">3</span>
-              <span>Masukkan <strong>PIN 4 Angka</strong> milikmu</span>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-1.5 text-[11px] text-slate-500 px-1">
-            <ShieldCheck className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+          <div className="flex items-center gap-2 rounded-xl bg-emerald-950/40 border border-emerald-500/25 px-3 py-2 text-[11px] text-emerald-300/90 backdrop-blur-md">
+            <ShieldCheck className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
             <span>PIN menjaga agar siswa lain tidak dapat mengisi atas namamu.</span>
           </div>
 
           <button
-            className="flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#2563EB] to-[#7C3AED] px-6 py-3.5 text-sm font-black text-white shadow-lg shadow-blue-500/25 transition-all hover:opacity-95 hover:shadow-xl hover:-translate-y-0.5 active:scale-95 cursor-pointer"
+            className="relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-full bg-gradient-to-r from-[#2563EB] via-[#4F46E5] to-[#7C3AED] px-6 py-3.5 text-sm font-black text-white shadow-lg shadow-indigo-950/50 border border-white/20 transition-all hover:brightness-110 hover:shadow-indigo-500/30 hover:-translate-y-0.5 active:scale-95 cursor-pointer"
             onClick={() => router.push("/dashboard-siswa")}
             type="button"
           >
