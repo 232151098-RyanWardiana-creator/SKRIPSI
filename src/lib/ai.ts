@@ -129,7 +129,7 @@ async function requestCompletion(
       body: JSON.stringify({
         model,
         messages,
-        temperature: 0.7,
+        temperature: 0.85,
         max_tokens: 4096,
         stream: false,
       }),
@@ -250,58 +250,67 @@ function mockSoalContent(params: GenerateSoalAsesmenParams): string {
   const materi = params.materi.trim() || "Matematika SMP";
   const ind = params.indikator || "IK-01";
 
+  // Dynamic randomization for fallback so questions never repeat
+  const n1 = Math.floor(Math.random() * 5) + 2;
+  const n2 = n1 + Math.floor(Math.random() * 4) + 2;
+  const totalMult = (n1 + n2) * (Math.floor(Math.random() * 5) + 4);
+  const part1 = (n1 / (n1 + n2)) * totalMult;
+
+  const unitPrice = (Math.floor(Math.random() * 6) + 5) * 2000;
+  const unitCount = Math.floor(Math.random() * 4) + 3;
+  const targetCount = unitCount + Math.floor(Math.random() * 3) + 2;
+  const totalCost = targetCount * unitPrice;
+
+  const scale = [100, 200, 250, 500, 1000][Math.floor(Math.random() * 5)];
+  const mapCm = Math.floor(Math.random() * 6) + 3;
+  const realMeters = (mapCm * scale) / 100;
+
   const samples = [
     {
-      p: `Dalam situasi kehidupan sehari-hari pada materi ${materi}, perbandingan yang digunakan adalah 2 : 5 untuk total 35 satuan bahan. Tentukan nilai bagian pertama:`,
-      a: "10 satuan",
-      b: "14 satuan",
-      c: "20 satuan",
-      d: "25 satuan",
+      p: `Dalam situasi kehidupan nyata terkait materi ${materi}, rasio bahan utama A dan B adalah ${n1} : ${n2} dengan total campuran ${totalMult} kg. Berapakah berat bahan A?`,
+      a: `${part1} kg`,
+      b: `${part1 + 4} kg`,
+      c: `${part1 + 8} kg`,
+      d: `${part1 - 2 > 0 ? part1 - 2 : part1 + 10} kg`,
       kunci: "A",
-      bahas: `Jumlah perbandingan = 2 + 5 = 7 bagian. Nilai 1 bagian = 35 : 7 = 5. Nilai bagian pertama = 2 × 5 = 10 satuan.`,
+      bahas: `Jumlah perbandingan = ${n1} + ${n2} = ${n1 + n2} bagian. Nilai 1 bagian = ${totalMult} ÷ ${n1 + n2} = ${totalMult / (n1 + n2)} kg. Berat bahan A = ${n1} × ${totalMult / (n1 + n2)} = ${part1} kg.`,
     },
     {
-      p: `Pada materi ${materi}, jika 4 unit membutuhkan biaya Rp48.000, berapakah biaya yang dibutuhkan untuk 7 unit dengan perbandingan senilai?`,
-      a: "Rp72.000",
-      b: "Rp84.000",
-      c: "Rp96.000",
-      d: "Rp105.000",
+      p: `Pada materi ${materi}, jika ${unitCount} buah barang membutuhkan biaya Rp${(unitCount * unitPrice).toLocaleString("id-ID")}, berapakah biaya untuk ${targetCount} buah barang dengan perbandingan senilai?`,
+      a: `Rp${(totalCost - unitPrice).toLocaleString("id-ID")}`,
+      b: `Rp${totalCost.toLocaleString("id-ID")}`,
+      c: `Rp${(totalCost + unitPrice).toLocaleString("id-ID")}`,
+      d: `Rp${(totalCost + unitPrice * 2).toLocaleString("id-ID")}`,
       kunci: "B",
-      bahas: `Biaya satuan = Rp48.000 : 4 = Rp12.000/unit. Untuk 7 unit = 7 × Rp12.000 = Rp84.000.`,
+      bahas: `Harga per unit = Rp${(unitCount * unitPrice).toLocaleString("id-ID")} ÷ ${unitCount} = Rp${unitPrice.toLocaleString("id-ID")}. Biaya untuk ${targetCount} unit = ${targetCount} × Rp${unitPrice.toLocaleString("id-ID")} = Rp${totalCost.toLocaleString("id-ID")}.`,
     },
     {
-      p: `Sebuah denah berskala 1 : 200 menunjukkan ukuran panjang 4 cm. Pada materi ${materi}, panjang sebenarnya adalah ...`,
-      a: "800 cm (8 meter)",
-      b: "600 cm (6 meter)",
-      c: "500 cm (5 meter)",
-      d: "400 cm (4 meter)",
+      p: `Sebuah denah berskala 1 : ${scale} menunjukkan panjang taman ${mapCm} cm. Pada konteks ${materi}, berapakah panjang taman sebenarnya dalam meter?`,
+      a: `${realMeters} meter`,
+      b: `${realMeters + 2} meter`,
+      c: `${realMeters + 5} meter`,
+      d: `${realMeters > 3 ? realMeters - 2 : realMeters + 8} meter`,
       kunci: "A",
-      bahas: `Panjang sebenarnya = 4 cm × 200 = 800 cm = 8 meter.`,
+      bahas: `Panjang sebenarnya = ${mapCm} cm × ${scale} = ${mapCm * scale} cm = ${realMeters} meter.`,
     },
     {
-      p: `Terkait materi ${materi}, bentuk paling sederhana dari perbandingan 18 : 45 adalah ...`,
-      a: "3 : 7",
-      b: "2 : 5",
-      c: "3 : 5",
-      d: "2 : 9",
-      kunci: "B",
-      bahas: `FPB dari 18 dan 45 adalah 9. Bagi 18:9 = 2 dan 45:9 = 5, menghasilkan 2 : 5.`,
-    },
-    {
-      p: `Dalam konteks ${materi}, sebuah pekerjaan diselesaikan 6 pekerja dalam 15 hari. Jika dikerjakan oleh 10 pekerja, waktu yang diperlukan adalah ...`,
-      a: "7 hari",
-      b: "9 hari",
-      c: "10 hari",
-      d: "12 hari",
-      kunci: "B",
-      bahas: `Perbandingan berbalik nilai: 6 × 15 = 10 × t. 90 = 10t, maka t = 9 hari.`,
+      p: `Seorang pengendara motor menempuh jarak ${(Math.floor(Math.random() * 4) + 2) * 30} km dengan ${Math.floor(Math.random() * 3) + 2} liter bensin. Berapakah jarak yang dapat ditempuh jika tersedia ${(Math.floor(Math.random() * 3) + 5)} liter bensin?`,
+      a: "120 km",
+      b: "150 km",
+      c: "180 km",
+      d: "210 km",
+      kunci: "C",
+      bahas: `Gunakan perbandingan senilai: efisiensi konsumsi = jarak ÷ liter. Kalikan dengan jumlah liter target untuk mendapat jarak tempuh.`,
     },
   ];
 
+  // Randomize sample order so questions vary each time
+  const shuffled = [...samples].sort(() => Math.random() - 0.5);
+
   const items = Array.from({ length: params.jumlah }, (_, idx) => {
-    const pick = samples[idx % samples.length];
+    const pick = shuffled[idx % shuffled.length];
     return {
-      id: `soal-${idx + 1}`,
+      id: `soal-${Date.now()}-${idx + 1}`,
       pertanyaan: pick.p,
       indikator_id: ind.match(/IK-0[1-5]/)?.[0] || "IK-01",
       tingkat_kesulitan: params.tingkat,
@@ -315,18 +324,32 @@ function mockSoalContent(params: GenerateSoalAsesmenParams): string {
 }
 
 export async function generateSoalAsesmen(params: GenerateSoalAsesmenParams): Promise<AIResult> {
+  const seed = Math.floor(Math.random() * 100000);
+  const contexts = [
+    "resep kuliner, takaran bumbu dapur, dan pembuatan minuman",
+    "jarak tempuh, konsumsi bahan bakar, dan kecepatan kendaraan bermotor",
+    "skala denah rumah, miniatur bangunan, dan peta perjalanan",
+    "perbandingan harga barang di pasar tradisional, diskon per unit, dan paket hemat",
+    "pencampuran warna cat tembok, komposisi pupuk pertanian hidroponik",
+    "pembagian keuntungan usaha bersama, bagi hasil panen, dan permodalan",
+    "waktu penyelesaian renovasi bangunan, jumlah tukang, dan konveksi pakaian",
+  ];
+  const randomContext = contexts[Math.floor(Math.random() * contexts.length)];
+
   const messages: ChatMessage[] = [
     {
       role: "system",
-      content: `Kamu adalah pakar pembuat soal asesmen diagnostik matematika SMP Kurikulum Merdeka.
-TUGAS UTAMA: Buatkan soal pilihan ganda kontekstual kehidupan nyata yang relevan secara langsung dengan topik "${params.materi}".
-HINDARI teks pengantar dan teks penutup. Keluarkan HANYA JSON array valid tanpa formatting markdown backticks.
+      content: `Kamu adalah pakar penyusun asesmen diagnostik matematika SMP Kurikulum Merdeka.
+TUGAS UTAMA: Susun butir soal diagnostik pilihan ganda kontekstual kehidupan nyata yang KREATIF, SEGAR, dan BERBEDA di setiap permintaan untuk topik materi "${params.materi}".
+HINDARI pengulangan soal atau angka klise yang sudah sering dipakai. Gunakan variasi skenario kehidupan nyata yang unik (misal terinspirasi dari konteks: ${randomContext}).
+Pastikan angka perhitungan rapi, realistis, dan logis untuk siswa SMP.
+Keluarkan HANYA JSON array valid tanpa formatting markdown backticks atau pengantar apa pun.
 
 Format setiap objek dalam array:
 [
   {
     "id": "soal-1",
-    "pertanyaan": "teks soal cerita kontekstual realistis sesuai topik materi yang diminta",
+    "pertanyaan": "soal cerita kontekstual realistis yang unik dan segar",
     "indikator_id": "${params.indikator}",
     "tingkat_kesulitan": "${params.tingkat}",
     "pilihan": {
@@ -339,12 +362,11 @@ Format setiap objek dalam array:
     "pembahasan": "penjelasan langkah matematis runtut dan jelas",
     "diagram": "opsional representasi teks/tabel"
   }
-]
-Pastikan tepat satu jawaban benar, angka realistis, dan JSON dapat diproses langsung dengan JSON.parse.`,
+]`,
     },
     {
       role: "user",
-      content: `Buat tepat ${params.jumlah} butir soal diagnostik pilihan ganda kontekstual kehidupan nyata untuk topik materi "${params.materi}", indikator "${params.indikator}", dengan tingkat kesulitan "${params.tingkat}". Jangan keluarkan teks apa pun selain JSON array valid.`,
+      content: `Buat tepat ${params.jumlah} butir soal pilihan ganda kontekstual BARU dan BERBEDA (Variasi Token #${seed}) untuk topik materi "${params.materi}", indikator "${params.indikator}", tingkat "${params.tingkat}". Pastikan soal memiliki skenario unik, angka yang berbeda, tepat satu jawaban benar, dan format JSON array valid.`,
     },
   ];
 
