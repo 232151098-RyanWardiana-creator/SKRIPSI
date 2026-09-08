@@ -227,22 +227,75 @@ export interface GeneratedQuestion {
 }
 
 export function parseGeneratedQuestions(content: string, defaults: { indikator: string; tingkat: GenerateSoalAsesmenParams["tingkat"] }): GeneratedQuestion[] {
-  const stripped = content.trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "").trim();
-  const parsed: unknown = JSON.parse(stripped);
-  if (!Array.isArray(parsed) || parsed.length === 0 || parsed.length > 10) throw new Error("Invalid question array");
+  let clean = content.replace(/<think>[\s\S]*?<\/think>/gi, "").trim();
+  clean = clean.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "").trim();
+  
+  const firstBracket = clean.indexOf("[");
+  const lastBracket = clean.lastIndexOf("]");
+  if (firstBracket !== -1 && lastBracket !== -1 && lastBracket > firstBracket) {
+    clean = clean.slice(firstBracket, lastBracket + 1);
+  }
+
+  const parsed: unknown = JSON.parse(clean);
+  if (!Array.isArray(parsed) || parsed.length === 0) throw new Error("Invalid question array");
+
   return parsed.map((raw, index) => {
     if (!raw || typeof raw !== "object") throw new Error("Invalid question");
     const item = raw as Record<string, unknown>;
-    const choices = item.pilihan as Record<string, unknown> | undefined;
-    const answer = String(item.jawaban_benar ?? item.jawaban ?? "").toUpperCase();
-    const indicator = String(item.indikator_id ?? item.indikator ?? defaults.indikator).match(/IK-0[1-5]/)?.[0] || "";
-    const difficulty = String(item.tingkat_kesulitan ?? item.tingkat ?? defaults.tingkat).toLowerCase();
-    const normalizedChoices = { A: String(choices?.A ?? choices?.a ?? "").trim(), B: String(choices?.B ?? choices?.b ?? "").trim(), C: String(choices?.C ?? choices?.c ?? "").trim(), D: String(choices?.D ?? choices?.d ?? "").trim() };
-    const question = String(item.pertanyaan ?? "").trim();
-    const explanation = String(item.pembahasan ?? item.penjelasan ?? "").trim();
-    if (!question || !explanation || !indicator || !["mudah", "sedang", "sulit"].includes(difficulty) || !["A", "B", "C", "D"].includes(answer) || Object.values(normalizedChoices).some((choice) => !choice)) throw new Error("Invalid question fields");
+
+    const question = String(item.pertanyaan ?? item.question ?? item.soal ?? item.prompt ?? "").trim();
+    const explanation = String(item.pembahasan ?? item.penjelasan ?? item.explanation ?? item.reasoning ?? "Langkah penyelesaian sesuai konsep perbandingan.").trim();
+
+    let choices = { A: "", B: "", C: "", D: "" };
+    const stripPrefix = (text: string) => text.replace(/^[A-Da-d][.)]\s*/, "").trim();
+
+    if (Array.isArray(item.options) || Array.isArray(item.pilihan)) {
+      const arr = (Array.isArray(item.options) ? item.options : item.pilihan) as unknown[];
+      choices.A = stripPrefix(String(arr[0] ?? ""));
+      choices.B = stripPrefix(String(arr[1] ?? ""));
+      choices.C = stripPrefix(String(arr[2] ?? ""));
+      choices.D = stripPrefix(String(arr[3] ?? ""));
+    } else {
+      const obj = ((item.pilihan || item.options || item.choices || {}) as Record<string, unknown>);
+      choices.A = stripPrefix(String(obj.A ?? obj.a ?? ""));
+      choices.B = stripPrefix(String(obj.B ?? obj.b ?? ""));
+      choices.C = stripPrefix(String(obj.C ?? obj.c ?? ""));
+      choices.D = stripPrefix(String(obj.D ?? obj.d ?? ""));
+    }
+
+    let answer: "A" | "B" | "C" | "D" = "A";
+    const rawAns = item.jawaban_benar ?? item.jawaban ?? item.correctAnswer ?? item.answer ?? item.kunci ?? "";
+    if (typeof rawAns === "number" && rawAns >= 0 && rawAns <= 3) {
+      answer = (["A", "B", "C", "D"][rawAns] || "A") as "A" | "B" | "C" | "D";
+    } else {
+      const s = String(rawAns).trim().toUpperCase();
+      if (["A", "B", "C", "D"].includes(s)) {
+        answer = s as "A" | "B" | "C" | "D";
+      } else if (["0", "1", "2", "3"].includes(s)) {
+        answer = (["A", "B", "C", "D"][Number(s)] || "A") as "A" | "B" | "C" | "D";
+      }
+    }
+
+    const indicator = String(item.indikator_id ?? item.indikator ?? defaults.indikator).match(/IK-0[1-5]/)?.[0] || defaults.indikator;
+    const rawDifficulty = String(item.tingkat_kesulitan ?? item.tingkat ?? defaults.tingkat).toLowerCase();
+    const difficulty = (["mudah", "sedang", "sulit"].includes(rawDifficulty) ? rawDifficulty : defaults.tingkat) as GeneratedQuestion["tingkat_kesulitan"];
+
+    if (!question || !choices.A || !choices.B || !choices.C || !choices.D) {
+      throw new Error("Invalid question fields");
+    }
+
     const diagram = typeof item.diagram === "string" && item.diagram.trim() ? item.diagram.trim() : undefined;
-    return { id: String(item.id || `soal-${index + 1}`), pertanyaan: question, indikator_id: indicator, tingkat_kesulitan: difficulty as GeneratedQuestion["tingkat_kesulitan"], pilihan: normalizedChoices, jawaban_benar: answer as GeneratedQuestion["jawaban_benar"], pembahasan: explanation, ...(diagram && { diagram }) };
+
+    return {
+      id: String(item.id || `soal-${index + 1}`),
+      pertanyaan: question,
+      indikator_id: indicator,
+      tingkat_kesulitan: difficulty,
+      pilihan: choices,
+      jawaban_benar: answer,
+      pembahasan: explanation,
+      ...(diagram && { diagram }),
+    };
   });
 }
 
