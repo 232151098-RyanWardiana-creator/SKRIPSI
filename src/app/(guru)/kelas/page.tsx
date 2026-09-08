@@ -254,23 +254,27 @@ export default function KelasPage() {
         <section className="card">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b pb-4">
             <div>
-              <div className="flex flex-wrap items-center gap-2.5">
+              <div className="flex items-center gap-2">
                 <h2 className="text-2xl font-black text-[#1E1B4B]">Kelas {activeKelas.nama}</h2>
-                <Button variant="ghost" onClick={bukaEditKelas} className="h-8 px-2.5 text-xs text-[#0066cc]">
-                  <Edit2 className="h-3.5 w-3.5 mr-1" />Edit Kelas
-                </Button>
-                <Button
-                  variant="ghost"
-                  onClick={() => setPendingDeleteClass(activeKelas)}
-                  className="h-8 px-2.5 text-xs text-rose-600 hover:bg-rose-50 hover:text-rose-700"
+                <button
+                  onClick={bukaEditKelas}
+                  title="Edit Kelas"
+                  aria-label="Edit Kelas"
+                  className="grid h-8 w-8 place-items-center rounded-xl border border-slate-200 bg-white text-slate-600 shadow-2xs transition-all hover:bg-blue-50 hover:text-[#2563EB] hover:border-blue-200 cursor-pointer"
+                  type="button"
                 >
-                  <Trash2 className="h-3.5 w-3.5 mr-1 text-rose-500" />Hapus Kelas
-                </Button>
+                  <Edit2 className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={() => setPendingDeleteClass(activeKelas)}
+                  title="Hapus Kelas"
+                  aria-label="Hapus Kelas"
+                  className="grid h-8 w-8 place-items-center rounded-xl border border-rose-200 bg-white text-rose-600 shadow-2xs transition-all hover:bg-rose-50 hover:border-rose-300 cursor-pointer"
+                  type="button"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
               </div>
-              <p className="mt-1 text-sm text-[#7a7a7a]">
-                Wali Kelas: <strong>{activeKelas.wali_kelas || "Belum ditentukan"}</strong> • {activeKelas.tahun_ajaran} •{" "}
-                {siswaList.length} Peserta Didik
-              </p>
             </div>
             <div className="flex flex-wrap gap-2">
               <Button variant="ghost" onClick={() => setModalCetakKode(true)}>

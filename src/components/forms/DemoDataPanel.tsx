@@ -67,14 +67,20 @@ export function DemoDataPanel() {
             {sibuk === "muat" ? <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden /> : null}
             Muat Data Simulasi
           </Button>
-          <Button disabled={sibuk !== null} onClick={() => void jalankan("DELETE")} variant="secondary">
+          <button
+            disabled={sibuk !== null}
+            onClick={() => void jalankan("DELETE")}
+            title="Hapus Data Simulasi"
+            aria-label="Hapus Data Simulasi"
+            className="grid h-11 w-11 place-items-center rounded-full border border-rose-200 bg-white text-rose-600 shadow-2xs transition-all hover:bg-rose-50 hover:border-rose-300 disabled:opacity-50 cursor-pointer"
+            type="button"
+          >
             {sibuk === "hapus" ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden />
+              <Loader2 className="h-4 w-4 animate-spin text-rose-600" aria-hidden />
             ) : (
-              <Trash2 className="mr-2 h-4 w-4 text-rose-500" aria-hidden />
+              <Trash2 className="h-4 w-4 text-rose-600" aria-hidden />
             )}
-            Hapus Data Simulasi
-          </Button>
+          </button>
         </div>
       </div>
 
