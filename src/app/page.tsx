@@ -228,7 +228,7 @@ export default function Home() {
       </nav>
 
       {/* 2. Hero Section: Responsive Mobile & Desktop */}
-      <section id="home" className="relative px-4 sm:px-6 pt-24 sm:pt-32 pb-20 sm:pb-16 md:px-12 lg:pt-36 lg:pb-20 text-center">
+      <section id="home" className="relative px-4 sm:px-6 pt-24 sm:pt-32 pb-24 sm:pb-16 md:px-12 lg:pt-36 lg:pb-20 text-center">
         {/* Soft Backdrop Orbs */}
         <div className="pointer-events-none absolute top-10 left-1/2 -z-10 h-[300px] sm:h-[400px] w-[90vw] max-w-[650px] -translate-x-1/2 rounded-full bg-gradient-to-r from-blue-200/40 via-indigo-200/30 to-purple-200/40 blur-[70px] sm:blur-[90px]" />
 
@@ -254,50 +254,57 @@ export default function Home() {
             Ubah hasil asesmen diagnostik menjadi 3 level LKPD siap cetak secara instan.
           </p>
 
-          {/* Action Buttons: Stack on Mobile, Row on Tablet+ */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 pt-2 w-full max-w-xs sm:max-w-none mx-auto">
+          {/* Action Buttons: Compact Grid on Mobile, Flex Row on Tablet+ */}
+          <div className="grid grid-cols-2 gap-2.5 sm:flex sm:flex-row sm:items-center sm:justify-center sm:gap-4 pt-1 w-full max-w-sm sm:max-w-none mx-auto">
             <Link
               href="/login"
-              className="flex items-center justify-center rounded-full bg-[#7C3AED] px-8 py-3.5 text-sm font-black text-white shadow-lg shadow-[#7C3AED]/30 transition-all hover:bg-[#6D28D9] hover:shadow-xl hover:-translate-y-0.5 active:scale-95 text-center"
+              className="flex items-center justify-center rounded-full bg-[#7C3AED] px-4 sm:px-8 py-3 sm:py-3.5 text-xs sm:text-sm font-black text-white shadow-md shadow-[#7C3AED]/25 transition-all hover:bg-[#6D28D9] hover:shadow-xl hover:-translate-y-0.5 active:scale-95 text-center whitespace-nowrap"
             >
               Masuk Portal
             </Link>
             <Link
               href="/generator"
-              className="flex items-center justify-center rounded-full border-2 border-slate-200 bg-white px-7 py-3.5 text-sm font-black text-slate-800 shadow-xs transition-all hover:border-[#2563EB] hover:text-[#2563EB] hover:-translate-y-0.5 active:scale-95 text-center"
+              className="flex items-center justify-center rounded-full border-2 border-slate-200 bg-white px-4 sm:px-7 py-3 sm:py-3.5 text-xs sm:text-sm font-black text-slate-800 shadow-xs transition-all hover:border-[#2563EB] hover:text-[#2563EB] hover:-translate-y-0.5 active:scale-95 text-center whitespace-nowrap"
             >
               Generator LKPD
             </Link>
           </div>
 
-          {/* 3 Interactive Feature Tiers */}
-          <div className="grid gap-3 sm:gap-4 pt-6 sm:pt-8 sm:grid-cols-3 text-center">
-            {/* Level Dasar */}
-            <div className="flex flex-col items-center justify-center rounded-2xl border border-rose-200/80 bg-white p-4 sm:p-5 shadow-xs transition-all hover:scale-[1.02] hover:border-rose-400">
-              <h3 className="text-sm font-black text-rose-600">Level Dasar</h3>
-              <p className="mt-1 text-xs font-medium text-slate-600">Scaffolding & Garis Bilangan</p>
-              <p className="mt-2.5 w-full rounded-xl border border-rose-100 bg-rose-50/70 py-2 text-center font-mono text-xs font-black text-rose-700">
-                -3 - 4 = -7
-              </p>
+          {/* 3 Interactive Feature Tiers (Swipeable Carousel on Mobile, 3-Col Grid on Desktop) */}
+          <div className="pt-4 sm:pt-8">
+            <div className="flex sm:grid overflow-x-auto no-scrollbar snap-x snap-mandatory gap-3 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid-cols-3 text-center pb-2">
+              {/* Level Dasar */}
+              <div className="min-w-[80vw] sm:min-w-0 snap-center shrink-0 sm:shrink flex flex-col items-center justify-center rounded-2xl border border-rose-200/80 bg-white p-4 sm:p-5 shadow-xs transition-all hover:scale-[1.02] hover:border-rose-400">
+                <h3 className="text-sm font-black text-rose-600">Level Dasar</h3>
+                <p className="mt-1 text-xs font-medium text-slate-600">Scaffolding & Garis Bilangan</p>
+                <p className="mt-2.5 w-full rounded-xl border border-rose-100 bg-rose-50/70 py-2 text-center font-mono text-xs font-black text-rose-700">
+                  -3 - 4 = -7
+                </p>
+              </div>
+
+              {/* Level Menengah */}
+              <div className="min-w-[80vw] sm:min-w-0 snap-center shrink-0 sm:shrink flex flex-col items-center justify-center rounded-2xl border border-amber-200/80 bg-white p-4 sm:p-5 shadow-xs transition-all hover:scale-[1.02] hover:border-amber-400">
+                <h3 className="text-sm font-black text-amber-600">Level Menengah</h3>
+                <p className="mt-1 text-xs font-medium text-slate-600">Operasi Hitung Campuran</p>
+                <p className="mt-2.5 w-full rounded-xl border border-amber-100 bg-amber-50/70 py-2 text-center font-mono text-xs font-black text-amber-800">
+                  (-14) + 20 - 8 = -2
+                </p>
+              </div>
+
+              {/* Level Mahir */}
+              <div className="min-w-[80vw] sm:min-w-0 snap-center shrink-0 sm:shrink flex flex-col items-center justify-center rounded-2xl border border-blue-200/80 bg-white p-4 sm:p-5 shadow-xs transition-all hover:scale-[1.02] hover:border-blue-400">
+                <h3 className="text-sm font-black text-blue-600">Level Mahir</h3>
+                <p className="mt-1 text-xs font-medium text-slate-600">Pemodelan Kontekstual HOTS</p>
+                <p className="mt-2.5 w-full rounded-xl border border-blue-100 bg-blue-50/70 py-2 text-center font-mono text-xs font-black text-blue-800">
+                  (-2) + 7 - 3 = +2
+                </p>
+              </div>
             </div>
 
-            {/* Level Menengah */}
-            <div className="flex flex-col items-center justify-center rounded-2xl border border-amber-200/80 bg-white p-4 sm:p-5 shadow-xs transition-all hover:scale-[1.02] hover:border-amber-400">
-              <h3 className="text-sm font-black text-amber-600">Level Menengah</h3>
-              <p className="mt-1 text-xs font-medium text-slate-600">Operasi Hitung Campuran</p>
-              <p className="mt-2.5 w-full rounded-xl border border-amber-100 bg-amber-50/70 py-2 text-center font-mono text-xs font-black text-amber-800">
-                (-14) + 20 - 8 = -2
-              </p>
-            </div>
-
-            {/* Level Mahir */}
-            <div className="flex flex-col items-center justify-center rounded-2xl border border-blue-200/80 bg-white p-4 sm:p-5 shadow-xs transition-all hover:scale-[1.02] hover:border-blue-400">
-              <h3 className="text-sm font-black text-blue-600">Level Mahir</h3>
-              <p className="mt-1 text-xs font-medium text-slate-600">Pemodelan Kontekstual HOTS</p>
-              <p className="mt-2.5 w-full rounded-xl border border-blue-100 bg-blue-50/70 py-2 text-center font-mono text-xs font-black text-blue-800">
-                (-2) + 7 - 3 = +2
-              </p>
-            </div>
+            {/* Mobile swipe hint */}
+            <p className="sm:hidden text-[10px] font-bold text-slate-400 mt-1 flex items-center justify-center gap-1">
+              <span>← Geser untuk level lainnya →</span>
+            </p>
           </div>
         </div>
       </section>

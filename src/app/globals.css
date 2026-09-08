@@ -7,6 +7,8 @@ body { margin:0; overflow-x:hidden; background:var(--surface); color:var(--ink);
 button,a,input,textarea,select { font:inherit; }
 button,a { -webkit-tap-highlight-color:transparent; }
 button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible { outline:2px solid #0071e3; outline-offset:2px; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 .input { width:100%; min-height:44px; border:1px solid transparent; border-radius:12px; background:#f2f3fc; padding:10px 14px; color:#1d1d1f; outline:none; }
 .input:focus { border-color:#0066cc; background:white; }
 .label { display:block; margin-top:16px; font-size:14px; font-weight:600; }
