@@ -194,22 +194,19 @@ export function SoalBuilder({ onDraftChange }: SoalBuilderProps) {
             Durasi (menit)
             <input className="input" type="number" min="5" max="120" value={durasi} onChange={e => setDurasi(Number(e.target.value))} />
           </label>
-          <div className="mt-5 border-t pt-5">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p className="flex items-center gap-2 text-sm font-semibold">
-                  <Brain className="h-4 w-4 text-[#0066cc]" />Aktifkan kuesioner VAK
-                </p>
-                <p className="mt-1 text-xs text-[#6b7280]">5 pertanyaan preferensi belajar (2 menit).</p>
-              </div>
+          <div className="mt-5 border-t border-slate-100 pt-5">
+            <div className="flex items-center justify-between gap-4">
+              <p className="flex items-center gap-2 text-sm font-bold text-slate-800">
+                <Brain className="h-4 w-4 text-[#2563EB]" />Kuesioner Gaya Belajar
+              </p>
               <button
                 type="button"
                 role="switch"
                 aria-checked={kuesionerAktif}
                 onClick={() => setKuesionerAktif(v => !v)}
-                className={`relative h-7 w-12 shrink-0 rounded-full transition-colors ${kuesionerAktif ? "bg-[#0066cc]" : "bg-[#9ca3af]"}`}
+                className={`relative h-7 w-12 shrink-0 rounded-full transition-colors cursor-pointer ${kuesionerAktif ? "bg-[#2563EB]" : "bg-slate-300"}`}
               >
-                <span className={`absolute top-1 h-5 w-5 rounded-full bg-white transition-all ${kuesionerAktif ? "left-6" : "left-1"}`} />
+                <span className={`absolute top-1 h-5 w-5 rounded-full bg-white transition-all shadow-xs ${kuesionerAktif ? "left-6" : "left-1"}`} />
               </button>
             </div>
           </div>
@@ -242,12 +239,11 @@ export function SoalBuilder({ onDraftChange }: SoalBuilderProps) {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <h2 className="text-xl font-bold text-[#1E1B4B]">Daftar Butir Soal</h2>
-              <p className="text-xs font-medium text-slate-500">Pilihan ganda diagnostik materi Rasio SMP Kelas VII</p>
             </div>
             <div className="flex flex-wrap gap-2">
               <Button onClick={manual}><Plus className="h-4 w-4" />Soal Manual</Button>
               <Button variant="secondary" disabled={loading || !materi.trim()} onClick={generate}>
-                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}Generate AI
+                {loading && <Loader2 className="h-4 w-4 animate-spin" />}Generate AI
               </Button>
             </div>
           </div>
@@ -283,10 +279,11 @@ export function SoalBuilder({ onDraftChange }: SoalBuilderProps) {
           {soal.length === 0 && (
             <div className="rounded-2xl border-2 border-dashed border-slate-300 px-6 py-12 text-center bg-slate-50/50">
               <p className="font-bold text-slate-800">Belum ada butir soal asesmen.</p>
-              <p className="mt-1.5 text-xs font-medium text-slate-500 max-w-sm mx-auto">Tambahkan soal secara manual, gunakan generator AI, atau muat contoh materi Rasio.</p>
               <div className="mt-5 flex flex-wrap justify-center gap-2">
                 <Button onClick={manual}><Plus className="h-4 w-4" />Soal Manual</Button>
-                <Button variant="secondary" disabled={loading || !materi.trim()} onClick={generate}><Sparkles className="h-4 w-4" />Generate AI</Button>
+                <Button variant="secondary" disabled={loading || !materi.trim()} onClick={generate}>
+                  {loading && <Loader2 className="h-4 w-4 animate-spin" />}Generate AI
+                </Button>
                 <Button variant="ghost" onClick={useDefaultQuestions}>5 Contoh Rasio</Button>
               </div>
             </div>

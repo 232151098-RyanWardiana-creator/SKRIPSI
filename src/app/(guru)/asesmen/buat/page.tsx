@@ -8,7 +8,7 @@ import { ProgresAlur } from "@/components/ui/ProgresAlur";
 import { useClassStore } from "@/lib/class-store";
 import { upsertAssessment } from "@/lib/assessment-store";
 import type { AnswerKey, Asesmen } from "@/types";
-import { generateUUID } from "@/lib/utils";
+import { generateUUID, cn } from "@/lib/utils";
 import { CheckCircle2, Send } from "lucide-react";
 
 export default function BuatAsesmenPage() {
@@ -56,20 +56,34 @@ export default function BuatAsesmenPage() {
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-black text-[#1E1B4B]">Buat Soal Asesmen</h1>
-          <div className="mt-2.5 flex items-center gap-2">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Kelas Sasaran:</span>
-            <select
-              className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-[#1E1B4B] shadow-2xs focus:border-[#2563EB] focus:outline-none"
-              value={kelasSelected?.kelas.id ?? ""}
-              onChange={(e) => setSelectedClassId(e.target.value)}
-            >
-              {classes.length === 0 && <option value="">Belum ada kelas</option>}
-              {classes.map(({ kelas, siswa }) => (
-                <option key={kelas.id} value={kelas.id}>
-                  {kelas.nama} — {kelas.tahun_ajaran} ({siswa.length} siswa)
-                </option>
-              ))}
-            </select>
+          <div className="mt-2.5 flex flex-wrap items-center gap-2">
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider mr-0.5">Kelas Sasaran:</span>
+            {classes.length === 0 ? (
+              <span className="text-xs font-medium text-slate-400 bg-slate-100 rounded-xl px-3 py-1.5 border border-slate-200">
+                Belum ada kelas
+              </span>
+            ) : (
+              <div className="inline-flex flex-wrap items-center gap-1.5 rounded-2xl bg-slate-100/90 p-1 border border-slate-200/80">
+                {classes.map(({ kelas }) => {
+                  const isSelected = (kelasSelected?.kelas.id ?? "") === kelas.id;
+                  return (
+                    <button
+                      key={kelas.id}
+                      type="button"
+                      onClick={() => setSelectedClassId(kelas.id)}
+                      className={cn(
+                        "rounded-xl px-3.5 py-1.5 text-xs font-black transition-all cursor-pointer",
+                        isSelected
+                          ? "bg-[#2563EB] text-white shadow-xs scale-[1.02]"
+                          : "text-slate-600 hover:text-slate-900 hover:bg-white/80"
+                      )}
+                    >
+                      Kelas {kelas.nama}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
         <Button disabled={!kelasSelected || !draft || draft.soal.length === 0} onClick={handlePublish}>
