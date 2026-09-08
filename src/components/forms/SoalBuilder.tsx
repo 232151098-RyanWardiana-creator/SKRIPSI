@@ -7,6 +7,7 @@ import { INDIKATOR_KOMPETENSI } from "@/constants/indikator";
 import type { Indikator } from "@/types";
 import { Brain, Check, Loader2, Plus, RefreshCw, Sparkles, Tag, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ModalGenerateAI } from "./ModalGenerateAI";
 
 type Difficulty = "mudah" | "sedang" | "sulit";
 export type SoalDraft = { id: number; pertanyaan: string; indikator: Indikator; pilihan: string[]; benar: number; pembahasan: string; diagram?: string; tingkat: Difficulty };
@@ -79,6 +80,7 @@ export function SoalBuilder({ onDraftChange }: SoalBuilderProps) {
   const [saved, setSaved] = useState(false);
   const [hydrated, setHydrated] = useState(false);
   const [resetOpen, setResetOpen] = useState(false);
+  const [modalAIOpen, setModalAIOpen] = useState(false);
 
   // Restore from localStorage
   /* eslint-disable react-hooks/set-state-in-effect -- hydration intentionally restores client persistence */
@@ -143,17 +145,38 @@ export function SoalBuilder({ onDraftChange }: SoalBuilderProps) {
 
   const useDefaultQuestions = () => setSoal(DEFAULT_SOAL.map(item => ({ ...item, pilihan: [...item.pilihan] })));
 
-  async function generate() {
+  async function generateWithConfig(aiConfig: {
+    provider: string;
+    model: string;
+    customApiKey?: string;
+    customBaseUrl?: string;
+  }) {
     setLoading(true);
     setAiMessage("");
     try {
       const response = await fetch("/api/ai/generate-soal", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ materi, indikator, jumlah, tingkat })
+        body: JSON.stringify({
+          materi,
+          indikator,
+          jumlah,
+          tingkat,
+          provider: aiConfig.provider,
+          model: aiConfig.model,
+          customApiKey: aiConfig.customApiKey,
+          customBaseUrl: aiConfig.customBaseUrl,
+        }),
       });
-      const payload = await response.json() as { questions?: AIQuestion[]; source?: string; model?: string; fallback?: boolean; error?: string | null };
-      if (!response.ok || !payload.questions?.length) throw new Error(payload.error || "AI belum menghasilkan soal yang valid.");
+      const payload = (await response.json()) as {
+        questions?: AIQuestion[];
+        source?: string;
+        model?: string;
+        fallback?: boolean;
+        error?: string | null;
+      };
+      if (!response.ok || !payload.questions?.length)
+        throw new Error(payload.error || "AI belum menghasilkan soal yang valid.");
       const stamp = Date.now();
       const generated = payload.questions.map((item, index) => ({
         id: stamp + index,
@@ -163,14 +186,22 @@ export function SoalBuilder({ onDraftChange }: SoalBuilderProps) {
         benar: "ABCD".indexOf(item.jawaban_benar) as number,
         pembahasan: item.pembahasan,
         diagram: item.diagram,
-        tingkat: item.tingkat_kesulitan
+        tingkat: item.tingkat_kesulitan,
       }));
-      setSoal(list => {
+      setSoal((list) => {
         const nextSoal = [...list, ...generated];
-        localStorage.setItem(STORAGE_KEY, JSON.stringify({ judul, durasi, soal: nextSoal, kuesionerAktif, materi, indikator, tingkat }));
+        localStorage.setItem(
+          STORAGE_KEY,
+          JSON.stringify({ judul, durasi, soal: nextSoal, kuesionerAktif, materi, indikator, tingkat })
+        );
         return nextSoal;
       });
-      setAiMessage(`${payload.questions.length} butir soal ditambahkan · ${payload.fallback ? "Fallback lokal" : `9Router (${payload.model})`}`);
+      setModalAIOpen(false);
+      setAiMessage(
+        `${payload.questions.length} butir soal ditambahkan · ${
+          payload.fallback ? "Fallback kontekstual" : `AI (${payload.model || aiConfig.model})`
+        }`
+      );
     } catch (error) {
       setAiMessage(error instanceof Error ? error.message : "Gagal membuat soal dengan AI.");
     } finally {
@@ -242,7 +273,7 @@ export function SoalBuilder({ onDraftChange }: SoalBuilderProps) {
             </div>
             <div className="flex flex-wrap gap-2">
               <Button onClick={manual}><Plus className="h-4 w-4" />Soal Manual</Button>
-              <Button variant="secondary" disabled={loading || !materi.trim()} onClick={generate}>
+              <Button variant="secondary" disabled={loading || !materi.trim()} onClick={() => setModalAIOpen(true)}>
                 {loading && <Loader2 className="h-4 w-4 animate-spin" />}Generate AI
               </Button>
             </div>
@@ -281,7 +312,7 @@ export function SoalBuilder({ onDraftChange }: SoalBuilderProps) {
               <p className="font-bold text-slate-800">Belum ada butir soal asesmen.</p>
               <div className="mt-5 flex flex-wrap justify-center gap-2">
                 <Button onClick={manual}><Plus className="h-4 w-4" />Soal Manual</Button>
-                <Button variant="secondary" disabled={loading || !materi.trim()} onClick={generate}>
+                <Button variant="secondary" disabled={loading || !materi.trim()} onClick={() => setModalAIOpen(true)}>
                   {loading && <Loader2 className="h-4 w-4 animate-spin" />}Generate AI
                 </Button>
                 <Button variant="ghost" onClick={useDefaultQuestions}>5 Contoh Rasio</Button>
@@ -385,6 +416,16 @@ export function SoalBuilder({ onDraftChange }: SoalBuilderProps) {
           ))}
         </div>
       </section>
+      <ModalGenerateAI
+        isOpen={modalAIOpen}
+        onClose={() => setModalAIOpen(false)}
+        onGenerate={generateWithConfig}
+        loading={loading}
+        materi={materi}
+        jumlah={jumlah}
+        indikator={indikator}
+        tingkat={tingkat}
+      />
       <ConfirmModal
         isOpen={resetOpen}
         title="Reset draf asesmen?"

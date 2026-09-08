@@ -63,6 +63,16 @@ export interface GenerateSoalAsesmenParams {
   indikator: string;
   jumlah: number;
   tingkat: "mudah" | "sedang" | "sulit";
+  provider?: string;
+  model?: string;
+  customApiKey?: string;
+  customBaseUrl?: string;
+}
+
+interface ChatOptions {
+  baseUrl?: string;
+  apiKey?: string;
+  model?: string;
 }
 
 function config() {
@@ -98,8 +108,17 @@ function mockContent(kind: "lkpd" | "asesmen", context: string): string {
   return `# LKPD Matematika — ${context}\n\n## Tujuan Pembelajaran\nMemahami dan menerapkan konsep melalui aktivitas sesuai tingkat kemampuan awal.\n\n## Petunjuk\nKerjakan setiap aktivitas secara runtut dan tuliskan alasan jawaban.\n\n## Aktivitas\nKonten contoh digunakan karena 9Router sedang tidak tersedia.\n\n## Refleksi\nTuliskan konsep yang sudah dipahami dan bagian yang masih perlu dilatih.`;
 }
 
-async function chatCompletion(messages: ChatMessage[], fallback: string): Promise<AIResult> {
-  const { baseUrl, apiKey, model, timeoutMs } = config();
+async function chatCompletion(
+  messages: ChatMessage[],
+  fallback: string,
+  options?: ChatOptions
+): Promise<AIResult> {
+  const cfg = config();
+  const baseUrl = options?.baseUrl || cfg.baseUrl;
+  const apiKey = options?.apiKey || cfg.apiKey;
+  const model = options?.model || cfg.model;
+  const timeoutMs = cfg.timeoutMs;
+
   if (!apiKey) return { content: fallback, source: "mock", model, isFallback: true };
 
   const controller = new AbortController();
@@ -113,20 +132,32 @@ async function chatCompletion(messages: ChatMessage[], fallback: string): Promis
         "Content-Type": "application/json",
         Authorization: `Bearer ${apiKey}`,
       },
-      body: JSON.stringify({ model, messages, temperature: 0.7, max_tokens: 4096 }),
+      body: JSON.stringify({
+        model,
+        messages,
+        temperature: 0.7,
+        max_tokens: 4096,
+        stream: false,
+      }),
       cache: "no-store",
       signal: controller.signal,
     });
 
-    if (!response.ok) throw new Error(`9Router returned HTTP ${response.status}`);
+    if (!response.ok) throw new Error(`Gateway returned HTTP ${response.status}`);
     const data = (await response.json()) as ChatCompletionResponse;
     const content = data.choices?.[0]?.message?.content?.trim();
-    if (!content) throw new Error("9Router returned an empty completion");
+    if (!content) throw new Error("Gateway returned an empty completion");
     return { content, source: "online", model: data.model || model, isFallback: false };
   } catch (error) {
-    const reason = error instanceof Error ? error.name : "UnknownError";
+    const reason = error instanceof Error ? error.message : "UnknownError";
     console.error(`AI request failed (${reason}); using mock fallback.`);
-    return { content: fallback, source: "mock", model, isFallback: true, error: `9Router gagal (${safeError(error)}); konten cadangan digunakan.` };
+    return {
+      content: fallback,
+      source: "mock",
+      model,
+      isFallback: true,
+      error: `AI fallback (${safeError(error)}): konten cadangan digunakan.`,
+    };
   } finally {
     clearTimeout(timeout);
   }
@@ -191,15 +222,114 @@ export function parseGeneratedQuestions(content: string, defaults: { indikator: 
 }
 
 function mockSoalContent(params: GenerateSoalAsesmenParams): string {
-  return JSON.stringify(Array.from({ length: params.jumlah }, (_, index) => ({ id: `soal-${index + 1}`, pertanyaan: `Pada konteks suhu, lift, atau transaksi, manakah jawaban yang tepat untuk soal ${index + 1} tentang ${params.materi}?`, indikator_id: params.indikator.match(/IK-0[1-5]/)?.[0] || "IK-01", tingkat_kesulitan: params.tingkat, pilihan: { A: `${index + 1}`, B: `${index + 2}`, C: `${index + 3}`, D: `${index + 4}` }, jawaban_benar: "A", pembahasan: "Gunakan aturan operasi bilangan bulat secara bertahap; jawaban yang sesuai adalah A.", diagram: index % 2 === 0 ? "−3  −2  −1   0   1   2   3\n ────●────●────●────●────●────●────●──→" : undefined })));
+  const materi = params.materi.trim() || "Matematika SMP";
+  const ind = params.indikator || "IK-01";
+
+  const samples = [
+    {
+      p: `Dalam situasi kehidupan sehari-hari pada materi ${materi}, perbandingan yang digunakan adalah 2 : 5 untuk total 35 satuan bahan. Tentukan nilai bagian pertama:`,
+      a: "10 satuan",
+      b: "14 satuan",
+      c: "20 satuan",
+      d: "25 satuan",
+      kunci: "A",
+      bahas: `Jumlah perbandingan = 2 + 5 = 7 bagian. Nilai 1 bagian = 35 : 7 = 5. Nilai bagian pertama = 2 × 5 = 10 satuan.`,
+    },
+    {
+      p: `Pada materi ${materi}, jika 4 unit membutuhkan biaya Rp48.000, berapakah biaya yang dibutuhkan untuk 7 unit dengan perbandingan senilai?`,
+      a: "Rp72.000",
+      b: "Rp84.000",
+      c: "Rp96.000",
+      d: "Rp105.000",
+      kunci: "B",
+      bahas: `Biaya satuan = Rp48.000 : 4 = Rp12.000/unit. Untuk 7 unit = 7 × Rp12.000 = Rp84.000.`,
+    },
+    {
+      p: `Sebuah denah berskala 1 : 200 menunjukkan ukuran panjang 4 cm. Pada materi ${materi}, panjang sebenarnya adalah ...`,
+      a: "800 cm (8 meter)",
+      b: "600 cm (6 meter)",
+      c: "500 cm (5 meter)",
+      d: "400 cm (4 meter)",
+      kunci: "A",
+      bahas: `Panjang sebenarnya = 4 cm × 200 = 800 cm = 8 meter.`,
+    },
+    {
+      p: `Terkait materi ${materi}, bentuk paling sederhana dari perbandingan 18 : 45 adalah ...`,
+      a: "3 : 7",
+      b: "2 : 5",
+      c: "3 : 5",
+      d: "2 : 9",
+      kunci: "B",
+      bahas: `FPB dari 18 dan 45 adalah 9. Bagi 18:9 = 2 dan 45:9 = 5, menghasilkan 2 : 5.`,
+    },
+    {
+      p: `Dalam konteks ${materi}, sebuah pekerjaan diselesaikan 6 pekerja dalam 15 hari. Jika dikerjakan oleh 10 pekerja, waktu yang diperlukan adalah ...`,
+      a: "7 hari",
+      b: "9 hari",
+      c: "10 hari",
+      d: "12 hari",
+      kunci: "B",
+      bahas: `Perbandingan berbalik nilai: 6 × 15 = 10 × t. 90 = 10t, maka t = 9 hari.`,
+    },
+  ];
+
+  const items = Array.from({ length: params.jumlah }, (_, idx) => {
+    const pick = samples[idx % samples.length];
+    return {
+      id: `soal-${idx + 1}`,
+      pertanyaan: pick.p,
+      indikator_id: ind.match(/IK-0[1-5]/)?.[0] || "IK-01",
+      tingkat_kesulitan: params.tingkat,
+      pilihan: { A: pick.a, B: pick.b, C: pick.c, D: pick.d },
+      jawaban_benar: pick.kunci,
+      pembahasan: pick.bahas,
+    };
+  });
+
+  return JSON.stringify(items);
 }
 
 export async function generateSoalAsesmen(params: GenerateSoalAsesmenParams): Promise<AIResult> {
   const messages: ChatMessage[] = [
-    { role: "system", content: `Kamu ahli pembuat soal asesmen diagnostik matematika SMP Kelas VII Kurikulum Merdeka. Keluarkan HANYA JSON array valid, tanpa markdown atau teks lain. Setiap objek wajib tepat berbentuk {"id":"soal-1","pertanyaan":"teks kontekstual","indikator_id":"IK-01 s.d. IK-05","tingkat_kesulitan":"mudah|sedang|sulit","pilihan":{"A":"...","B":"...","C":"...","D":"..."},"jawaban_benar":"A|B|C|D","pembahasan":"langkah penyelesaian","diagram":"ASCII opsional"}. Gunakan konteks suhu, lift, transaksi, atau garis bilangan. Pastikan tepat satu jawaban benar dan JSON dapat langsung diproses JSON.parse.` },
-    { role: "user", content: `Buat tepat ${params.jumlah} soal materi "${params.materi}", indikator "${params.indikator}", tingkat "${params.tingkat}". Variasikan konteks dan jangan keluarkan apa pun selain JSON array.` },
+    {
+      role: "system",
+      content: `Kamu adalah pakar pembuat soal asesmen diagnostik matematika SMP Kurikulum Merdeka.
+TUGAS UTAMA: Buatkan soal pilihan ganda kontekstual kehidupan nyata yang relevan secara langsung dengan topik "${params.materi}".
+HINDARI teks pengantar dan teks penutup. Keluarkan HANYA JSON array valid tanpa formatting markdown backticks.
+
+Format setiap objek dalam array:
+[
+  {
+    "id": "soal-1",
+    "pertanyaan": "teks soal cerita kontekstual realistis sesuai topik materi yang diminta",
+    "indikator_id": "${params.indikator}",
+    "tingkat_kesulitan": "${params.tingkat}",
+    "pilihan": {
+      "A": "opsi A",
+      "B": "opsi B",
+      "C": "opsi C",
+      "D": "opsi D"
+    },
+    "jawaban_benar": "A|B|C|D",
+    "pembahasan": "penjelasan langkah matematis runtut dan jelas",
+    "diagram": "opsional representasi teks/tabel"
+  }
+]
+Pastikan tepat satu jawaban benar, angka realistis, dan JSON dapat diproses langsung dengan JSON.parse.`,
+    },
+    {
+      role: "user",
+      content: `Buat tepat ${params.jumlah} butir soal diagnostik pilihan ganda kontekstual kehidupan nyata untuk topik materi "${params.materi}", indikator "${params.indikator}", dengan tingkat kesulitan "${params.tingkat}". Jangan keluarkan teks apa pun selain JSON array valid.`,
+    },
   ];
-  return chatCompletion(messages, mockSoalContent(params));
+
+  const aiOptions = {
+    baseUrl: params.customBaseUrl || undefined,
+    apiKey: params.customApiKey || undefined,
+    model: params.model,
+  };
+
+  return chatCompletion(messages, mockSoalContent(params), aiOptions);
 }
 
 export async function getAIStatus(): Promise<AIStatus> {
