@@ -63,7 +63,7 @@ export default function KelasPage() {
         <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
           <h1 className="text-2xl sm:text-3xl font-black text-[#1E1B4B]">Manajemen Kelas</h1>
           <Button onClick={tambahKelasBaru}>
-            <Plus className="h-4 w-4" />Tambah Kelas Baru
+            <Plus className="h-4 w-4" />Kelas Baru
           </Button>
         </div>
         <div className="card text-center py-14">
@@ -76,7 +76,7 @@ export default function KelasPage() {
           </p>
           <div className="mt-6 flex justify-center gap-3">
             <Button onClick={tambahKelasBaru}>
-              <Plus className="h-4 w-4" />Tambah Kelas Baru
+              <Plus className="h-4 w-4" />Kelas Baru
             </Button>
           </div>
         </div>
@@ -194,7 +194,7 @@ export default function KelasPage() {
           <h1 className="text-2xl sm:text-3xl font-black text-[#1E1B4B]">Manajemen Kelas</h1>
         </div>
         <Button onClick={tambahKelasBaru}>
-          <Plus className="h-4 w-4" />Tambah Kelas Baru
+          <Plus className="h-4 w-4" />Kelas Baru
         </Button>
       </div>
 
@@ -281,7 +281,7 @@ export default function KelasPage() {
                 <Printer className="h-4 w-4" />Cetak Kode Undangan
               </Button>
               <Button onClick={bukaTambahSiswa}>
-                <UserPlus className="h-4 w-4" />Tambah Siswa
+                <Plus className="h-4 w-4" />Siswa
               </Button>
             </div>
           </div>
@@ -354,11 +354,8 @@ export default function KelasPage() {
               </tbody>
             </table>
             {siswaList.length === 0 && (
-              <div className="py-12 text-center text-[#7a7a7a]">
+              <div className="py-12 text-center text-slate-500 font-medium">
                 <p>Belum ada peserta didik yang terdaftar di kelas {activeKelas.nama}.</p>
-                <Button className="mt-4" onClick={bukaTambahSiswa}>
-                  <UserPlus className="h-4 w-4" />Tambah Siswa Pertama
-                </Button>
               </div>
             )}
           </div>
