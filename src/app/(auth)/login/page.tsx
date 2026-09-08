@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { AuthForm } from "@/components/forms/AuthForm";
@@ -45,7 +46,9 @@ export default function LoginPage() {
           </p>
         </div>
 
-        <AuthForm mode="login" />
+        <Suspense fallback={<div className="p-8 text-center text-xs font-semibold text-slate-500">Memuat formulir masuk...</div>}>
+          <AuthForm mode="login" />
+        </Suspense>
       </section>
 
       {/* Footer Branding */}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import type { Role } from "@/types";
 import {
@@ -18,12 +18,18 @@ import {
   Sparkles,
   KeyRound,
   ShieldCheck,
+  ShieldAlert,
 } from "lucide-react";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { saveStoredTeacherProfile, getStoredTeacherProfile } from "@/lib/teacher-profile";
 
 export function AuthForm({ mode = "login" }: { mode?: "login" | "register" }) {
-  const [role, setRole] = useState<Role>("guru");
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const queryRole = searchParams.get("role");
+  const redirectTarget = searchParams.get("redirect");
+
+  const [role, setRole] = useState<Role>(queryRole === "siswa" ? "siswa" : "guru");
   const [nama, setNama] = useState("");
   const [sekolah, setSekolah] = useState("");
   const [email, setEmail] = useState("");
@@ -32,7 +38,6 @@ export function AuthForm({ mode = "login" }: { mode?: "login" | "register" }) {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
-  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,8 +70,9 @@ export function AuthForm({ mode = "login" }: { mode?: "login" | "register" }) {
           });
         }
 
+        const target = redirectTarget || "/dashboard";
         setSuccessMsg("Pendaftaran berhasil. Mengalihkan ke dasbor guru...");
-        setTimeout(() => router.push("/dashboard"), 1200);
+        setTimeout(() => router.push(target), 1200);
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) {
@@ -76,8 +82,9 @@ export function AuthForm({ mode = "login" }: { mode?: "login" | "register" }) {
               : error.message
           );
         }
-        setSuccessMsg("Berhasil masuk. Memuat dasbor guru...");
-        setTimeout(() => router.push("/dashboard"), 600);
+        const target = redirectTarget || "/dashboard";
+        setSuccessMsg(`Berhasil masuk. Mengalihkan ke ${target === "/generator" ? "Generator LKPD" : "dasbor"}...`);
+        setTimeout(() => router.push(target), 600);
       }
     } catch (err: unknown) {
       setErrorMsg(err instanceof Error ? err.message : "Terjadi kesalahan saat otentikasi.");
@@ -88,6 +95,18 @@ export function AuthForm({ mode = "login" }: { mode?: "login" | "register" }) {
 
   return (
     <form className="space-y-4" onSubmit={handleSubmit}>
+      {redirectTarget && (
+        <div className="flex items-start gap-2.5 rounded-2xl border border-amber-200 bg-amber-50/90 p-3 text-xs text-amber-950 shadow-xs">
+          <ShieldAlert className="h-4 w-4 shrink-0 text-amber-600 mt-0.5" />
+          <div>
+            <span className="font-black text-amber-900">Perlu Akses Masuk</span>
+            <p className="mt-0.5 text-slate-600 font-medium">
+              Halaman <code className="font-mono font-bold text-amber-900 bg-amber-100/70 px-1 py-0.5 rounded">{redirectTarget}</code> memerlukan login. Silakan masuk terlebih dahulu.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Pemilih Peran Interaktif */}
       <div className="grid grid-cols-2 gap-1.5 rounded-2xl bg-slate-100/90 p-1.5 border border-slate-200/80">
         <button

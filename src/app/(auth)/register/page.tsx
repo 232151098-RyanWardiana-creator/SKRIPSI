@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import { ArrowLeft, Sparkles } from "lucide-react";
 import { AuthForm } from "@/components/forms/AuthForm";
@@ -44,7 +45,9 @@ export default function RegisterPage() {
           </p>
         </div>
 
-        <AuthForm mode="register" />
+        <Suspense fallback={<div className="p-8 text-center text-xs font-semibold text-slate-500">Memuat formulir pendaftaran...</div>}>
+          <AuthForm mode="register" />
+        </Suspense>
       </section>
 
       {/* Footer Branding */}
