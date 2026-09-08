@@ -363,7 +363,10 @@ export function GeneratorWizard() {
       }
     }
     setProgress(null);
-    if (!only) setActive("dasar");
+    if (!only) {
+      setActive("dasar");
+      setStep(3);
+    }
   }
 
   function patch(level: Level, values: Partial<DocumentState>) {
@@ -572,7 +575,63 @@ export function GeneratorWizard() {
         </aside>
 
         <main className="min-w-0">
-          {step < 3 ? (
+          {loadingLevels.length > 0 ? (
+            <div className="card grid min-h-[460px] place-items-center p-8 text-center bg-white border border-blue-100 shadow-sm rounded-2xl">
+              <div className="max-w-md mx-auto space-y-5">
+                <div className="relative mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-50 border border-blue-200 shadow-2xs">
+                  <Loader2 className="h-8 w-8 text-[#2563EB] animate-spin" />
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-black text-[#1E1B4B]">
+                    {progress ? `Membuat LKPD Level ${labels[progress.level]}... (${progress.index + 1}/3)` : "Menyusun Dokumen LKPD..."}
+                  </h3>
+                  <p className="mt-1 text-xs text-slate-500">
+                    Engine AI: <strong className="text-slate-800">{providerName}</strong> · <span className="text-[#2563EB]">{modelLabel}</span>
+                  </p>
+                </div>
+
+                {/* Progress 3 Level Indicators */}
+                <div className="grid grid-cols-3 gap-2 pt-2">
+                  {levels.map((lvl, idx) => {
+                    const isDone = documents[lvl]?.status === "success" || documents[lvl]?.status === "fallback";
+                    const isCurrent = progress?.level === lvl;
+                    return (
+                      <div
+                        key={lvl}
+                        className={cn(
+                          "rounded-xl border p-2.5 text-xs font-bold transition-all text-center",
+                          isDone
+                            ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+                            : isCurrent
+                            ? "border-[#2563EB] bg-blue-50 text-[#2563EB] shadow-xs ring-1 ring-[#2563EB]"
+                            : "border-slate-200 bg-slate-50 text-slate-400"
+                        )}
+                      >
+                        <div className="flex items-center justify-center gap-1.5 mb-1">
+                          {isDone ? (
+                            <Check className="h-3.5 w-3.5 text-emerald-600" />
+                          ) : isCurrent ? (
+                            <Loader2 className="h-3.5 w-3.5 animate-spin text-[#2563EB]" />
+                          ) : (
+                            <span className="h-3.5 w-3.5 rounded-full border border-slate-300 text-[9px] grid place-items-center">{idx + 1}</span>
+                          )}
+                          <span>{labels[lvl]}</span>
+                        </div>
+                        <span className="text-[10px] font-normal block">
+                          {isDone ? "Selesai" : isCurrent ? "Menyusun..." : "Menunggu"}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <p className="text-[11px] text-slate-400 leading-relaxed">
+                  AI sedang menyusun kegiatan belajar kontekstual, panduan scaffolding, serta kunci jawaban dan rubrik penilaian guru.
+                </p>
+              </div>
+            </div>
+          ) : step < 3 ? (
             <div className="card grid min-h-96 place-items-center text-center text-slate-600">
               <p className="font-semibold text-slate-700">Lengkapi konfigurasi di samping</p>
             </div>
