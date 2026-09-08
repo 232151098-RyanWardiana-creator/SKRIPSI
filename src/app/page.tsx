@@ -29,6 +29,7 @@ import {
   Sparkles,
   Sliders,
   Users,
+  X,
   Zap,
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
@@ -45,6 +46,9 @@ export default function Home() {
 
   // 2. Scrollspy Active Section
   const [activeSection, setActiveSection] = useState<string>("home");
+
+  // Mobile Top Menu Toggle State
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // 3. Creative Hero Interactive Showcase State
   const [activeLevel, setActiveLevel] = useState<LevelTab>("dasar");
@@ -186,14 +190,61 @@ export default function Home() {
         </nav>
       </header>
 
-      {/* 📱 Mobile Top Right: Tombol Melayang Masuk Portal Saja di Ujung Kanan */}
-      <div className="fixed top-4 right-4 z-40 md:hidden">
-        <Link
-          href="/login"
-          className="flex items-center gap-1.5 rounded-full bg-[#1E1B4B] px-4 py-2 text-xs font-black text-white shadow-xl shadow-indigo-950/20 backdrop-blur-md transition hover:bg-[#2563EB] active:scale-95 border border-white/20"
+      {/* 📱 Mobile Top Right: Tombol Logo Melayang (Klik 1: Buka Navigasi, Klik 2: Masuk Portal) */}
+      <div className="fixed top-3.5 right-3.5 z-50 md:hidden">
+        <button
+          onClick={() => setMobileMenuOpen((prev) => !prev)}
+          type="button"
+          aria-label="Menu Navigasi Portal"
+          aria-expanded={mobileMenuOpen}
+          className="flex h-10 w-10 items-center justify-center rounded-full bg-[#1E1B4B] text-white shadow-xl shadow-indigo-950/25 backdrop-blur-md transition-all active:scale-90 border-2 border-white/40 cursor-pointer"
         >
-          <LogIn className="h-3.5 w-3.5" /> Masuk Portal
-        </Link>
+          {mobileMenuOpen ? <X className="h-4 w-4" /> : <LogIn className="h-4 w-4" />}
+        </button>
+
+        {/* Dropdown Menu Popup saat logo diklik */}
+        {mobileMenuOpen && (
+          <>
+            <div
+              className="fixed inset-0 z-40 bg-black/20 backdrop-blur-xs"
+              onClick={() => setMobileMenuOpen(false)}
+            />
+            <div className="absolute right-0 mt-2 w-60 rounded-2xl border-2 border-[#1E1B4B]/15 bg-white/95 p-3 shadow-2xl shadow-indigo-950/25 backdrop-blur-2xl z-50 animate-in fade-in zoom-in-95 duration-150">
+              <Link
+                href="/login"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#2563EB] to-[#7C3AED] py-2.5 px-4 text-xs font-black text-white shadow-md shadow-blue-600/25 transition-all hover:opacity-95 active:scale-95 text-center"
+              >
+                <LogIn className="h-3.5 w-3.5" />
+                Masuk Portal
+              </Link>
+
+              <div className="my-2 h-[1px] bg-slate-200/80" />
+
+              <p className="px-2 text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-1">
+                Navigasi Cepat
+              </p>
+              <div className="flex flex-col gap-1 text-xs font-bold text-slate-700">
+                {[
+                  { id: "home", label: "Beranda" },
+                  { id: "keunggulan", label: "Keunggulan" },
+                  { id: "simulasi", label: "Simulasi TaRL" },
+                  { id: "alur", label: "Alur Guru" },
+                ].map((item) => (
+                  <a
+                    key={item.id}
+                    href={`#${item.id}`}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center justify-between rounded-lg px-2.5 py-2 transition-colors hover:bg-slate-100 hover:text-[#2563EB]"
+                  >
+                    <span>{item.label}</span>
+                    <ChevronRight className="h-3.5 w-3.5 text-slate-400" />
+                  </a>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
       </div>
 
       {/* 📱 Floating Mobile Navigation Bar (Melayang Khusus Layar HP) */}
@@ -228,83 +279,79 @@ export default function Home() {
       </nav>
 
       {/* 2. Hero Section: Responsive Mobile & Desktop */}
-      <section id="home" className="relative px-4 sm:px-6 pt-24 sm:pt-32 pb-24 sm:pb-16 md:px-12 lg:pt-36 lg:pb-20 text-center">
+      <section id="home" className="relative px-4 sm:px-6 pt-20 sm:pt-32 pb-24 sm:pb-16 md:px-12 lg:pt-36 lg:pb-20 text-center">
         {/* Soft Backdrop Orbs */}
-        <div className="pointer-events-none absolute top-10 left-1/2 -z-10 h-[300px] sm:h-[400px] w-[90vw] max-w-[650px] -translate-x-1/2 rounded-full bg-gradient-to-r from-blue-200/40 via-indigo-200/30 to-purple-200/40 blur-[70px] sm:blur-[90px]" />
+        <div className="pointer-events-none absolute top-6 sm:top-10 left-1/2 -z-10 h-[320px] sm:h-[400px] w-[92vw] max-w-[650px] -translate-x-1/2 rounded-full bg-gradient-to-r from-blue-300/40 via-indigo-300/35 to-purple-300/40 blur-[80px] sm:blur-[90px]" />
 
         <div className="mx-auto max-w-4xl space-y-4 sm:space-y-6">
-          <div className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-3.5 sm:px-4 py-1.5 border border-blue-200/60 shadow-xs">
-            <span className="h-2 w-2 rounded-full bg-[#2563EB] animate-ping" />
-            <span className="text-[11px] sm:text-xs font-extrabold uppercase tracking-wider text-[#2563EB]">
-              Platform Diferensiasi Matematika
-            </span>
-          </div>
-
-          {/* Bold Headline */}
-          <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black leading-[1.15] sm:leading-[1.08] tracking-tight text-[#1E1B4B]">
-            Belajar Tepat. <br />
-            <span className="animate-shimmer-blue">Berdiferensiasi.</span>
-          </h1>
-
-          <p className="text-lg sm:text-2xl font-black text-[#1E1B4B]/85 tracking-tight">
-            Bilangan Bulat SMP Kelas VII
-          </p>
-
-          <p className="mx-auto max-w-xl text-sm sm:text-base md:text-lg font-medium leading-relaxed text-slate-600 px-2">
-            Ubah hasil asesmen diagnostik menjadi 3 level LKPD siap cetak secara instan.
-          </p>
-
-          {/* Action Buttons: Compact Grid on Mobile, Flex Row on Tablet+ */}
-          <div className="grid grid-cols-2 gap-2.5 sm:flex sm:flex-row sm:items-center sm:justify-center sm:gap-4 pt-1 w-full max-w-sm sm:max-w-none mx-auto">
-            <Link
-              href="/login"
-              className="flex items-center justify-center rounded-full bg-[#7C3AED] px-4 sm:px-8 py-3 sm:py-3.5 text-xs sm:text-sm font-black text-white shadow-md shadow-[#7C3AED]/25 transition-all hover:bg-[#6D28D9] hover:shadow-xl hover:-translate-y-0.5 active:scale-95 text-center whitespace-nowrap"
-            >
-              Masuk Portal
-            </Link>
-            <Link
-              href="/generator"
-              className="flex items-center justify-center rounded-full border-2 border-slate-200 bg-white px-4 sm:px-7 py-3 sm:py-3.5 text-xs sm:text-sm font-black text-slate-800 shadow-xs transition-all hover:border-[#2563EB] hover:text-[#2563EB] hover:-translate-y-0.5 active:scale-95 text-center whitespace-nowrap"
-            >
-              Generator LKPD
-            </Link>
-          </div>
-
-          {/* 3 Interactive Feature Tiers (Swipeable Carousel on Mobile, 3-Col Grid on Desktop) */}
-          <div className="pt-4 sm:pt-8">
-            <div className="flex sm:grid overflow-x-auto no-scrollbar snap-x snap-mandatory gap-3 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid-cols-3 text-center pb-2">
-              {/* Level Dasar */}
-              <div className="min-w-[80vw] sm:min-w-0 snap-center shrink-0 sm:shrink flex flex-col items-center justify-center rounded-2xl border border-rose-200/80 bg-white p-4 sm:p-5 shadow-xs transition-all hover:scale-[1.02] hover:border-rose-400">
-                <h3 className="text-sm font-black text-rose-600">Level Dasar</h3>
-                <p className="mt-1 text-xs font-medium text-slate-600">Scaffolding & Garis Bilangan</p>
-                <p className="mt-2.5 w-full rounded-xl border border-rose-100 bg-rose-50/70 py-2 text-center font-mono text-xs font-black text-rose-700">
-                  -3 - 4 = -7
-                </p>
-              </div>
-
-              {/* Level Menengah */}
-              <div className="min-w-[80vw] sm:min-w-0 snap-center shrink-0 sm:shrink flex flex-col items-center justify-center rounded-2xl border border-amber-200/80 bg-white p-4 sm:p-5 shadow-xs transition-all hover:scale-[1.02] hover:border-amber-400">
-                <h3 className="text-sm font-black text-amber-600">Level Menengah</h3>
-                <p className="mt-1 text-xs font-medium text-slate-600">Operasi Hitung Campuran</p>
-                <p className="mt-2.5 w-full rounded-xl border border-amber-100 bg-amber-50/70 py-2 text-center font-mono text-xs font-black text-amber-800">
-                  (-14) + 20 - 8 = -2
-                </p>
-              </div>
-
-              {/* Level Mahir */}
-              <div className="min-w-[80vw] sm:min-w-0 snap-center shrink-0 sm:shrink flex flex-col items-center justify-center rounded-2xl border border-blue-200/80 bg-white p-4 sm:p-5 shadow-xs transition-all hover:scale-[1.02] hover:border-blue-400">
-                <h3 className="text-sm font-black text-blue-600">Level Mahir</h3>
-                <p className="mt-1 text-xs font-medium text-slate-600">Pemodelan Kontekstual HOTS</p>
-                <p className="mt-2.5 w-full rounded-xl border border-blue-100 bg-blue-50/70 py-2 text-center font-mono text-xs font-black text-blue-800">
-                  (-2) + 7 - 3 = +2
-                </p>
-              </div>
+          {/* Spotlight Wrapper Card on Mobile */}
+          <div className="rounded-3xl sm:rounded-none border border-[#1E1B4B]/10 sm:border-0 bg-white/75 sm:bg-transparent p-5 sm:p-0 shadow-xl shadow-indigo-950/5 sm:shadow-none backdrop-blur-md sm:backdrop-blur-none space-y-3.5 sm:space-y-6">
+            <div className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-3.5 sm:px-4 py-1.5 border border-blue-200/60 shadow-xs">
+              <span className="h-2 w-2 rounded-full bg-[#2563EB] animate-ping" />
+              <span className="text-[11px] sm:text-xs font-extrabold uppercase tracking-wider text-[#2563EB]">
+                Platform Diferensiasi Matematika
+              </span>
             </div>
 
-            {/* Mobile swipe hint */}
-            <p className="sm:hidden text-[10px] font-bold text-slate-400 mt-1 flex items-center justify-center gap-1">
-              <span>← Geser untuk level lainnya →</span>
+            {/* Bold Headline */}
+            <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black leading-[1.15] sm:leading-[1.08] tracking-tight text-[#1E1B4B]">
+              Belajar Tepat. <br />
+              <span className="animate-shimmer-blue">Berdiferensiasi.</span>
+            </h1>
+
+            <p className="text-lg sm:text-2xl font-black text-[#1E1B4B]/85 tracking-tight">
+              Bilangan Bulat SMP Kelas VII
             </p>
+
+            <p className="mx-auto max-w-xl text-xs sm:text-base md:text-lg font-medium leading-relaxed text-slate-600 px-1 sm:px-2">
+              Ubah hasil asesmen diagnostik menjadi 3 level LKPD siap cetak secara instan.
+            </p>
+
+            {/* Action Buttons: Compact Grid on Mobile, Flex Row on Tablet+ */}
+            <div className="grid grid-cols-2 gap-2.5 sm:flex sm:flex-row sm:items-center sm:justify-center sm:gap-4 pt-1 w-full max-w-sm sm:max-w-none mx-auto">
+              <Link
+                href="/login"
+                className="flex items-center justify-center rounded-full bg-[#7C3AED] px-4 sm:px-8 py-2.5 sm:py-3.5 text-xs sm:text-sm font-black text-white shadow-md shadow-[#7C3AED]/25 transition-all hover:bg-[#6D28D9] hover:shadow-xl hover:-translate-y-0.5 active:scale-95 text-center whitespace-nowrap"
+              >
+                Masuk Portal
+              </Link>
+              <Link
+                href="/generator"
+                className="flex items-center justify-center rounded-full border-2 border-slate-200 bg-white px-4 sm:px-7 py-2.5 sm:py-3.5 text-xs sm:text-sm font-black text-slate-800 shadow-xs transition-all hover:border-[#2563EB] hover:text-[#2563EB] hover:-translate-y-0.5 active:scale-95 text-center whitespace-nowrap"
+              >
+                Generator LKPD
+              </Link>
+            </div>
+          </div>
+
+          {/* 3 Interactive Feature Tiers (Matriks 2 Baris di Mobile, 3 Kolom di Desktop - Tanpa Scroll) */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-4 pt-3 sm:pt-8 text-center">
+            {/* Level Dasar */}
+            <div className="col-span-1 flex flex-col items-center justify-center rounded-2xl border border-rose-200/80 bg-white p-3 sm:p-5 shadow-xs transition-all hover:scale-[1.02] hover:border-rose-400">
+              <h3 className="text-xs sm:text-sm font-black text-rose-600">Level Dasar</h3>
+              <p className="mt-0.5 sm:mt-1 text-[10px] sm:text-xs font-medium text-slate-600">Scaffolding & Garis Bilangan</p>
+              <p className="mt-1.5 sm:mt-2.5 w-full rounded-xl border border-rose-100 bg-rose-50/70 py-1 sm:py-2 text-center font-mono text-[11px] sm:text-xs font-black text-rose-700">
+                -3 - 4 = -7
+              </p>
+            </div>
+
+            {/* Level Menengah */}
+            <div className="col-span-1 flex flex-col items-center justify-center rounded-2xl border border-amber-200/80 bg-white p-3 sm:p-5 shadow-xs transition-all hover:scale-[1.02] hover:border-amber-400">
+              <h3 className="text-xs sm:text-sm font-black text-amber-600">Level Menengah</h3>
+              <p className="mt-0.5 sm:mt-1 text-[10px] sm:text-xs font-medium text-slate-600">Operasi Hitung Campuran</p>
+              <p className="mt-1.5 sm:mt-2.5 w-full rounded-xl border border-amber-100 bg-amber-50/70 py-1 sm:py-2 text-center font-mono text-[11px] sm:text-xs font-black text-amber-800">
+                (-14) + 20 - 8 = -2
+              </p>
+            </div>
+
+            {/* Level Mahir (Baris 2 Penuh di Mobile, Kolom 3 di Desktop) */}
+            <div className="col-span-2 sm:col-span-1 flex flex-col items-center justify-center rounded-2xl border border-blue-200/80 bg-white p-3 sm:p-5 shadow-xs transition-all hover:scale-[1.02] hover:border-blue-400">
+              <h3 className="text-xs sm:text-sm font-black text-blue-600">Level Mahir</h3>
+              <p className="mt-0.5 sm:mt-1 text-[10px] sm:text-xs font-medium text-slate-600">Pemodelan Kontekstual HOTS</p>
+              <p className="mt-1.5 sm:mt-2.5 w-full sm:w-full max-w-xs sm:max-w-none rounded-xl border border-blue-100 bg-blue-50/70 py-1 sm:py-2 text-center font-mono text-[11px] sm:text-xs font-black text-blue-800">
+                (-2) + 7 - 3 = +2
+              </p>
+            </div>
           </div>
         </div>
       </section>
@@ -529,7 +576,7 @@ export default function Home() {
             </h2>
           </div>
 
-          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4 text-center">
+          <div className="mt-8 sm:mt-12 grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-6 text-center">
             {[
               {
                 step: "1",
@@ -566,20 +613,20 @@ export default function Home() {
             ].map((item) => (
               <div
                 key={item.step}
-                className="group relative flex flex-col items-center justify-center rounded-3xl border border-slate-200/80 bg-[#FAF9FF] p-7 transition-all duration-200 hover:-translate-y-1 hover:border-[#2563EB]/40 hover:shadow-lg"
+                className="group relative flex flex-col items-center justify-center rounded-2xl sm:rounded-3xl border border-slate-200/80 bg-[#FAF9FF] p-3.5 sm:p-7 transition-all duration-200 hover:-translate-y-1 hover:border-[#2563EB]/40 hover:shadow-lg"
               >
                 {/* 🌟 Background Blur Glowing Aura & Frosted Glass Badge */}
-                <div className="relative mb-2 flex items-center justify-center">
-                  <div className={`absolute h-16 w-16 rounded-full ${item.glow} blur-xl transition-all group-hover:scale-125`} />
-                  <div className={`relative flex h-14 w-14 items-center justify-center rounded-2xl border ${item.badgeBorder} shadow-xs backdrop-blur-md transition-all group-hover:scale-105`}>
-                    <span className={`text-2xl font-black tracking-tight ${item.color}`}>
+                <div className="relative mb-1 sm:mb-2 flex items-center justify-center">
+                  <div className={`absolute h-9 w-9 sm:h-16 sm:w-16 rounded-full ${item.glow} blur-md sm:blur-xl transition-all group-hover:scale-125`} />
+                  <div className={`relative flex h-9 w-9 sm:h-14 sm:w-14 items-center justify-center rounded-xl sm:rounded-2xl border ${item.badgeBorder} shadow-xs backdrop-blur-md transition-all group-hover:scale-105`}>
+                    <span className={`text-base sm:text-2xl font-black tracking-tight ${item.color}`}>
                       {item.step}
                     </span>
                   </div>
                 </div>
 
-                <h3 className="mt-3 text-lg font-black text-[#1E1B4B]">{item.title}</h3>
-                <p className="mt-2 text-xs font-medium leading-relaxed text-slate-600">
+                <h3 className="mt-1.5 sm:mt-3 text-xs sm:text-lg font-black text-[#1E1B4B]">{item.title}</h3>
+                <p className="hidden sm:block mt-2 text-xs font-medium leading-relaxed text-slate-600">
                   {item.desc}
                 </p>
               </div>
