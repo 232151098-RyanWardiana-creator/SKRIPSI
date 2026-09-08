@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Stepper } from "@/components/ui/Stepper";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
@@ -419,7 +418,7 @@ export function GeneratorWizard() {
   return (
     <div>
       {/* Header Generator Clean */}
-      <div className="mb-6 flex flex-col justify-between gap-4 border-b pb-5 xl:flex-row xl:items-center">
+      <div className="mb-6 flex flex-col justify-between gap-4 border-b pb-5 sm:flex-row sm:items-center">
         <div>
           <h1 className="flex items-center gap-2 text-2xl font-black text-[#1E1B4B] md:text-3xl">
             <GeneratorLogo aria-hidden className="h-9 w-9 shrink-0" size={36} />
@@ -431,12 +430,11 @@ export function GeneratorWizard() {
           </div>
 
           {storageMessage && <p role="alert" className="mt-2 text-sm text-amber-700">{storageMessage}</p>}
-          <Button className="mt-2" variant="ghost" onClick={() => setResetOpen(true)}>
-            <RefreshCw className="h-4 w-4" />Reset / Buat Baru
-          </Button>
         </div>
 
-        <Stepper active={step} steps={["Pilih Asesmen", "Konfigurasi", "Generate", "Preview & Edit"]} />
+        <Button variant="ghost" onClick={() => setResetOpen(true)}>
+          <RefreshCw className="h-4 w-4" />Reset / Buat Baru
+        </Button>
       </div>
 
       <div className="grid min-h-[620px] gap-6 lg:grid-cols-[340px_minmax(0,1fr)]">
@@ -682,7 +680,7 @@ export function GeneratorWizard() {
 
                 <div className="pt-1.5">
                   <span className="text-[11px] font-black uppercase tracking-wider text-amber-900 block mb-1.5">
-                    2. Kunci Jawaban & Panduan Guru (Catatan Pegangan Khusus Guru)
+                    2. Kunci Jawaban & Panduan Guru
                   </span>
                   <div className="grid grid-cols-3 gap-2" role="tablist">
                     {levels.map((level) => {
@@ -703,7 +701,6 @@ export function GeneratorWizard() {
                         >
                           <div className="flex items-center justify-between">
                             <span>Kunci Jawaban {labels[level]}</span>
-                            <span className="text-[10px] text-amber-700 font-bold">Pegangan</span>
                           </div>
                         </button>
                       );
@@ -712,45 +709,26 @@ export function GeneratorWizard() {
                 </div>
               </div>
 
+              {/* Action Bar Atas: Ganti Model & Regenerasi */}
+              <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+                <div className="text-xs font-semibold text-slate-600">
+                  Engine AI: <strong className="text-slate-900">{providerName}</strong> · <span className="text-[#2563EB]">{modelLabel}</span>
+                  {current?.validatedAt && (
+                    <span className="ml-2 text-emerald-700 font-bold">· Tervalidasi</span>
+                  )}
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Button variant="ghost" disabled={loadingLevels.length > 0} onClick={() => setModalAIOpen(true)}>
+                    Ganti Model AI
+                  </Button>
+                  <Button variant="secondary" disabled={loadingLevels.includes(active)} onClick={() => generate(active)}>
+                    <RefreshCw className="h-4 w-4" />Regenerasi Level Ini
+                  </Button>
+                </div>
+              </div>
+
               {current ? (
                 <article className="space-y-5">
-                  {/* Status Card */}
-                  <div className="card flex flex-wrap items-center justify-between gap-3">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <Badge level={active}>{labels[active]}</Badge>
-                        <span className={cn(
-                          "rounded-full px-2.5 py-0.5 text-[11px] font-bold uppercase",
-                          docType === "siswa" ? "bg-blue-100 text-[#2563EB]" : "bg-amber-100 text-amber-900"
-                        )}>
-                          {docType === "siswa" ? "Dokumen Peserta Didik" : "Kunci & Panduan Guru"}
-                        </span>
-                      </div>
-                      {current.isFallback && (
-                        <p className="mt-2 inline-block rounded-full bg-yellow-100 px-3 py-1 text-xs font-semibold text-yellow-800">
-                          Disimulasikan dalam Mode Offline
-                        </p>
-                      )}
-                      <p className="mt-2 text-xs text-[#6b7280]">
-                        Sumber: {current.source === "online" ? "AI Online" : "Cadangan"} · Status: {current.status} · Model: {current.model}
-                      </p>
-                      {current.error && <p className="mt-2 text-sm text-amber-700">{current.error}</p>}
-                      {current.validatedAt && (
-                        <p className="mt-2 text-sm font-semibold text-green-700">
-                          Tervalidasi {new Date(current.validatedAt).toLocaleString("id-ID")}
-                        </p>
-                      )}
-                    </div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <Button variant="ghost" disabled={loadingLevels.length > 0} onClick={() => setModalAIOpen(true)}>
-                        Ganti Model AI
-                      </Button>
-                      <Button variant="ghost" disabled={loadingLevels.includes(active)} onClick={() => generate(active)}>
-                        <RefreshCw className="h-4 w-4" />Regenerasi Level Ini
-                      </Button>
-                    </div>
-                  </div>
-
                   {/* KONDISI TAMPILAN BERDASARKAN TAB AKTIF: DOKUMEN SISWA ATAU KUNCI JAWABAN */}
                   {docType === "siswa" ? (
                     /* CARD 1: Dokumen LKPD Siswa (Bebas Kunci Jawaban) */
@@ -767,10 +745,11 @@ export function GeneratorWizard() {
                         <button
                           type="button"
                           onClick={() => setDocType("kunci")}
-                          className="flex items-center gap-1.5 rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs font-bold text-amber-900 hover:bg-amber-100 transition cursor-pointer"
+                          title="Buka Kunci Jawaban"
+                          aria-label="Buka Kunci Jawaban"
+                          className="grid h-9 w-9 place-items-center rounded-xl border border-amber-200 bg-amber-50 text-amber-800 hover:bg-amber-100 transition cursor-pointer shadow-2xs"
                         >
-                          <KeyRound className="h-3.5 w-3.5 text-amber-700" />
-                          Buka Kunci Jawaban →
+                          <KeyRound className="h-4 w-4" />
                         </button>
                       </div>
 
@@ -813,7 +792,7 @@ export function GeneratorWizard() {
                       </div>
                     </div>
                   ) : (
-                    /* CARD 2: Kunci Jawaban & Panduan Guru (Catatan Pegangan Khusus Guru) */
+                    /* CARD 2: Kunci Jawaban & Panduan Guru */
                     <div className="card space-y-4 border-2 border-amber-200 bg-amber-50/40 shadow-sm">
                       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-amber-200/80 pb-3">
                         <div className="flex items-center gap-2.5">
@@ -825,17 +804,18 @@ export function GeneratorWizard() {
                               Kunci Jawaban & Panduan Guru (Level {labels[active]})
                             </h3>
                             <p className="text-xs text-amber-800">
-                              Catatan khusus pegangan guru: pembahasan langkah matematis dan rubrik penskoran.
+                              Pembahasan langkah matematis dan rubrik penskoran.
                             </p>
                           </div>
                         </div>
                         <button
                           type="button"
                           onClick={() => setDocType("siswa")}
-                          className="flex items-center gap-1.5 rounded-lg border border-blue-200 bg-white px-2.5 py-1 text-xs font-bold text-[#2563EB] hover:bg-blue-50 transition cursor-pointer"
+                          title="Kembali ke LKPD Siswa"
+                          aria-label="Kembali ke LKPD Siswa"
+                          className="grid h-9 w-9 place-items-center rounded-xl border border-blue-200 bg-white text-[#2563EB] hover:bg-blue-50 transition cursor-pointer shadow-2xs"
                         >
-                          <FileText className="h-3.5 w-3.5" />
-                          Kembali ke LKPD Siswa →
+                          <FileText className="h-4 w-4" />
                         </button>
                       </div>
 
