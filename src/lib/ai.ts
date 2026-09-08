@@ -72,6 +72,7 @@ export interface GenerateSoalAsesmenParams {
 interface ChatOptions {
   baseUrl?: string;
   apiKey?: string;
+  backupApiKey?: string;
   model?: string;
 }
 
@@ -108,22 +109,15 @@ function mockContent(kind: "lkpd" | "asesmen", context: string): string {
   return `# LKPD Matematika — ${context}\n\n## Tujuan Pembelajaran\nMemahami dan menerapkan konsep melalui aktivitas sesuai tingkat kemampuan awal.\n\n## Petunjuk\nKerjakan setiap aktivitas secara runtut dan tuliskan alasan jawaban.\n\n## Aktivitas\nKonten contoh digunakan karena 9Router sedang tidak tersedia.\n\n## Refleksi\nTuliskan konsep yang sudah dipahami dan bagian yang masih perlu dilatih.`;
 }
 
-async function chatCompletion(
+async function requestCompletion(
+  baseUrl: string,
+  apiKey: string,
+  model: string,
   messages: ChatMessage[],
-  fallback: string,
-  options?: ChatOptions
-): Promise<AIResult> {
-  const cfg = config();
-  const baseUrl = options?.baseUrl || cfg.baseUrl;
-  const apiKey = options?.apiKey || cfg.apiKey;
-  const model = options?.model || cfg.model;
-  const timeoutMs = cfg.timeoutMs;
-
-  if (!apiKey) return { content: fallback, source: "mock", model, isFallback: true };
-
+  timeoutMs: number
+): Promise<{ content: string; model: string }> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
-
   try {
     developmentLog(`AI chat request: ${baseUrl}/chat/completions (model: ${model})`);
     const response = await fetch(`${baseUrl}/chat/completions`, {
@@ -147,19 +141,50 @@ async function chatCompletion(
     const data = (await response.json()) as ChatCompletionResponse;
     const content = data.choices?.[0]?.message?.content?.trim();
     if (!content) throw new Error("Gateway returned an empty completion");
-    return { content, source: "online", model: data.model || model, isFallback: false };
-  } catch (error) {
-    const reason = error instanceof Error ? error.message : "UnknownError";
-    console.error(`AI request failed (${reason}); using mock fallback.`);
+    return { content, model: data.model || model };
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function chatCompletion(
+  messages: ChatMessage[],
+  fallback: string,
+  options?: ChatOptions
+): Promise<AIResult> {
+  const cfg = config();
+  const baseUrl = options?.baseUrl || cfg.baseUrl;
+  const apiKey = options?.apiKey || cfg.apiKey;
+  const backupApiKey = options?.backupApiKey;
+  const model = options?.model || cfg.model;
+  const timeoutMs = cfg.timeoutMs;
+
+  if (!apiKey) return { content: fallback, source: "mock", model, isFallback: true };
+
+  try {
+    const res = await requestCompletion(baseUrl, apiKey, model, messages, timeoutMs);
+    return { content: res.content, source: "online", model: res.model, isFallback: false };
+  } catch (primaryError) {
+    const reason = primaryError instanceof Error ? primaryError.message : "UnknownError";
+    console.warn(`Primary AI key failed (${reason}).`);
+
+    if (backupApiKey && backupApiKey !== apiKey) {
+      try {
+        console.info("Switching to backup AI key...");
+        const res = await requestCompletion(baseUrl, backupApiKey, model, messages, timeoutMs);
+        return { content: res.content, source: "online", model: res.model, isFallback: false };
+      } catch (backupError) {
+        console.error(`Backup AI key failed (${safeError(backupError)}); using mock fallback.`);
+      }
+    }
+
     return {
       content: fallback,
       source: "mock",
       model,
       isFallback: true,
-      error: `AI fallback (${safeError(error)}): konten cadangan digunakan.`,
+      error: `AI fallback (${safeError(primaryError)}): konten cadangan digunakan.`,
     };
-  } finally {
-    clearTimeout(timeout);
   }
 }
 
@@ -325,15 +350,18 @@ Pastikan tepat satu jawaban benar, angka realistis, dan JSON dapat diproses lang
 
   let baseUrl: string | undefined = params.customBaseUrl;
   let apiKey: string | undefined = params.customApiKey;
+  let backupApiKey: string | undefined = undefined;
 
   if (params.provider === "xkiro") {
     baseUrl = process.env.XKIRO_BASE_URL || "https://api.xkiro.com/v1";
     apiKey = process.env.XKIRO_API_KEY || "";
+    backupApiKey = process.env.XKIRO_API_KEY_BACKUP || "";
   }
 
   const aiOptions = {
     baseUrl,
     apiKey,
+    backupApiKey,
     model: params.model,
   };
 
