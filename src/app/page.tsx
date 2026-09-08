@@ -128,10 +128,10 @@ export default function Home() {
   const currentScoreInfo = getScoreInfo(simScore);
 
   return (
-    <main className="min-h-screen bg-[#FAF9FF] text-[#1E1B4B] antialiased selection:bg-[#2563EB] selection:text-white">
-      {/* 🟢 Mouse Follower Glow Dot */}
+    <main className="min-h-screen bg-[#FAF9FF] text-[#1E1B4B] antialiased selection:bg-[#2563EB] selection:text-white overflow-x-hidden">
+      {/* 🟢 Mouse Follower Glow Dot (Desktop only) */}
       <div
-        className="pointer-events-none fixed z-50 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center rounded-full border-2 border-emerald-500 bg-white shadow-[0_0_12px_rgba(16,185,129,0.5)] transition-transform duration-75"
+        className="pointer-events-none fixed z-50 -translate-x-1/2 -translate-y-1/2 hidden md:flex items-center justify-center rounded-full border-2 border-emerald-500 bg-white shadow-[0_0_12px_rgba(16,185,129,0.5)] transition-transform duration-75"
         style={{
           width: "24px",
           height: "24px",
@@ -142,116 +142,119 @@ export default function Home() {
         <div className="h-2 w-2 rounded-full bg-emerald-500" />
       </div>
 
-      {/* 1. Floating Pill Navbar with Active Scrollspy */}
-      <header className="fixed inset-x-0 top-4 z-40 flex justify-center px-4 transition-all">
-        <nav className="flex items-center gap-1.5 rounded-full border-2 border-[#1E1B4B]/10 bg-white/90 p-2 shadow-xl backdrop-blur-md">
-          <Link href="/" className="px-3 text-lg font-black tracking-tight text-[#1E1B4B] hover:scale-105 transition-transform">
+      {/* 1. Floating Pill Navbar (Responsive Mobile & Desktop) */}
+      <header className="fixed inset-x-0 top-3 sm:top-4 z-40 flex justify-center px-3 sm:px-6 transition-all">
+        <nav className="flex w-full max-w-5xl items-center justify-between md:w-auto md:justify-center gap-1.5 sm:gap-2 rounded-full border-2 border-[#1E1B4B]/10 bg-white/95 px-3 sm:px-4 py-2 shadow-xl shadow-indigo-950/5 backdrop-blur-md">
+          <Link href="/" className="px-2 text-base sm:text-lg font-black tracking-tight text-[#1E1B4B] hover:scale-105 transition-transform">
             LKPD<span className="text-[#EC4899]">.</span>
           </Link>
-          <div className="mx-1 h-5 w-[1px] bg-[#1E1B4B]/15" />
 
-          {/* Scrollspy Navigation Pills */}
-          {[
-            { id: "home", label: "Beranda" },
-            { id: "keunggulan", label: "Keunggulan" },
-            { id: "simulasi", label: "Simulasi TaRL" },
-            { id: "alur", label: "Alur Guru" },
-          ].map((item) => {
-            const isActive = activeSection === item.id;
-            return (
-              <a
-                key={item.id}
-                href={`#${item.id}`}
-                className={`flex items-center rounded-full px-3.5 py-1.5 text-xs font-bold transition-all ${
-                  isActive
-                    ? "bg-[#2563EB] text-white shadow-md"
-                    : "text-[#1E1B4B]/70 hover:bg-[#1E1B4B]/5 hover:text-[#1E1B4B]"
-                }`}
-              >
-                <span>{item.label}</span>
-              </a>
-            );
-          })}
+          <div className="hidden md:block mx-1 h-5 w-[1px] bg-[#1E1B4B]/15" />
 
-          <div className="mx-1 h-5 w-[1px] bg-[#1E1B4B]/15" />
+          {/* Scrollspy Navigation Pills (Desktop Only) */}
+          <div className="hidden md:flex items-center gap-1">
+            {[
+              { id: "home", label: "Beranda" },
+              { id: "keunggulan", label: "Keunggulan" },
+              { id: "simulasi", label: "Simulasi TaRL" },
+              { id: "alur", label: "Alur Guru" },
+            ].map((item) => {
+              const isActive = activeSection === item.id;
+              return (
+                <a
+                  key={item.id}
+                  href={`#${item.id}`}
+                  className={`flex items-center rounded-full px-3.5 py-1.5 text-xs font-bold transition-all ${
+                    isActive
+                      ? "bg-[#2563EB] text-white shadow-md"
+                      : "text-[#1E1B4B]/70 hover:bg-[#1E1B4B]/5 hover:text-[#1E1B4B]"
+                  }`}
+                >
+                  <span>{item.label}</span>
+                </a>
+              );
+            })}
+          </div>
+
+          <div className="hidden md:block mx-1 h-5 w-[1px] bg-[#1E1B4B]/15" />
+
           <Link
             href="/login"
-            className="flex items-center gap-1.5 rounded-full bg-[#1E1B4B] px-4 py-1.5 text-xs font-black text-white shadow-sm transition hover:bg-[#2563EB] active:scale-95"
+            className="flex items-center gap-1.5 rounded-full bg-[#1E1B4B] px-3.5 sm:px-4 py-1.5 sm:py-2 text-xs font-black text-white shadow-sm transition hover:bg-[#2563EB] active:scale-95 whitespace-nowrap"
           >
             <LogIn className="h-3.5 w-3.5" /> Masuk Portal
           </Link>
         </nav>
       </header>
 
-      {/* 2. Hero Section with Creative Interactive Visual Showcase */}
-      {/* 2. Hero Section: Clean, Centered, Punchy, and Ultra-Lightweight (Zero Lag) */}
-      <section id="home" className="relative px-6 pt-32 pb-16 md:px-12 lg:pt-36 lg:pb-20 text-center">
+      {/* 2. Hero Section: Responsive Mobile & Desktop */}
+      <section id="home" className="relative px-4 sm:px-6 pt-24 sm:pt-32 pb-12 sm:pb-16 md:px-12 lg:pt-36 lg:pb-20 text-center">
         {/* Soft Backdrop Orbs */}
-        <div className="pointer-events-none absolute top-10 left-1/2 -z-10 h-[400px] w-[650px] -translate-x-1/2 rounded-full bg-gradient-to-r from-blue-200/40 via-indigo-200/30 to-purple-200/40 blur-[90px]" />
+        <div className="pointer-events-none absolute top-10 left-1/2 -z-10 h-[300px] sm:h-[400px] w-[90vw] max-w-[650px] -translate-x-1/2 rounded-full bg-gradient-to-r from-blue-200/40 via-indigo-200/30 to-purple-200/40 blur-[70px] sm:blur-[90px]" />
 
-        <div className="mx-auto max-w-4xl space-y-6">
-          <div className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-4 py-1.5 border border-blue-200/60 shadow-xs">
+        <div className="mx-auto max-w-4xl space-y-4 sm:space-y-6">
+          <div className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-3.5 sm:px-4 py-1.5 border border-blue-200/60 shadow-xs">
             <span className="h-2 w-2 rounded-full bg-[#2563EB] animate-ping" />
-            <span className="text-xs font-extrabold uppercase tracking-wider text-[#2563EB]">
+            <span className="text-[11px] sm:text-xs font-extrabold uppercase tracking-wider text-[#2563EB]">
               Platform Diferensiasi Matematika
             </span>
           </div>
 
-          {/* Bold Headline with Animated Shimmer */}
-          <h1 className="text-5xl font-black leading-[1.08] tracking-tight text-[#1E1B4B] sm:text-6xl lg:text-7xl">
+          {/* Bold Headline */}
+          <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black leading-[1.15] sm:leading-[1.08] tracking-tight text-[#1E1B4B]">
             Belajar Tepat. <br />
             <span className="animate-shimmer-blue">Berdiferensiasi.</span>
           </h1>
 
-          <p className="text-xl sm:text-2xl font-black text-[#1E1B4B]/85 tracking-tight">
+          <p className="text-lg sm:text-2xl font-black text-[#1E1B4B]/85 tracking-tight">
             Bilangan Bulat SMP Kelas VII
           </p>
 
-          <p className="mx-auto max-w-xl text-base font-medium leading-relaxed text-slate-600 sm:text-lg">
+          <p className="mx-auto max-w-xl text-sm sm:text-base md:text-lg font-medium leading-relaxed text-slate-600 px-2">
             Ubah hasil asesmen diagnostik menjadi 3 level LKPD siap cetak secara instan.
           </p>
 
-          {/* Action Buttons */}
-          <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
+          {/* Action Buttons: Stack on Mobile, Row on Tablet+ */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 pt-2 w-full max-w-xs sm:max-w-none mx-auto">
             <Link
               href="/login"
-              className="flex items-center justify-center rounded-full bg-[#7C3AED] px-8 py-3.5 text-sm font-black text-white shadow-lg shadow-[#7C3AED]/30 transition-all hover:bg-[#6D28D9] hover:shadow-xl hover:-translate-y-0.5 active:scale-95"
+              className="flex items-center justify-center rounded-full bg-[#7C3AED] px-8 py-3.5 text-sm font-black text-white shadow-lg shadow-[#7C3AED]/30 transition-all hover:bg-[#6D28D9] hover:shadow-xl hover:-translate-y-0.5 active:scale-95 text-center"
             >
               Masuk Portal
             </Link>
             <Link
               href="/generator"
-              className="flex items-center justify-center rounded-full border-2 border-slate-200 bg-white px-7 py-3.5 text-sm font-black text-slate-800 shadow-xs transition-all hover:border-[#2563EB] hover:text-[#2563EB] hover:-translate-y-0.5 active:scale-95"
+              className="flex items-center justify-center rounded-full border-2 border-slate-200 bg-white px-7 py-3.5 text-sm font-black text-slate-800 shadow-xs transition-all hover:border-[#2563EB] hover:text-[#2563EB] hover:-translate-y-0.5 active:scale-95 text-center"
             >
               Generator LKPD
             </Link>
           </div>
 
-          {/* 3 Interactive Feature Tiers (Centered & Clean) */}
-          <div className="grid gap-4 pt-8 sm:grid-cols-3 text-center">
+          {/* 3 Interactive Feature Tiers */}
+          <div className="grid gap-3 sm:gap-4 pt-6 sm:pt-8 sm:grid-cols-3 text-center">
             {/* Level Dasar */}
-            <div className="flex flex-col items-center justify-center rounded-2xl border border-rose-200/80 bg-white p-5 shadow-xs transition-all hover:scale-[1.02] hover:border-rose-400">
+            <div className="flex flex-col items-center justify-center rounded-2xl border border-rose-200/80 bg-white p-4 sm:p-5 shadow-xs transition-all hover:scale-[1.02] hover:border-rose-400">
               <h3 className="text-sm font-black text-rose-600">Level Dasar</h3>
-              <p className="mt-1.5 text-xs font-medium text-slate-600">Scaffolding & Garis Bilangan</p>
-              <p className="mt-3 w-full rounded-xl border border-rose-100 bg-rose-50/70 py-1.5 text-center font-mono text-xs font-black text-rose-700">
+              <p className="mt-1 text-xs font-medium text-slate-600">Scaffolding & Garis Bilangan</p>
+              <p className="mt-2.5 w-full rounded-xl border border-rose-100 bg-rose-50/70 py-2 text-center font-mono text-xs font-black text-rose-700">
                 -3 - 4 = -7
               </p>
             </div>
 
             {/* Level Menengah */}
-            <div className="flex flex-col items-center justify-center rounded-2xl border border-amber-200/80 bg-white p-5 shadow-xs transition-all hover:scale-[1.02] hover:border-amber-400">
+            <div className="flex flex-col items-center justify-center rounded-2xl border border-amber-200/80 bg-white p-4 sm:p-5 shadow-xs transition-all hover:scale-[1.02] hover:border-amber-400">
               <h3 className="text-sm font-black text-amber-600">Level Menengah</h3>
-              <p className="mt-1.5 text-xs font-medium text-slate-600">Operasi Hitung Campuran</p>
-              <p className="mt-3 w-full rounded-xl border border-amber-100 bg-amber-50/70 py-1.5 text-center font-mono text-xs font-black text-amber-800">
+              <p className="mt-1 text-xs font-medium text-slate-600">Operasi Hitung Campuran</p>
+              <p className="mt-2.5 w-full rounded-xl border border-amber-100 bg-amber-50/70 py-2 text-center font-mono text-xs font-black text-amber-800">
                 (-14) + 20 - 8 = -2
               </p>
             </div>
 
             {/* Level Mahir */}
-            <div className="flex flex-col items-center justify-center rounded-2xl border border-blue-200/80 bg-white p-5 shadow-xs transition-all hover:scale-[1.02] hover:border-blue-400">
+            <div className="flex flex-col items-center justify-center rounded-2xl border border-blue-200/80 bg-white p-4 sm:p-5 shadow-xs transition-all hover:scale-[1.02] hover:border-blue-400">
               <h3 className="text-sm font-black text-blue-600">Level Mahir</h3>
-              <p className="mt-1.5 text-xs font-medium text-slate-600">Pemodelan Kontekstual HOTS</p>
-              <p className="mt-3 w-full rounded-xl border border-blue-100 bg-blue-50/70 py-1.5 text-center font-mono text-xs font-black text-blue-800">
+              <p className="mt-1 text-xs font-medium text-slate-600">Pemodelan Kontekstual HOTS</p>
+              <p className="mt-2.5 w-full rounded-xl border border-blue-100 bg-blue-50/70 py-2 text-center font-mono text-xs font-black text-blue-800">
                 (-2) + 7 - 3 = +2
               </p>
             </div>
