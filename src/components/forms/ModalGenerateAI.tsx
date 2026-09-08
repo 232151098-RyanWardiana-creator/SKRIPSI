@@ -170,7 +170,7 @@ export function ModalGenerateAI({
             </div>
             <div>
               <span className="text-slate-400 font-bold uppercase text-[10px] block">Indikator:</span>
-              <span className="font-bold text-slate-900">{indikator}</span>
+              <span className="font-bold text-slate-900">{indikator === "SEMUA" ? "Rata (IK-01–05)" : indikator}</span>
             </div>
             <div>
               <span className="text-slate-400 font-bold uppercase text-[10px] block">Target:</span>

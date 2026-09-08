@@ -72,7 +72,7 @@ export function SoalBuilder({ onDraftChange }: SoalBuilderProps) {
   const [soal, setSoal] = useState<SoalDraft[]>([]);
   const [kuesionerAktif, setKuesionerAktif] = useState(true);
   const [materi, setMateri] = useState("Rasio (Perbandingan)");
-  const [indikator, setIndikator] = useState<Indikator>("IK-03");
+  const [indikator, setIndikator] = useState<Indikator | "SEMUA">("SEMUA");
   const [jumlah, setJumlah] = useState(3);
   const [tingkat, setTingkat] = useState<Difficulty>("sedang");
   const [loading, setLoading] = useState(false);
@@ -94,7 +94,7 @@ export function SoalBuilder({ onDraftChange }: SoalBuilderProps) {
         if (Array.isArray(data.soal)) setSoal(data.soal);
         if (typeof data.kuesionerAktif === "boolean") setKuesionerAktif(data.kuesionerAktif);
         if (typeof data.materi === "string") setMateri(data.materi);
-        if (typeof data.indikator === "string") setIndikator(data.indikator as Indikator);
+        if (typeof data.indikator === "string") setIndikator(data.indikator as Indikator | "SEMUA");
         if (typeof data.tingkat === "string") setTingkat(data.tingkat as Difficulty);
       }
     } catch {
@@ -138,7 +138,7 @@ export function SoalBuilder({ onDraftChange }: SoalBuilderProps) {
     setSoal([]);
     setKuesionerAktif(true);
     setMateri("Rasio (Perbandingan)");
-    setIndikator("IK-01");
+    setIndikator("SEMUA");
     setAiMessage("");
     setResetOpen(false);
   }
@@ -279,15 +279,16 @@ export function SoalBuilder({ onDraftChange }: SoalBuilderProps) {
             </div>
           </div>
 
-          <div className="mt-4 grid gap-3 rounded-2xl bg-blue-50/70 border border-blue-100 p-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-4 grid gap-3 rounded-2xl bg-blue-50/70 border border-blue-100 p-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1.3fr_1.5fr_90px_1.1fr]">
             <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
               Materi
               <input className="input mt-1 bg-white" value={materi} onChange={e => setMateri(e.target.value)} />
             </label>
             <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
               Indikator Fokus
-              <select className="input mt-1 bg-white" value={indikator} onChange={e => setIndikator(e.target.value as Indikator)}>
-                {Object.keys(INDIKATOR_KOMPETENSI).map(key => <option key={key}>{key}</option>)}
+              <select className="input mt-1 bg-white truncate" value={indikator} onChange={e => setIndikator(e.target.value as Indikator | "SEMUA")}>
+                <option value="SEMUA">Semua (IK-01–05)</option>
+                {Object.keys(INDIKATOR_KOMPETENSI).map(key => <option key={key} value={key}>{key}</option>)}
               </select>
             </label>
             <label className="text-xs font-bold uppercase tracking-wider text-slate-700">

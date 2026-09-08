@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { generateSoalAsesmen, parseGeneratedQuestions } from "@/lib/ai";
 
 export const runtime = "nodejs";
-const indicators = ["IK-01", "IK-02", "IK-03", "IK-04", "IK-05"] as const;
+const indicators = ["IK-01", "IK-02", "IK-03", "IK-04", "IK-05", "SEMUA"] as const;
 const difficulties = ["mudah", "sedang", "sulit"] as const;
 
 export async function POST(request: Request) {

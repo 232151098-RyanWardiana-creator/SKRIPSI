@@ -276,7 +276,8 @@ export function parseGeneratedQuestions(content: string, defaults: { indikator: 
       }
     }
 
-    const indicator = String(item.indikator_id ?? item.indikator ?? defaults.indikator).match(/IK-0[1-5]/)?.[0] || defaults.indikator;
+    const defaultInd = defaults.indikator === "SEMUA" ? `IK-0${(index % 5) + 1}` : defaults.indikator;
+    const indicator = String(item.indikator_id ?? item.indikator ?? defaultInd).match(/IK-0[1-5]/)?.[0] || defaultInd;
     const rawDifficulty = String(item.tingkat_kesulitan ?? item.tingkat ?? defaults.tingkat).toLowerCase();
     const difficulty = (["mudah", "sedang", "sulit"].includes(rawDifficulty) ? rawDifficulty : defaults.tingkat) as GeneratedQuestion["tingkat_kesulitan"];
 
@@ -362,10 +363,11 @@ function mockSoalContent(params: GenerateSoalAsesmenParams): string {
 
   const items = Array.from({ length: params.jumlah }, (_, idx) => {
     const pick = shuffled[idx % shuffled.length];
+    const assignedInd = ind === "SEMUA" ? `IK-0${(idx % 5) + 1}` : (ind.match(/IK-0[1-5]/)?.[0] || "IK-01");
     return {
       id: `soal-${Date.now()}-${idx + 1}`,
       pertanyaan: pick.p,
-      indikator_id: ind.match(/IK-0[1-5]/)?.[0] || "IK-01",
+      indikator_id: assignedInd,
       tingkat_kesulitan: params.tingkat,
       pilihan: { A: pick.a, B: pick.b, C: pick.c, D: pick.d },
       jawaban_benar: pick.kunci,
@@ -389,11 +391,17 @@ export async function generateSoalAsesmen(params: GenerateSoalAsesmenParams): Pr
   ];
   const randomContext = contexts[Math.floor(Math.random() * contexts.length)];
 
+  const isAll = params.indikator === "SEMUA" || params.indikator === "all";
+  const indicatorInstruction = isAll
+    ? `Bagikan butir-butir soal secara MERATA ke indikator IK-01 sampai IK-05. Tentukan properti "indikator_id" secara tepat untuk setiap soal (IK-01, IK-02, IK-03, IK-04, atau IK-05) secara berurutan atau bergiliran seimbang.`
+    : `Setiap soal wajib memiliki properti "indikator_id": "${params.indikator}".`;
+
   const messages: ChatMessage[] = [
     {
       role: "system",
       content: `Kamu adalah pakar penyusun asesmen diagnostik matematika SMP Kurikulum Merdeka.
 TUGAS UTAMA: Susun butir soal diagnostik pilihan ganda kontekstual kehidupan nyata yang KREATIF, SEGAR, dan BERBEDA di setiap permintaan untuk topik materi "${params.materi}".
+${indicatorInstruction}
 HINDARI pengulangan soal atau angka klise yang sudah sering dipakai. Gunakan variasi skenario kehidupan nyata yang unik (misal terinspirasi dari konteks: ${randomContext}).
 Pastikan angka perhitungan rapi, realistis, dan logis untuk siswa SMP.
 Keluarkan HANYA JSON array valid tanpa formatting markdown backticks atau pengantar apa pun.
@@ -403,7 +411,7 @@ Format setiap objek dalam array:
   {
     "id": "soal-1",
     "pertanyaan": "soal cerita kontekstual realistis yang unik dan segar",
-    "indikator_id": "${params.indikator}",
+    "indikator_id": "${isAll ? "IK-01 (sesuaikan IK-01 s.d IK-05)" : params.indikator}",
     "tingkat_kesulitan": "${params.tingkat}",
     "pilihan": {
       "A": "opsi A",
@@ -419,7 +427,9 @@ Format setiap objek dalam array:
     },
     {
       role: "user",
-      content: `Buat tepat ${params.jumlah} butir soal pilihan ganda kontekstual BARU dan BERBEDA (Variasi Token #${seed}) untuk topik materi "${params.materi}", indikator "${params.indikator}", tingkat "${params.tingkat}". Pastikan soal memiliki skenario unik, angka yang berbeda, tepat satu jawaban benar, dan format JSON array valid.`,
+      content: isAll
+        ? `Buat tepat ${params.jumlah} butir soal pilihan ganda kontekstual BARU dan BERBEDA (Variasi Token #${seed}) untuk materi "${params.materi}", tingkat "${params.tingkat}". BAGIKAN SECARA MERATA ke indikator IK-01 s.d. IK-05 (berikan "indikator_id" IK-01, IK-02, dst pada masing-masing soal). Pastikan tepat satu jawaban benar dan keluarkan HANYA JSON array valid.`
+        : `Buat tepat ${params.jumlah} butir soal pilihan ganda kontekstual BARU dan BERBEDA (Variasi Token #${seed}) untuk topik materi "${params.materi}", indikator "${params.indikator}", tingkat "${params.tingkat}". Pastikan soal memiliki skenario unik, angka yang berbeda, tepat satu jawaban benar, dan format JSON array valid.`,
     },
   ];
 
