@@ -324,7 +324,17 @@ export function GeneratorWizard() {
             model: currentModelId,
           }),
         });
-        const payload = (await response.json()) as { results?: GeneratedLKPD[]; error?: string };
+        const text = await response.text();
+        let payload: { results?: GeneratedLKPD[]; error?: string };
+        try {
+          payload = JSON.parse(text) as { results?: GeneratedLKPD[]; error?: string };
+        } catch {
+          throw new Error(
+            response.status === 504
+              ? "Waktu tunggu server Vercel habis (Timeout). Pilih model respons cepat seperti DeepSeek V3.2 atau Codestral."
+              : `Respons server tidak valid (${response.status}).`
+          );
+        }
         if (!response.ok || !payload.results?.[0]) throw new Error(payload.error || "Gagal membuat LKPD.");
         const item = payload.results[0];
         updateDocument(level, { ...item, draft: item.content, editing: false, validatedAt: null }, true);

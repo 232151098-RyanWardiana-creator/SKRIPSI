@@ -195,10 +195,13 @@ async function requestCompletion(
   apiKey: string,
   model: string,
   messages: ChatMessage[],
-  timeoutMs: number
+  timeoutMs: number,
+  maxTokens: number = 2500
 ): Promise<{ content: string; model: string }> {
+  // Cap at 25 seconds so serverless functions never hit Vercel gateway timeout
+  const effectiveTimeout = Math.min(timeoutMs, 25_000);
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  const timeout = setTimeout(() => controller.abort(), effectiveTimeout);
   try {
     developmentLog(`AI chat request: ${baseUrl}/chat/completions (model: ${model})`);
     const response = await fetch(`${baseUrl}/chat/completions`, {
@@ -211,7 +214,7 @@ async function requestCompletion(
         model,
         messages,
         temperature: 0.85,
-        max_tokens: 4096,
+        max_tokens: maxTokens,
         stream: false,
       }),
       cache: "no-store",
