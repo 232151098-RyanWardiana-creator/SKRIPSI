@@ -53,26 +53,31 @@ export function AuthForm({ mode = "login" }: { mode?: "login" | "register" }) {
       }
 
       if (mode === "register") {
-        const { data, error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: { data: { full_name: nama, sekolah, role: "guru" } },
+        const res = await fetch("/api/auth/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password, nama, sekolah }),
         });
-        if (error) throw error;
 
-        if (data.user) {
-          await supabase.from("profiles").upsert({ id: data.user.id, email, nama, sekolah });
-          await saveStoredTeacherProfile({
-            ...getStoredTeacherProfile(),
-            nama,
-            email,
-            sekolah,
-          });
+        const resData = await res.json().catch(() => null);
+        if (!res.ok) {
+          throw new Error(resData?.error || "Pendaftaran gagal. Periksa data kembali.");
         }
+
+        // Otomatis login ke sesi Supabase di browser
+        const { error: loginErr } = await supabase.auth.signInWithPassword({ email, password });
+        if (loginErr) throw loginErr;
+
+        await saveStoredTeacherProfile({
+          ...getStoredTeacherProfile(),
+          nama,
+          email,
+          sekolah,
+        });
 
         const target = redirectTarget || "/dashboard";
         setSuccessMsg("Pendaftaran berhasil. Mengalihkan ke dasbor guru...");
-        setTimeout(() => router.push(target), 1200);
+        setTimeout(() => router.push(target), 1000);
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) {
