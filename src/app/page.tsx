@@ -111,7 +111,7 @@ export default function Home() {
         level: "dasar",
         label: "Level Dasar",
         badge: "bg-rose-500 text-white",
-        desc: "Perlu bimbingan konsep dan langkah konkret pada garis bilangan.",
+        desc: "Perlu bimbingan konsep perbandingan dasar, rasio ekuivalen, dan representasi konkret.",
       };
     }
     if (score < 80) {
@@ -119,14 +119,14 @@ export default function Home() {
         level: "menengah",
         label: "Level Menengah",
         badge: "bg-amber-500 text-white",
-        desc: "Latihan terarah operasi hitung campuran dengan variasi tanda bertingkat.",
+        desc: "Latihan terarah menentukan nilai perbandingan senilai dan laju satuan bertingkat.",
       };
     }
     return {
       level: "mahir",
       label: "Level Mahir",
       badge: "bg-blue-600 text-white",
-      desc: "Tantangan masalah nyata dan pemodelan matematika tingkat lanjut (HOTS).",
+      desc: "Tantangan masalah nyata rasio kontekstual, skala peta, dan pemodelan tingkat lanjut (HOTS).",
     };
   };
 
@@ -305,7 +305,7 @@ export default function Home() {
             </h1>
 
             <p className="text-lg sm:text-2xl font-black text-[#1E1B4B]/85 tracking-tight">
-              Bilangan Bulat SMP Kelas VII
+              Rasio (Perbandingan) SMP Kelas VII
             </p>
 
             <p className="mx-auto max-w-xl text-xs sm:text-base md:text-lg font-medium leading-relaxed text-slate-600 px-1 sm:px-2">
@@ -335,27 +335,27 @@ export default function Home() {
             {/* Level Dasar */}
             <div className="col-span-1 flex flex-col items-center justify-center rounded-2xl border border-rose-200/80 bg-white p-3 sm:p-5 shadow-xs transition-all hover:scale-[1.02] hover:border-rose-400">
               <h3 className="text-xs sm:text-sm font-black text-rose-600">Level Dasar</h3>
-              <p className="mt-0.5 sm:mt-1 text-[10px] sm:text-xs font-medium text-slate-600">Scaffolding & Garis Bilangan</p>
+              <p className="mt-0.5 sm:mt-1 text-[10px] sm:text-xs font-medium text-slate-600">Konsep Rasio & Bentuk Sederhana</p>
               <p className="mt-1.5 sm:mt-2.5 w-full rounded-xl border border-rose-100 bg-rose-50/70 py-1 sm:py-2 text-center font-mono text-[11px] sm:text-xs font-black text-rose-700">
-                -3 - 4 = -7
+                12 : 18 = 2 : 3
               </p>
             </div>
 
             {/* Level Menengah */}
             <div className="col-span-1 flex flex-col items-center justify-center rounded-2xl border border-amber-200/80 bg-white p-3 sm:p-5 shadow-xs transition-all hover:scale-[1.02] hover:border-amber-400">
               <h3 className="text-xs sm:text-sm font-black text-amber-600">Level Menengah</h3>
-              <p className="mt-0.5 sm:mt-1 text-[10px] sm:text-xs font-medium text-slate-600">Operasi Hitung Campuran</p>
+              <p className="mt-0.5 sm:mt-1 text-[10px] sm:text-xs font-medium text-slate-600">Perbandingan Senilai & Laju</p>
               <p className="mt-1.5 sm:mt-2.5 w-full rounded-xl border border-amber-100 bg-amber-50/70 py-1 sm:py-2 text-center font-mono text-[11px] sm:text-xs font-black text-amber-800">
-                (-14) + 20 - 8 = -2
+                5 liter → 60 km | 8 L → 96 km
               </p>
             </div>
 
             {/* Level Mahir (Baris 2 Penuh di Mobile, Kolom 3 di Desktop) */}
             <div className="col-span-2 sm:col-span-1 flex flex-col items-center justify-center rounded-2xl border border-blue-200/80 bg-white p-3 sm:p-5 shadow-xs transition-all hover:scale-[1.02] hover:border-blue-400">
               <h3 className="text-xs sm:text-sm font-black text-blue-600">Level Mahir</h3>
-              <p className="mt-0.5 sm:mt-1 text-[10px] sm:text-xs font-medium text-slate-600">Pemodelan Kontekstual HOTS</p>
+              <p className="mt-0.5 sm:mt-1 text-[10px] sm:text-xs font-medium text-slate-600">Masalah Kontekstual & Skala HOTS</p>
               <p className="mt-1.5 sm:mt-2.5 w-full sm:w-full max-w-xs sm:max-w-none rounded-xl border border-blue-100 bg-blue-50/70 py-1 sm:py-2 text-center font-mono text-[11px] sm:text-xs font-black text-blue-800">
-                (-2) + 7 - 3 = +2
+                Skala 1 : 250.000 | 6 cm → 15 km
               </p>
             </div>
           </div>
@@ -389,13 +389,13 @@ export default function Home() {
               { icon: Brain, text: "Gaya Belajar VAK", bg: "bg-purple-100", color: "text-purple-600" },
               { icon: CheckCircle2, text: "5 Indikator (IK-01–05)", bg: "bg-emerald-100", color: "text-emerald-600" },
               { icon: Zap, text: "Otomatisasi AI 9Router", bg: "bg-amber-100", color: "text-amber-600" },
-              { icon: Code2, text: "Materi Bilangan Bulat", bg: "bg-pink-100", color: "text-pink-600" },
+              { icon: Code2, text: "Materi Rasio & Perbandingan", bg: "bg-pink-100", color: "text-pink-600" },
               { icon: GraduationCap, text: "Kurikulum Merdeka", bg: "bg-blue-100", color: "text-blue-600" },
               { icon: Layers, text: "TaRL 3 Level Kognitif", bg: "bg-indigo-100", color: "text-indigo-600" },
               { icon: Brain, text: "Gaya Belajar VAK", bg: "bg-purple-100", color: "text-purple-600" },
               { icon: CheckCircle2, text: "5 Indikator (IK-01–05)", bg: "bg-emerald-100", color: "text-emerald-600" },
               { icon: Zap, text: "Otomatisasi AI 9Router", bg: "bg-amber-100", color: "text-amber-600" },
-              { icon: Code2, text: "Materi Bilangan Bulat", bg: "bg-pink-100", color: "text-pink-600" },
+              { icon: Code2, text: "Materi Rasio & Perbandingan", bg: "bg-pink-100", color: "text-pink-600" },
             ].map((item, idx) => {
               const Icon = item.icon;
               return (

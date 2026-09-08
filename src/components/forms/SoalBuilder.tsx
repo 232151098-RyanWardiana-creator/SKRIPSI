@@ -25,11 +25,11 @@ const STORAGE_KEY = "lkpd_draft_asesmen_builder";
 interface SoalBuilderProps { onDraftChange?: (draft: AsesmenDraft) => void }
 
 export function SoalBuilder({ onDraftChange }: SoalBuilderProps) {
-  const [judul, setJudul] = useState("Diagnostik Bilangan Bulat");
+  const [judul, setJudul] = useState("Diagnostik Rasio dan Perbandingan");
   const [durasi, setDurasi] = useState(30);
   const [soal, setSoal] = useState<SoalDraft[]>([]);
   const [kuesionerAktif, setKuesionerAktif] = useState(true);
-  const [materi, setMateri] = useState("Operasi Bilangan Bulat");
+  const [materi, setMateri] = useState("Rasio (Perbandingan)");
   const [indikator, setIndikator] = useState<Indikator>("IK-03");
   const [jumlah, setJumlah] = useState(3);
   const [tingkat, setTingkat] = useState<Difficulty>("sedang");

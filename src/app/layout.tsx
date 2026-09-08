@@ -10,7 +10,7 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "LKPD-AI — Bilangan Bulat SMP VII",
+  title: "LKPD-AI — Rasio & Perbandingan SMP VII",
   description: "Platform LKPD berdiferensiasi berbasis asesmen untuk matematika SMP.",
 };
 

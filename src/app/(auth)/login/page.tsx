@@ -41,7 +41,7 @@ export default function LoginPage() {
             Masuk <span className="bg-gradient-to-r from-[#2563EB] via-[#6366F1] to-[#7C3AED] bg-clip-text text-transparent">Portal</span>
           </h1>
           <p className="mt-2 text-xs sm:text-sm font-medium text-slate-600">
-            Pilih portal peranmu di bawah untuk memulai pembelajaran.
+            Platform Berdiferensiasi Rasio (Perbandingan) SMP Kelas VII
           </p>
         </div>
 

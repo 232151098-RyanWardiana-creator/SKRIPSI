@@ -54,8 +54,8 @@ export function GeneratorWizard() {
   const { assessments } = useAssessmentStore();
   const { submissions } = useSubmissionStore();
   const [step, setStep] = useState(0); const [selectedClassId, setKelasId] = useState(""); const [selectedAssessmentId, setAssessmentId] = useState("");
-  const [topik, setTopik] = useState("Operasi Bilangan Bulat"); const [jumlah, setJumlah] = useState(5);
-  const [gaya, setGaya] = useState("Gunakan konteks suhu, lift, dan transaksi sederhana."); const [pertimbangkanGaya, setPertimbangkanGaya] = useState(true);
+  const [topik, setTopik] = useState("Rasio dan Perbandingan"); const [jumlah, setJumlah] = useState(5);
+  const [gaya, setGaya] = useState("Gunakan konteks resep masakan, denah/skala peta, dan perbandingan harga satuan."); const [pertimbangkanGaya, setPertimbangkanGaya] = useState(true);
   const [isGuestMode, setIsGuestMode] = useState(false);
   const [documents, setDocuments] = useState<Record<Level, DocumentState | undefined>>(emptyDocuments);
   const documentsRef = useRef<Record<Level, DocumentState | undefined>>(emptyDocuments());
