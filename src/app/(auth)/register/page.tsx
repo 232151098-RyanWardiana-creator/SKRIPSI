@@ -25,18 +25,18 @@ export default function RegisterPage() {
       </div>
 
       {/* Main Glassmorphic Card with Animated Running Dark Light Beam */}
-      <div className="relative w-full max-w-md rounded-[34px] p-[2.5px] overflow-hidden shadow-2xl shadow-indigo-950/20 z-10 bg-slate-200/90">
+      <div className="relative w-full max-w-md rounded-[34px] p-[3px] overflow-hidden shadow-2xl shadow-indigo-950/20 z-10 bg-slate-200/90">
         {/* Animated Running Dark Light Beam (Cahaya Gelap Berjalan Mengelilingi Kartu) */}
         <div
           className="absolute inset-[-150%] animate-border-beam pointer-events-none"
           style={{
             background:
-              "conic-gradient(from 0deg at 50% 50%, transparent 0deg, transparent 220deg, rgba(30,27,75,0.4) 270deg, #000000 310deg, rgba(30,27,75,0.4) 340deg, transparent 360deg)",
+              "conic-gradient(from 0deg at 50% 50%, transparent 0deg, transparent 200deg, rgba(30,27,75,0.5) 260deg, #000000 310deg, rgba(30,27,75,0.5) 345deg, transparent 360deg)",
           }}
         />
 
         {/* Inner Solid Card */}
-        <section className="relative h-full w-full rounded-[31.5px] bg-white p-6 sm:p-9 z-10">
+        <section className="relative h-full w-full rounded-[31px] bg-white p-6 sm:p-9 z-10">
           <div className="mb-6 text-center pt-1">
             <div className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-blue-50 to-indigo-50 px-4 py-1.5 border border-blue-200/80 shadow-xs mb-3">
               <span className="h-2 w-2 rounded-full bg-[#2563EB] animate-ping" />

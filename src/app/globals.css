@@ -25,6 +25,19 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
   100% { background-position: 0% 50%; }
 }
 
+@keyframes borderBeamRotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-border-beam {
+  animation: borderBeamRotate 3.5s linear infinite !important;
+}
+
 @keyframes borderBeamTravel {
   100% {
     offset-distance: 100%;
