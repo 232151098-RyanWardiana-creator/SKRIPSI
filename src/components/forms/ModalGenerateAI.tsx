@@ -108,9 +108,12 @@ export function ModalGenerateAI({
               <label className="text-xs font-black uppercase tracking-wider text-slate-600">
                 Pilihan Model ({currentProvider.name})
               </label>
+              <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">
+                {currentProvider.models.length} Model
+              </span>
             </div>
 
-            <div className="grid gap-1.5 max-h-52 overflow-y-auto pr-0.5">
+            <div className="grid gap-1.5 max-h-56 overflow-y-auto pr-1.5 scroll-smooth [scrollbar-width:thin] [scrollbar-color:#cbd5e1_transparent]">
               {currentProvider.models.map((m) => {
                 const isSelected = selectedModelId === m.id;
                 return (
