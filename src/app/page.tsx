@@ -35,6 +35,7 @@ import {
 import ReactMarkdown from "react-markdown";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
+import { LiquidButton } from "@/components/ui/liquid-glass-button";
 
 type LevelTab = "dasar" | "menengah" | "mahir";
 type GayaTab = "visual" | "auditory" | "kinestetik";
@@ -213,10 +214,14 @@ export default function Home() {
               <Link
                 href="/login"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#2563EB] to-[#7C3AED] py-2.5 px-4 text-xs font-black text-white shadow-md shadow-blue-600/25 transition-all hover:opacity-95 active:scale-95 text-center"
+                className="w-full flex justify-center"
               >
-                <LogIn className="h-3.5 w-3.5" />
-                Masuk Portal
+                <LiquidButton
+                  className="w-full rounded-xl bg-white/40 border border-white/60 py-2.5 px-4 text-xs font-black text-[#1E1B4B] shadow-md transition-all hover:bg-white/70 active:scale-95 text-center flex items-center justify-center gap-2"
+                >
+                  <LogIn className="h-3.5 w-3.5 text-[#2563EB]" />
+                  Masuk Portal
+                </LiquidButton>
               </Link>
 
               <div className="my-2 h-[1px] bg-slate-200/80" />
@@ -309,11 +314,12 @@ export default function Home() {
 
             {/* Action Buttons: Compact Grid on Mobile, Flex Row on Tablet+ */}
             <div className="grid grid-cols-2 gap-2.5 sm:flex sm:flex-row sm:items-center sm:justify-center sm:gap-4 pt-1 w-full max-w-sm sm:max-w-none mx-auto">
-              <Link
-                href="/login"
-                className="flex items-center justify-center rounded-full bg-[#7C3AED] px-4 sm:px-8 py-2.5 sm:py-3.5 text-xs sm:text-sm font-black text-white shadow-md shadow-[#7C3AED]/25 transition-all hover:bg-[#6D28D9] hover:shadow-xl hover:-translate-y-0.5 active:scale-95 text-center whitespace-nowrap"
-              >
-                Masuk Portal
+              <Link href="/login" className="w-full sm:w-auto">
+                <LiquidButton
+                  className="w-full sm:w-auto rounded-full bg-gradient-to-r from-[#7C3AED]/90 via-[#6366F1]/90 to-[#2563EB]/90 border border-white/50 px-4 sm:px-8 py-2.5 sm:py-3.5 text-xs sm:text-sm font-black text-white shadow-xl shadow-purple-600/25 backdrop-blur-xl transition-all hover:scale-105 active:scale-95 text-center whitespace-nowrap"
+                >
+                  Masuk Portal
+                </LiquidButton>
               </Link>
               <Link
                 href="/generator"
@@ -653,9 +659,11 @@ export default function Home() {
             </div>
             <Link
               href="/login"
-              className="flex shrink-0 items-center justify-center rounded-full bg-white px-8 py-3.5 text-sm font-black text-[#2563EB] shadow-lg transition-all hover:bg-slate-50 hover:shadow-xl hover:scale-105 active:scale-95"
+              className="flex shrink-0 items-center justify-center"
             >
-              Masuk Portal
+              <LiquidButton className="rounded-full bg-white/20 border border-white/40 px-8 py-3.5 text-sm font-black text-white shadow-xl backdrop-blur-md transition-all hover:bg-white/30 hover:scale-105 active:scale-95">
+                Masuk Portal
+              </LiquidButton>
             </Link>
           </div>
         </div>
