@@ -110,7 +110,7 @@ export function AuthForm({ mode = "login" }: { mode?: "login" | "register" }) {
       {/* Pemilih Peran Interaktif */}
       <div className="grid grid-cols-2 gap-1.5 rounded-2xl bg-slate-100/90 p-1.5 border border-slate-200/80">
         <button
-          className={`flex items-center justify-center gap-2 rounded-xl py-2.5 text-xs sm:text-sm font-black transition-all ${
+          className={`flex items-center justify-center rounded-xl py-2.5 text-xs sm:text-sm font-black transition-all ${
             role === "guru"
               ? "bg-[#1E1B4B] text-white shadow-md shadow-indigo-950/20 scale-[1.01]"
               : "text-slate-600 hover:text-[#1E1B4B] hover:bg-white/60"
@@ -118,11 +118,10 @@ export function AuthForm({ mode = "login" }: { mode?: "login" | "register" }) {
           onClick={() => setRole("guru")}
           type="button"
         >
-          <GraduationCap className="h-4 w-4" />
           Portal Guru
         </button>
         <button
-          className={`flex items-center justify-center gap-2 rounded-xl py-2.5 text-xs sm:text-sm font-black transition-all ${
+          className={`flex items-center justify-center rounded-xl py-2.5 text-xs sm:text-sm font-black transition-all ${
             role === "siswa"
               ? "bg-[#2563EB] text-white shadow-md shadow-blue-600/25 scale-[1.01]"
               : "text-slate-600 hover:text-[#2563EB] hover:bg-white/60"
@@ -130,7 +129,6 @@ export function AuthForm({ mode = "login" }: { mode?: "login" | "register" }) {
           onClick={() => setRole("siswa")}
           type="button"
         >
-          <Users className="h-4 w-4" />
           Portal Siswa
         </button>
       </div>

@@ -24,6 +24,35 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
 }
+
+@keyframes borderBeamTravel {
+  100% {
+    offset-distance: 100%;
+  }
+}
+
+.card-border-beam {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 2.5px solid transparent;
+  -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  z-index: 20;
+}
+
+.card-border-beam::after {
+  content: "";
+  position: absolute;
+  width: 180px;
+  height: 180px;
+  background: radial-gradient(ellipse at center, #000000 0%, rgba(30, 27, 75, 0.85) 40%, transparent 70%);
+  offset-anchor: 50% 50%;
+  offset-path: rect(0 auto auto 0 round 32px);
+  animation: borderBeamTravel 5s linear infinite;
+}
 .animate-shimmer-blue {
   background: linear-gradient(90deg, #1d4ed8, #3b82f6, #06b6d4, #6366f1, #2563eb, #1d4ed8);
   background-size: 250% auto;
