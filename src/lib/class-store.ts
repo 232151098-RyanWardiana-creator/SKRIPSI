@@ -108,7 +108,11 @@ export async function saveClasses(classes: ClassStoreEntry[]): Promise<boolean> 
   }
 
   // Hapus baris yang sudah tidak ada di daftar.
-  if (keptClassIds.length) {
+  if (keptClassIds.length === 0) {
+    // Pengguna mengosongkan seluruh kelas
+    await supabase.from("students").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+    await supabase.from("classes").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+  } else {
     await supabase.from("classes").delete().not("id", "in", `(${keptClassIds.join(",")})`);
     await supabase
       .from("students")
@@ -117,6 +121,18 @@ export async function saveClasses(classes: ClassStoreEntry[]): Promise<boolean> 
       .not("id", "in", `(${keptStudentIds.length ? keptStudentIds.join(",") : ensureUUID("kosong")})`);
   }
 
+  await refreshClasses();
+  return true;
+}
+
+export async function deleteClass(classId: string): Promise<boolean> {
+  if (!isSupabaseConfigured) return false;
+  await supabase.from("students").delete().eq("kelas_id", classId);
+  const { error } = await supabase.from("classes").delete().eq("id", classId);
+  if (error) {
+    console.error("Gagal menghapus kelas:", error);
+    return false;
+  }
   await refreshClasses();
   return true;
 }

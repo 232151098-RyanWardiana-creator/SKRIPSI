@@ -2,13 +2,13 @@
 
 import { useState } from "react";
 import { type SiswaMock, type KelasMock } from "@/types";
-import { useClassStore, resetStudentPin } from "@/lib/class-store";
+import { useClassStore, resetStudentPin, deleteClass } from "@/lib/class-store";
 import { Button } from "@/components/ui/Button";
 import { ProgresAlur } from "@/components/ui/ProgresAlur";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { DemoDataPanel } from "@/components/forms/DemoDataPanel";
 import { initials, generateUUID } from "@/lib/utils";
-import { Edit2, KeyRound, Plus, Printer, Trash2, UserPlus, X, Check, Copy } from "lucide-react";
+import { Edit2, KeyRound, Plus, Printer, Trash2, UserPlus, X, Check, Copy, Users } from "lucide-react";
 
 export default function KelasPage() {
   const { classes: dataStore, updateClasses: setDataStore } = useClassStore();
@@ -39,9 +39,49 @@ export default function KelasPage() {
 
   const dataControls = <DemoDataPanel />;
 
+  const tambahKelasBaru = () => {
+    const nextChar = String.fromCharCode(65 + dataStore.length);
+    const newId = generateUUID();
+    const newKelas: KelasMock = {
+      id: newId,
+      nama: `VII-${nextChar}`,
+      wali_kelas: "Guru Pengampu, S.Pd.",
+      tahun_ajaran: "2026/2027",
+      kode_undangan: `VII${nextChar}-K${Math.floor(100 + Math.random() * 900)}`,
+      guru_id: "",
+      jumlah_siswa: 0,
+    };
+    setDataStore((prev) => [...prev, { kelas: newKelas, siswa: [] }]);
+    setActiveId(newId);
+  };
+
   if (!activeKelas) {
-    const initialId = generateUUID();
-    return <div><ProgresAlur current={0} />{dataControls}<div className="card text-center"><h1 className="text-2xl font-semibold">Belum ada kelas</h1><p className="mt-2 text-[#6b7280]">Data masih kosong. Buat kelas baru untuk memulai.</p><Button className="mt-4" onClick={() => setDataStore([{ kelas: { id: initialId, nama: "VII-A", wali_kelas: "Guru Pengampu, S.Pd.", tahun_ajaran: "2026/2027", kode_undangan: `VIIA-K${Math.floor(100 + Math.random() * 900)}`, guru_id: "", jumlah_siswa: 0 }, siswa: [] }])}><Plus className="h-4 w-4" />Tambah Kelas Baru</Button></div></div>;
+    return (
+      <div>
+        <ProgresAlur current={0} />
+        <div className="mb-6">{dataControls}</div>
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+          <h1 className="text-2xl sm:text-3xl font-black text-[#1E1B4B]">Manajemen Kelas</h1>
+          <Button onClick={tambahKelasBaru}>
+            <Plus className="h-4 w-4" />Tambah Kelas Baru
+          </Button>
+        </div>
+        <div className="card text-center py-14">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-500 mb-3 border border-slate-200">
+            <Users className="h-7 w-7 text-slate-600" />
+          </div>
+          <h2 className="text-xl font-bold text-slate-800">Daftar Kelas Kosong</h2>
+          <p className="mt-1.5 text-sm text-slate-500 max-w-sm mx-auto font-medium">
+            Belum ada kelas yang terdaftar. Anda dapat membuat kelas baru secara manual atau memuat data simulasi untuk presentasi.
+          </p>
+          <div className="mt-6 flex justify-center gap-3">
+            <Button onClick={tambahKelasBaru}>
+              <Plus className="h-4 w-4" />Tambah Kelas Baru
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   const bukaEditKelas = () => {
@@ -125,9 +165,10 @@ export default function KelasPage() {
     setPendingStudent(null);
   };
 
-  const konfirmasiHapusKelas = () => {
+  const konfirmasiHapusKelas = async () => {
     if (!pendingDeleteClass) return;
     const targetId = pendingDeleteClass.id;
+    setPendingDeleteClass(null);
     setDataStore((prev) => prev.filter((item) => item.kelas.id !== targetId));
     const remaining = dataStore.filter((item) => item.kelas.id !== targetId);
     if (remaining.length > 0) {
@@ -135,23 +176,7 @@ export default function KelasPage() {
     } else {
       setActiveId("");
     }
-    setPendingDeleteClass(null);
-  };
-
-  const tambahKelasBaru = () => {
-    const nextChar = String.fromCharCode(65 + dataStore.length);
-    const newId = generateUUID();
-    const newKelas: KelasMock = {
-      id: newId,
-      nama: `VII-${nextChar}`,
-      wali_kelas: "Guru Pengampu, S.Pd.",
-      tahun_ajaran: "2026/2027",
-      kode_undangan: `VII${nextChar}-K${Math.floor(100 + Math.random() * 900)}`,
-      guru_id: "",
-      jumlah_siswa: 0,
-    };
-    setDataStore(prev => [...prev, { kelas: newKelas, siswa: [] }]);
-    setActiveId(newId);
+    await deleteClass(targetId);
   };
 
   const copyKode = () => {
