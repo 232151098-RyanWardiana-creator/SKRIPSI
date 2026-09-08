@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { X, Loader2, Check } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { AI_PROVIDERS, type AIProviderOption } from "@/constants/ai-providers";
@@ -20,6 +20,8 @@ interface ModalGenerateAIProps {
   tingkat?: string;
   targetInfo?: string;
   actionText?: string;
+  currentProviderId?: string;
+  currentModelId?: string;
 }
 
 export function ModalGenerateAI({
@@ -33,14 +35,31 @@ export function ModalGenerateAI({
   tingkat,
   targetInfo,
   actionText = "Mulai Generate",
+  currentProviderId,
+  currentModelId,
 }: ModalGenerateAIProps) {
-  const [selectedProviderId, setSelectedProviderId] = useState("xkiro");
+  const [selectedProviderId, setSelectedProviderId] = useState(
+    currentProviderId || "9router"
+  );
   const currentProvider =
     AI_PROVIDERS.find((p) => p.id === selectedProviderId) || AI_PROVIDERS[0];
 
   const [selectedModelId, setSelectedModelId] = useState<string>(
-    currentProvider.models[0]?.id || "deepseek/deepseek-v4-flash"
+    currentModelId || currentProvider.models[0]?.id || "INTELLIGENCE-SKRIPSI"
   );
+
+  useEffect(() => {
+    if (isOpen) {
+      const pId = currentProviderId || "9router";
+      const prov = AI_PROVIDERS.find((p) => p.id === pId) || AI_PROVIDERS[0];
+      setSelectedProviderId(pId);
+      const mId =
+        currentModelId && prov.models.some((m) => m.id === currentModelId)
+          ? currentModelId
+          : prov.models[0]?.id || "";
+      setSelectedModelId(mId);
+    }
+  }, [isOpen, currentProviderId, currentModelId]);
 
   if (!isOpen) return null;
 

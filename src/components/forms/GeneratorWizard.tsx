@@ -108,9 +108,9 @@ export function GeneratorWizard() {
   const [gaya, setGaya] = useState("Gunakan konteks resep masakan, denah/skala peta, dan perbandingan harga satuan.");
   const [pertimbangkanGaya, setPertimbangkanGaya] = useState(true);
 
-  // AI Provider & Model selection (active in Step 2 / modal)
+  // AI Provider & Model selection (default to Xkiro DeepSeek V3.2 for fast online response)
   const [aiProvider, setAiProvider] = useState("xkiro");
-  const [aiModel, setAiModel] = useState("deepseek/deepseek-v4-flash");
+  const [aiModel, setAiModel] = useState("deepseek/deepseek-v3.2");
   const [modalAIOpen, setModalAIOpen] = useState(false);
 
   const [documents, setDocuments] = useState<Record<Level, DocumentState | undefined>>(emptyDocuments);
@@ -672,9 +672,14 @@ export function GeneratorWizard() {
                         </p>
                       )}
                     </div>
-                    <Button variant="ghost" disabled={loadingLevels.includes(active)} onClick={() => generate(active)}>
-                      <RefreshCw className="h-4 w-4" />Regenerasi Level Ini
-                    </Button>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Button variant="ghost" disabled={loadingLevels.length > 0} onClick={() => setModalAIOpen(true)}>
+                        Ganti Model AI
+                      </Button>
+                      <Button variant="ghost" disabled={loadingLevels.includes(active)} onClick={() => generate(active)}>
+                        <RefreshCw className="h-4 w-4" />Regenerasi Level Ini
+                      </Button>
+                    </div>
                   </div>
 
                   {/* KONDISI TAMPILAN BERDASARKAN TAB AKTIF: DOKUMEN SISWA ATAU KUNCI JAWABAN */}
@@ -836,18 +841,22 @@ export function GeneratorWizard() {
       <ModalGenerateAI
         isOpen={modalAIOpen}
         onClose={() => setModalAIOpen(false)}
+        currentProviderId={aiProvider}
+        currentModelId={aiModel}
         onGenerate={async (config) => {
           setAiProvider(config.provider);
           setAiModel(config.model);
           setModalAIOpen(false);
           if (step === 2) {
             await generate(undefined, config);
+          } else if (step === 3) {
+            await generate(active, config);
           }
         }}
         loading={loadingLevels.length > 0}
         materi={topik}
-        targetInfo="3 Level (Dasar, Menengah, Mahir)"
-        actionText={step === 2 ? "Generate 3 Level" : "Terapkan Model"}
+        targetInfo={step === 3 ? `Regenerasi Level ${labels[active]}` : "3 Level (Dasar, Menengah, Mahir)"}
+        actionText={step === 2 ? "Generate 3 Level" : "Regenerasi Level Ini"}
       />
 
       {validationLevel && (

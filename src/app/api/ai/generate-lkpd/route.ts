@@ -1,7 +1,8 @@
-import { generateLKPD, getAIStatus, type GenerateLKPDParams } from "@/lib/ai";
+import { generateLKPD, type GenerateLKPDParams } from "@/lib/ai";
 import type { GayaBelajar, Level } from "@/types";
 
 export const runtime = "nodejs";
+export const maxDuration = 60;
 
 const levels: Level[] = ["dasar", "menengah", "mahir"];
 const gayaBelajar = new Set<Exclude<GayaBelajar, null>>(["visual", "auditory", "kinestetik"]);
@@ -50,20 +51,12 @@ export async function POST(request: Request) {
     customBaseUrl: typeof body.customBaseUrl === "string" ? body.customBaseUrl : undefined,
   };
   const requestedLevels = body.level ? [body.level] : levels;
-  const aiConnected = (await getAIStatus()).connected;
   const results = [];
 
-  // Deliberately sequential: the local proxy is less reliable under three simultaneous completions.
+  // Sequential execution ensures clean state tracking per level
   for (const level of requestedLevels) {
-    let settled = await Promise.allSettled([generateLKPD({ ...clean, level })]);
-    let outcome = settled[0];
-    if (aiConnected && (outcome.status === "rejected" || outcome.value.source === "mock")) {
-      settled = await Promise.allSettled([generateLKPD({ ...clean, level })]);
-      outcome = settled[0];
-    }
-
-    if (outcome.status === "fulfilled" && outcome.value.content.trim()) {
-      const value = outcome.value;
+    try {
+      const value = await generateLKPD({ ...clean, level });
       results.push({
         level,
         status: value.source === "online" ? "success" : "fallback",
@@ -73,7 +66,7 @@ export async function POST(request: Request) {
         isFallback: value.isFallback,
         error: value.error ?? null,
       });
-    } else {
+    } catch (error) {
       results.push({
         level,
         status: "error",
@@ -81,9 +74,7 @@ export async function POST(request: Request) {
         source: "mock",
         model: "tidak tersedia",
         isFallback: false,
-        error: outcome.status === "rejected" && outcome.reason instanceof Error
-          ? outcome.reason.message
-          : "Generator menghasilkan konten kosong.",
+        error: error instanceof Error ? error.message : "Generator menghasilkan konten kosong.",
       });
     }
   }

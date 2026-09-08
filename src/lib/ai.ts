@@ -3,7 +3,7 @@ import "server-only";
 import type { GayaBelajar, Level } from "@/types";
 
 const DEFAULT_BASE_URL = "http://127.0.0.1:20128/v1";
-const DEFAULT_MODEL = "cx/gpt-5.6-sol";
+const DEFAULT_MODEL = "INTELLIGENCE-SKRIPSI";
 const DEFAULT_TIMEOUT_MS = 180_000;
 const STATUS_TIMEOUT_MS = 10_000;
 
@@ -98,7 +98,13 @@ function developmentLog(message: string) {
 
 function safeError(error: unknown): string {
   if (error instanceof DOMException && error.name === "AbortError") return "Request timed out";
-  return error instanceof Error ? error.name : "UnknownError";
+  if (error instanceof Error) {
+    if (error.message.includes("fetch failed") || error.message.includes("ECONNREFUSED")) {
+      return "Koneksi gateway gagal";
+    }
+    return error.message || error.name;
+  }
+  return "AIError";
 }
 
 function sanitizePreview(value: unknown): string {
