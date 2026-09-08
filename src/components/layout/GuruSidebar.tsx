@@ -14,4 +14,4 @@ const items: NavItem[] = [
   { label: "Panduan", href: "/onboarding", icon: BookOpen },
   { label: "Pengaturan", href: "/pengaturan", icon: Settings },
 ];
-export function GuruSidebar() { return <Sidebar items={items} />; }
+export function GuruSidebar() { return <Sidebar items={items} role="Guru" />; }

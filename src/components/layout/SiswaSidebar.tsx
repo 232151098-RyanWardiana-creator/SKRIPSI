@@ -9,4 +9,4 @@ const items: NavItem[] = [
   { label: "LKPD Saya", href: "/lkpd-saya", icon: BookOpenCheck },
   { label: "Hasil & Progres", href: "/hasil-progres", icon: TrendingUp },
 ];
-export function SiswaSidebar() { return <Sidebar items={items} />; }
+export function SiswaSidebar() { return <Sidebar items={items} role="Siswa" />; }
