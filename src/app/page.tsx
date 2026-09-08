@@ -142,9 +142,9 @@ export default function Home() {
         <div className="h-2 w-2 rounded-full bg-emerald-500" />
       </div>
 
-      {/* 1. Floating Pill Navbar (Responsive Mobile & Desktop) */}
+      {/* 1. Floating Pill Navbar (Desktop & Mobile) */}
       <header className="fixed inset-x-0 top-3 sm:top-4 z-40 flex justify-center px-3 sm:px-6 transition-all">
-        <nav className="flex w-full max-w-5xl items-center justify-between md:w-auto md:justify-center gap-1.5 sm:gap-2 rounded-full border-2 border-[#1E1B4B]/10 bg-white/95 px-3 sm:px-4 py-2 shadow-xl shadow-indigo-950/5 backdrop-blur-md">
+        <nav className="flex w-full max-w-5xl items-center justify-between md:w-auto md:justify-center gap-1.5 sm:gap-2 rounded-full border-2 border-[#1E1B4B]/10 bg-white/95 px-3.5 sm:px-4 py-2 shadow-xl shadow-indigo-950/5 backdrop-blur-md">
           <Link href="/" className="px-2 text-base sm:text-lg font-black tracking-tight text-[#1E1B4B] hover:scale-105 transition-transform">
             LKPD<span className="text-[#EC4899]">.</span>
           </Link>
@@ -187,8 +187,39 @@ export default function Home() {
         </nav>
       </header>
 
+      {/* 📱 Floating Mobile Navigation Bar (Melayang Khusus Layar HP) */}
+      <nav
+        aria-label="Navigasi Melayang Mobile"
+        className="fixed bottom-4 inset-x-0 z-40 flex justify-center px-3 md:hidden pointer-events-none"
+      >
+        <div className="pointer-events-auto flex w-full max-w-sm items-center justify-between gap-1 rounded-full border-2 border-[#1E1B4B]/15 bg-white/95 p-1.5 shadow-2xl shadow-indigo-950/20 backdrop-blur-xl">
+          {[
+            { id: "home", label: "Beranda", shortLabel: "Beranda" },
+            { id: "keunggulan", label: "Keunggulan", shortLabel: "Keunggulan" },
+            { id: "simulasi", label: "Simulasi TaRL", shortLabel: "Simulasi" },
+            { id: "alur", label: "Alur Guru", shortLabel: "Alur" },
+          ].map((item) => {
+            const isActive = activeSection === item.id;
+            return (
+              <a
+                key={item.id}
+                href={`#${item.id}`}
+                className={`flex-1 text-center rounded-full py-2 px-1.5 text-[11px] font-black transition-all ${
+                  isActive
+                    ? "bg-[#2563EB] text-white shadow-md shadow-blue-600/30 scale-[1.02]"
+                    : "text-[#1E1B4B]/70 hover:bg-[#1E1B4B]/5 hover:text-[#1E1B4B]"
+                }`}
+              >
+                <span className="hidden sm:inline">{item.label}</span>
+                <span className="sm:hidden">{item.shortLabel}</span>
+              </a>
+            );
+          })}
+        </div>
+      </nav>
+
       {/* 2. Hero Section: Responsive Mobile & Desktop */}
-      <section id="home" className="relative px-4 sm:px-6 pt-24 sm:pt-32 pb-12 sm:pb-16 md:px-12 lg:pt-36 lg:pb-20 text-center">
+      <section id="home" className="relative px-4 sm:px-6 pt-24 sm:pt-32 pb-20 sm:pb-16 md:px-12 lg:pt-36 lg:pb-20 text-center">
         {/* Soft Backdrop Orbs */}
         <div className="pointer-events-none absolute top-10 left-1/2 -z-10 h-[300px] sm:h-[400px] w-[90vw] max-w-[650px] -translate-x-1/2 rounded-full bg-gradient-to-r from-blue-200/40 via-indigo-200/30 to-purple-200/40 blur-[70px] sm:blur-[90px]" />
 
@@ -568,7 +599,7 @@ export default function Home() {
       </section>
 
       {/* 7. Footer */}
-      <footer className="border-t-2 border-[#1E1B4B]/5 bg-white px-6 py-8 text-center text-xs font-medium text-[#1E1B4B]/60">
+      <footer className="border-t-2 border-[#1E1B4B]/5 bg-white px-6 pt-8 pb-24 md:pb-8 text-center text-xs font-medium text-[#1E1B4B]/60">
         <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-3 sm:flex-row">
           <p>
             <strong>LKPD-AI</strong> • Generator LKPD Berdiferensiasi Berbantuan AI Terintegrasi Asesmen Diagnostik
