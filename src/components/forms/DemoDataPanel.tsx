@@ -51,44 +51,38 @@ export function DemoDataPanel() {
   }
 
   return (
-    <Card className="p-5">
-      <div className="flex items-start gap-3">
-        <span className="rounded-xl bg-indigo-50 p-2 text-indigo-600">
-          <Database className="h-5 w-5" aria-hidden />
-        </span>
-        <div className="flex-1">
-          <h2 className="font-semibold text-slate-900">Data Simulasi untuk Presentasi</h2>
-          <p className="mt-1 text-sm text-slate-600">
-            Sekali klik, aplikasi terisi contoh utuh satu siklus: kelas <b>{DEMO_KELAS.nama}</b> berisi 8 siswa, hasil
-            asesmen diagnostik mereka, pembagian level, sampai LKPD yang sudah diisi dan dinilai. Cocok dipakai saat
-            menjelaskan aplikasi kepada orang lain.
-          </p>
-          <p className="mt-2 rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600">
-            Untuk mencoba sisi siswa: kode kelas <b>{DEMO_KODE_KELAS}</b>, PIN <b>{DEMO_PIN}</b> (semua siswa simulasi).
-          </p>
-
-          <div className="mt-4 flex flex-wrap gap-2">
-            <Button disabled={sibuk !== null} onClick={() => void jalankan("POST")}>
-              {sibuk === "muat" ? <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden /> : null}
-              Muat Data Simulasi
-            </Button>
-            <Button disabled={sibuk !== null} onClick={() => void jalankan("DELETE")} variant="secondary">
-              {sibuk === "hapus" ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden />
-              ) : (
-                <Trash2 className="mr-2 h-4 w-4" aria-hidden />
-              )}
-              Hapus Data Simulasi
-            </Button>
+    <Card className="p-4 sm:p-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <span className="rounded-xl bg-indigo-50 p-2.5 text-[#2563EB] shrink-0 border border-blue-100">
+            <Database className="h-5 w-5" aria-hidden />
+          </span>
+          <div>
+            <h2 className="font-bold text-slate-900 text-sm sm:text-base">Data Simulasi untuk Presentasi</h2>
           </div>
+        </div>
 
-          {kabar ? (
-            <p aria-live="polite" className="mt-3 text-sm font-medium text-slate-700">
-              {kabar}
-            </p>
-          ) : null}
+        <div className="flex flex-wrap items-center gap-2 pt-1 sm:pt-0">
+          <Button disabled={sibuk !== null} onClick={() => void jalankan("POST")}>
+            {sibuk === "muat" ? <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden /> : null}
+            Muat Data Simulasi
+          </Button>
+          <Button disabled={sibuk !== null} onClick={() => void jalankan("DELETE")} variant="secondary">
+            {sibuk === "hapus" ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden />
+            ) : (
+              <Trash2 className="mr-2 h-4 w-4 text-rose-500" aria-hidden />
+            )}
+            Hapus Data Simulasi
+          </Button>
         </div>
       </div>
+
+      {kabar ? (
+        <p aria-live="polite" className="mt-3 text-xs font-semibold text-blue-800 bg-blue-50/80 border border-blue-100 rounded-xl px-3.5 py-2.5">
+          {kabar}
+        </p>
+      ) : null}
     </Card>
   );
 }

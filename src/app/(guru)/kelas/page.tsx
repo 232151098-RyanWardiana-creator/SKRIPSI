@@ -19,6 +19,7 @@ export default function KelasPage() {
   const [copied, setCopied] = useState(false);
   const [pendingStudent, setPendingStudent] = useState<{ id: string; nama: string; kelasId: string; kelasNama: string } | null>(null);
   const [pendingReset, setPendingReset] = useState<{ id: string; nama: string } | null>(null);
+  const [pendingDeleteClass, setPendingDeleteClass] = useState<KelasMock | null>(null);
 
 
   // Edit form state
@@ -124,6 +125,19 @@ export default function KelasPage() {
     setPendingStudent(null);
   };
 
+  const konfirmasiHapusKelas = () => {
+    if (!pendingDeleteClass) return;
+    const targetId = pendingDeleteClass.id;
+    setDataStore((prev) => prev.filter((item) => item.kelas.id !== targetId));
+    const remaining = dataStore.filter((item) => item.kelas.id !== targetId);
+    if (remaining.length > 0) {
+      setActiveId(remaining[0].kelas.id);
+    } else {
+      setActiveId("");
+    }
+    setPendingDeleteClass(null);
+  };
+
   const tambahKelasBaru = () => {
     const nextChar = String.fromCharCode(65 + dataStore.length);
     const newId = generateUUID();
@@ -150,11 +164,9 @@ export default function KelasPage() {
     <div>
       <ProgresAlur current={0} />
       <div className="mb-6">{dataControls}</div>
-      <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-widest text-[#0066cc]">Administrasi Rombel</p>
-          <h1 className="mt-2 text-4xl font-semibold">Manajemen Kelas</h1>
-          <p className="mt-2 text-[#414753]">Kelola data rombongan belajar, nomor absen, dan kartu kode masuk siswa.</p>
+          <h1 className="text-2xl sm:text-3xl font-black text-[#1E1B4B]">Manajemen Kelas</h1>
         </div>
         <Button onClick={tambahKelasBaru}>
           <Plus className="h-4 w-4" />Tambah Kelas Baru
@@ -171,24 +183,44 @@ export default function KelasPage() {
             {dataStore.map(({ kelas, siswa }) => {
               const isSelected = activeKelas.id === kelas.id;
               return (
-                <button
-                  className={`w-full rounded-[22px] border p-5 text-left transition-all ${
+                <div
+                  key={kelas.id}
+                  className={`group relative w-full rounded-[22px] border p-5 text-left transition-all ${
                     isSelected ? "border-[#0066cc] bg-[#0066cc] text-white shadow-md" : "border-[#e0e0e0] bg-white hover:border-[#0066cc]/40"
                   }`}
-                  key={kelas.id}
-                  onClick={() => setActiveId(kelas.id)}
                 >
-                  <strong className="text-xl">{kelas.nama}</strong>
-                  <p className={`mt-1 text-sm ${isSelected ? "text-blue-100" : "text-[#414753]"}`}>
-                    Wali: {kelas.wali_kelas || "Belum ditentukan"}
-                  </p>
-                  <p className={`mt-4 text-sm ${isSelected ? "text-blue-100" : "text-[#6b7280]"}`}>
-                    {siswa.length} siswa terdaftar • {kelas.tahun_ajaran}
-                  </p>
-                  <p className={`mt-1 font-mono text-sm font-semibold ${isSelected ? "text-white" : "text-[#0066cc]"}`}>
-                    Kode: {kelas.kode_undangan}
-                  </p>
-                </button>
+                  <button
+                    className="w-full text-left cursor-pointer"
+                    onClick={() => setActiveId(kelas.id)}
+                    type="button"
+                  >
+                    <strong className="text-xl">{kelas.nama}</strong>
+                    <p className={`mt-1 text-sm ${isSelected ? "text-blue-100" : "text-[#414753]"}`}>
+                      Wali: {kelas.wali_kelas || "Belum ditentukan"}
+                    </p>
+                    <p className={`mt-4 text-sm ${isSelected ? "text-blue-100" : "text-[#6b7280]"}`}>
+                      {siswa.length} siswa terdaftar • {kelas.tahun_ajaran}
+                    </p>
+                    <p className={`mt-1 font-mono text-sm font-semibold ${isSelected ? "text-white" : "text-[#0066cc]"}`}>
+                      Kode: {kelas.kode_undangan}
+                    </p>
+                  </button>
+                  <button
+                    title={`Hapus Kelas ${kelas.nama}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setPendingDeleteClass(kelas);
+                    }}
+                    className={`absolute top-4 right-4 grid h-8 w-8 place-items-center rounded-xl transition-all ${
+                      isSelected
+                        ? "text-blue-200 hover:bg-white/20 hover:text-white"
+                        : "text-slate-400 hover:bg-rose-50 hover:text-rose-600"
+                    }`}
+                    type="button"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
               );
             })}
           </div>
@@ -197,10 +229,17 @@ export default function KelasPage() {
         <section className="card">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b pb-4">
             <div>
-              <div className="flex items-center gap-3">
-                <h2 className="text-2xl font-semibold">Kelas {activeKelas.nama}</h2>
+              <div className="flex flex-wrap items-center gap-2.5">
+                <h2 className="text-2xl font-black text-[#1E1B4B]">Kelas {activeKelas.nama}</h2>
                 <Button variant="ghost" onClick={bukaEditKelas} className="h-8 px-2.5 text-xs text-[#0066cc]">
-                  <Edit2 className="h-3.5 w-3.5" />Edit Kelas
+                  <Edit2 className="h-3.5 w-3.5 mr-1" />Edit Kelas
+                </Button>
+                <Button
+                  variant="ghost"
+                  onClick={() => setPendingDeleteClass(activeKelas)}
+                  className="h-8 px-2.5 text-xs text-rose-600 hover:bg-rose-50 hover:text-rose-700"
+                >
+                  <Trash2 className="h-3.5 w-3.5 mr-1 text-rose-500" />Hapus Kelas
                 </Button>
               </div>
               <p className="mt-1 text-sm text-[#7a7a7a]">
@@ -415,6 +454,19 @@ export default function KelasPage() {
 
       {/* Modal Cetak Kode Undangan Kelas */}
       <ConfirmModal isOpen={pendingStudent !== null} title="Hapus siswa?" description={pendingStudent ? `Hapus ${pendingStudent.nama} dari daftar kelas ${pendingStudent.kelasNama}?` : ""} confirmText="Hapus Siswa" variant="danger" onConfirm={hapusSiswa} onCancel={() => setPendingStudent(null)} />
+      <ConfirmModal
+        isOpen={pendingDeleteClass !== null}
+        title={`Hapus Kelas ${pendingDeleteClass?.nama || ""}?`}
+        description={
+          pendingDeleteClass
+            ? `Apakah Anda yakin ingin menghapus kelas "${pendingDeleteClass.nama}"? Seluruh data rombel, nomor absen, dan daftar siswa di dalamnya akan dihapus.`
+            : ""
+        }
+        confirmText="Hapus Kelas"
+        variant="danger"
+        onConfirm={konfirmasiHapusKelas}
+        onCancel={() => setPendingDeleteClass(null)}
+      />
       <ConfirmModal
         isOpen={pendingReset !== null}
         title="Reset PIN siswa?"
