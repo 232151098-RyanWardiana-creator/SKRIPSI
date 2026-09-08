@@ -6,6 +6,7 @@ import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { INDIKATOR_KOMPETENSI } from "@/constants/indikator";
 import type { Indikator } from "@/types";
 import { Brain, Check, Loader2, Plus, RefreshCw, Sparkles, Tag, Trash2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 type Difficulty = "mudah" | "sedang" | "sulit";
 export type SoalDraft = { id: number; pertanyaan: string; indikator: Indikator; pilihan: string[]; benar: number; pembahasan: string; diagram?: string; tingkat: Difficulty };
@@ -13,11 +14,51 @@ export interface AsesmenDraft { judul: string; materi: string; durasi: number; s
 type AIQuestion = { pertanyaan:string; indikator_id:Indikator; pilihan:{A:string;B:string;C:string;D:string}; jawaban_benar:"A"|"B"|"C"|"D"; pembahasan:string; diagram?:string; tingkat_kesulitan:Difficulty };
 
 export const DEFAULT_SOAL: SoalDraft[] = [
-  { id: 1, pertanyaan: "Bilangan yang terletak 4 langkah di sebelah kiri nol pada garis bilangan adalah ...", indikator: "IK-01", pilihan: ["−4", "−3", "3", "4"], benar: 0, pembahasan: "Empat langkah ke kiri dari nol menunjukkan bilangan −4.", tingkat: "mudah" },
-  { id: 2, pertanyaan: "Urutan bilangan −5, 2, −1, dan 4 dari yang terkecil adalah ...", indikator: "IK-02", pilihan: ["−5, −1, 2, 4", "−1, −5, 2, 4", "4, 2, −1, −5", "−5, 2, −1, 4"], benar: 0, pembahasan: "Pada garis bilangan, −5 berada paling kiri, kemudian −1, 2, dan 4.", tingkat: "mudah" },
-  { id: 3, pertanyaan: "Hasil dari −8 + 13 adalah ...", indikator: "IK-03", pilihan: ["−21", "−5", "5", "21"], benar: 2, pembahasan: "Bergerak 13 langkah ke kanan dari −8 menghasilkan 5.", tingkat: "sedang" },
-  { id: 4, pertanyaan: "Hasil dari (−6) × 4 adalah ...", indikator: "IK-04", pilihan: ["−24", "−10", "10", "24"], benar: 0, pembahasan: "Bilangan negatif dikalikan bilangan positif menghasilkan bilangan negatif: 6 × 4 = 24, jadi hasilnya −24.", tingkat: "sedang" },
-  { id: 5, pertanyaan: "Suhu awal sebuah kota −3°C. Suhu naik 7°C lalu turun 5°C. Suhu akhirnya adalah ...", indikator: "IK-05", pilihan: ["−15°C", "−1°C", "1°C", "9°C"], benar: 1, pembahasan: "Suhu akhir = −3 + 7 − 5 = −1°C.", tingkat: "sulit" },
+  {
+    id: 1,
+    pertanyaan: "Di kelas VII-A terdapat 15 siswa laki-laki dan 20 siswa perempuan. Rasio banyak siswa laki-laki terhadap perempuan adalah ...",
+    indikator: "IK-01",
+    pilihan: ["4 : 3", "3 : 4", "3 : 7", "15 : 35"],
+    benar: 1,
+    pembahasan: "Bandingkan 15 : 20. Bagi kedua bilangan dengan FPB (5) sehingga diperoleh 3 : 4.",
+    tingkat: "mudah",
+  },
+  {
+    id: 2,
+    pertanyaan: "Bentuk paling sederhana dari rasio 24 : 36 adalah ...",
+    indikator: "IK-02",
+    pilihan: ["2 : 3", "3 : 4", "4 : 6", "6 : 9"],
+    benar: 0,
+    pembahasan: "FPB dari 24 dan 36 adalah 12. Bagi 24:12 = 2 dan 36:12 = 3, diperoleh 2 : 3.",
+    tingkat: "mudah",
+  },
+  {
+    id: 3,
+    pertanyaan: "Harga 4 kg apel adalah Rp60.000. Rasio satuan harga per kilogram apel tersebut adalah ...",
+    indikator: "IK-03",
+    pilihan: ["Rp12.000/kg", "Rp14.000/kg", "Rp15.000/kg", "Rp20.000/kg"],
+    benar: 2,
+    pembahasan: "Rasio satuan = Rp60.000 : 4 kg = Rp15.000 per kg.",
+    tingkat: "sedang",
+  },
+  {
+    id: 4,
+    pertanyaan: "Sebuah motor membutuhkan 3 liter bensin untuk 75 km. Dengan perbandingan senilai, jarak tempuh dengan 6 liter bensin adalah ...",
+    indikator: "IK-04",
+    pilihan: ["120 km", "150 km", "175 km", "200 km"],
+    benar: 1,
+    pembahasan: "Laju = 75 / 3 = 25 km/liter. Jarak untuk 6 liter = 6 × 25 = 150 km.",
+    tingkat: "sedang",
+  },
+  {
+    id: 5,
+    pertanyaan: "Pada peta berskala 1 : 250.000, jarak dua kecamatan adalah 6 cm. Jarak sebenarnya adalah ...",
+    indikator: "IK-05",
+    pilihan: ["15 km", "25 km", "150 km", "250 km"],
+    benar: 0,
+    pembahasan: "Jarak sebenarnya = 6 cm × 250.000 = 1.500.000 cm = 15 km.",
+    tingkat: "sulit",
+  },
 ];
 
 const STORAGE_KEY = "lkpd_draft_asesmen_builder";
@@ -90,12 +131,12 @@ export function SoalBuilder({ onDraftChange }: SoalBuilderProps) {
 
   function resetDraft() {
     localStorage.removeItem(STORAGE_KEY);
-    setJudul("Diagnostik Bilangan Bulat");
+    setJudul("Diagnostik Rasio dan Perbandingan");
     setDurasi(30);
     setSoal([]);
     setKuesionerAktif(true);
-    setMateri("Operasi Bilangan Bulat");
-    setIndikator("IK-03");
+    setMateri("Rasio (Perbandingan)");
+    setIndikator("IK-01");
     setAiMessage("");
     setResetOpen(false);
   }
@@ -200,123 +241,148 @@ export function SoalBuilder({ onDraftChange }: SoalBuilderProps) {
         <div className="mb-5">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h2 className="text-xl font-semibold">Daftar Butir Soal</h2>
-              <p className="text-sm text-[#7a7a7a]">Pilihan ganda diagnostik kemampuan awal matematika SMP VII</p>
+              <h2 className="text-xl font-bold text-[#1E1B4B]">Daftar Butir Soal</h2>
+              <p className="text-xs font-medium text-slate-500">Pilihan ganda diagnostik materi Rasio SMP Kelas VII</p>
             </div>
             <div className="flex flex-wrap gap-2">
-              <Button onClick={manual}><Plus className="h-4 w-4" />Tambah Manual</Button>
+              <Button onClick={manual}><Plus className="h-4 w-4" />Soal Manual</Button>
               <Button variant="secondary" disabled={loading || !materi.trim()} onClick={generate}>
-                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}Buat Soal dengan AI
+                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}Generate AI
               </Button>
             </div>
           </div>
 
-          <div className="mt-4 grid gap-3 rounded-xl bg-blue-50/80 p-4 sm:grid-cols-2 lg:grid-cols-4">
-            <label className="text-sm font-semibold">
+          <div className="mt-4 grid gap-3 rounded-2xl bg-blue-50/70 border border-blue-100 p-4 sm:grid-cols-2 lg:grid-cols-4">
+            <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
               Materi
-              <input className="input mt-1" value={materi} onChange={e => setMateri(e.target.value)} />
+              <input className="input mt-1 bg-white" value={materi} onChange={e => setMateri(e.target.value)} />
             </label>
-            <label className="text-sm font-semibold">
+            <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
               Indikator Fokus
-              <select className="input mt-1" value={indikator} onChange={e => setIndikator(e.target.value as Indikator)}>
+              <select className="input mt-1 bg-white" value={indikator} onChange={e => setIndikator(e.target.value as Indikator)}>
                 {Object.keys(INDIKATOR_KOMPETENSI).map(key => <option key={key}>{key}</option>)}
               </select>
             </label>
-            <label className="text-sm font-semibold">
+            <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
               Jumlah
-              <input className="input mt-1" type="number" min="1" max="10" value={jumlah} onChange={e => setJumlah(Math.min(10, Math.max(1, Number(e.target.value))))} />
+              <input className="input mt-1 bg-white" type="number" min="1" max="10" value={jumlah} onChange={e => setJumlah(Math.min(10, Math.max(1, Number(e.target.value))))} />
             </label>
-            <label className="text-sm font-semibold">
+            <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
               Tingkat Kesulitan
-              <select className="input mt-1" value={tingkat} onChange={e => setTingkat(e.target.value as Difficulty)}>
+              <select className="input mt-1 bg-white" value={tingkat} onChange={e => setTingkat(e.target.value as Difficulty)}>
                 <option value="mudah">Mudah</option>
                 <option value="sedang">Sedang</option>
                 <option value="sulit">Sulit</option>
               </select>
             </label>
           </div>
-          {aiMessage && <p role="status" className="mt-3 text-sm font-medium text-[#0066cc]">{aiMessage}</p>}
+          {aiMessage && <p role="status" className="mt-3 text-xs font-semibold text-[#2563EB] bg-blue-50/90 border border-blue-100 rounded-xl px-3 py-2">{aiMessage}</p>}
         </div>
 
-        <div className="space-y-5">
+        <div className="space-y-4">
           {soal.length === 0 && (
-            <div className="rounded-2xl border-2 border-dashed border-[#b8c6d9] px-6 py-12 text-center">
-              <p className="font-semibold">Belum ada butir soal asesmen.</p>
-              <p className="mt-2 text-sm text-slate-500">Tambahkan soal manual, gunakan simulasi, atau buat soal otomatis dengan AI.</p>
+            <div className="rounded-2xl border-2 border-dashed border-slate-300 px-6 py-12 text-center bg-slate-50/50">
+              <p className="font-bold text-slate-800">Belum ada butir soal asesmen.</p>
+              <p className="mt-1.5 text-xs font-medium text-slate-500 max-w-sm mx-auto">Tambahkan soal secara manual, gunakan generator AI, atau muat contoh materi Rasio.</p>
               <div className="mt-5 flex flex-wrap justify-center gap-2">
-                <Button onClick={manual}><Plus className="h-4 w-4" />+ Tambah Soal Manual</Button>
-                <Button variant="secondary" disabled={loading || !materi.trim()} onClick={generate}><Sparkles className="h-4 w-4" />Buat Soal dengan AI</Button>
-                <Button variant="ghost" onClick={useDefaultQuestions}>Muat 5 Contoh Soal</Button>
+                <Button onClick={manual}><Plus className="h-4 w-4" />Soal Manual</Button>
+                <Button variant="secondary" disabled={loading || !materi.trim()} onClick={generate}><Sparkles className="h-4 w-4" />Generate AI</Button>
+                <Button variant="ghost" onClick={useDefaultQuestions}>5 Contoh Rasio</Button>
               </div>
             </div>
           )}
           {soal.map((item, index) => (
-            <article className="rounded-[18px] border border-[#e0e0e0] p-5 shadow-xs transition-all hover:border-[#0066cc]/40" key={item.id}>
-              <div className="mb-4 flex items-center justify-between">
-                <strong className="text-base">Soal {index + 1}</strong>
+            <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs transition-all hover:border-[#2563EB]/50" key={item.id}>
+              <div className="mb-3 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="grid h-6 w-6 place-items-center rounded-lg bg-[#2563EB] text-white text-xs font-black">
+                    {index + 1}
+                  </span>
+                  <strong className="text-sm font-black text-[#1E1B4B]">Butir Soal {index + 1}</strong>
+                </div>
                 <button
-                  className="inline-flex items-center gap-1 text-sm font-medium text-red-600 hover:text-red-700"
+                  className="grid h-8 w-8 place-items-center rounded-xl border border-rose-100 text-rose-500 hover:bg-rose-50 hover:text-rose-700 transition-colors cursor-pointer"
                   onClick={() => setSoal(list => list.filter(s => s.id !== item.id))}
+                  title="Hapus Butir Soal"
                   type="button"
                 >
-                  <Trash2 className="h-4 w-4" />Hapus
+                  <Trash2 className="h-4 w-4" />
                 </button>
               </div>
               <textarea
-                className="input min-h-24 font-medium"
+                className="input min-h-20 font-medium text-slate-900"
                 aria-label={`Pertanyaan soal ${index + 1}`}
                 value={item.pertanyaan}
                 onChange={e => update(item.id, "pertanyaan", e.target.value)}
+                placeholder="Tuliskan teks pertanyaan di sini..."
               />
               <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                <label className="text-sm font-semibold">
-                  <Tag className="mr-1 inline h-4 w-4 text-[#0066cc]" />Indikator
-                  <select className="input mt-2" value={item.indikator} onChange={e => update(item.id, "indikator", e.target.value as Indikator)}>
+                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+                  <Tag className="mr-1 inline h-3.5 w-3.5 text-[#2563EB]" />Indikator
+                  <select className="input mt-1.5" value={item.indikator} onChange={e => update(item.id, "indikator", e.target.value as Indikator)}>
                     {Object.entries(INDIKATOR_KOMPETENSI).map(([key, value]) => (
                       <option key={key} value={key}>{key} — {value}</option>
                     ))}
                   </select>
                 </label>
-                <label className="text-sm font-semibold">
+                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">
                   Tingkat Kesulitan
-                  <select className="input mt-2" value={item.tingkat} onChange={e => update(item.id, "tingkat", e.target.value as Difficulty)}>
+                  <select className="input mt-1.5" value={item.tingkat} onChange={e => update(item.id, "tingkat", e.target.value as Difficulty)}>
                     <option value="mudah">Mudah</option>
                     <option value="sedang">Sedang</option>
                     <option value="sulit">Sulit</option>
                   </select>
                 </label>
               </div>
-              <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                {item.pilihan.map((choice, pi) => (
-                  <label className="flex items-center gap-2" key={pi}>
-                    <input
-                      checked={item.benar === pi}
-                      name={`benar-${item.id}`}
-                      onChange={() => update(item.id, "benar", pi)}
-                      type="radio"
-                      className="h-4 w-4 accent-[#0066cc]"
-                    />
-                    <input
-                      className="input"
-                      placeholder={`Pilihan ${String.fromCharCode(65 + pi)}`}
-                      aria-label={`Pilihan ${String.fromCharCode(65 + pi)} soal ${index + 1}`}
-                      value={choice}
-                      onChange={e => {
-                        const next = [...item.pilihan];
-                        next[pi] = e.target.value;
-                        update(item.id, "pilihan", next);
-                      }}
-                    />
-                  </label>
-                ))}
+              <div className="mt-3 grid gap-2.5 sm:grid-cols-2">
+                {item.pilihan.map((choice, pi) => {
+                  const letter = String.fromCharCode(65 + pi);
+                  const isCorrect = item.benar === pi;
+                  return (
+                    <div
+                      key={pi}
+                      className={cn(
+                        "flex items-center gap-2 rounded-xl border p-1.5 transition-all",
+                        isCorrect
+                          ? "border-[#2563EB] bg-blue-50/60 ring-1 ring-[#2563EB]"
+                          : "border-slate-200 bg-white hover:border-slate-300"
+                      )}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => update(item.id, "benar", pi)}
+                        title={`Pilih ${letter} sebagai kunci jawaban benar`}
+                        className={cn(
+                          "grid h-8 w-8 shrink-0 place-items-center rounded-lg text-xs font-black transition-all cursor-pointer",
+                          isCorrect
+                            ? "bg-[#2563EB] text-white shadow-xs"
+                            : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                        )}
+                      >
+                        {letter}
+                      </button>
+                      <input
+                        className="w-full bg-transparent px-2 py-1 text-xs sm:text-sm font-medium text-slate-900 outline-none placeholder:text-slate-400"
+                        placeholder={`Pilihan ${letter}`}
+                        aria-label={`Pilihan ${letter} soal ${index + 1}`}
+                        value={choice}
+                        onChange={(e) => {
+                          const next = [...item.pilihan];
+                          next[pi] = e.target.value;
+                          update(item.id, "pilihan", next);
+                        }}
+                      />
+                    </div>
+                  );
+                })}
               </div>
               <label className="label">
                 Pembahasan / Kunci Alur Berpikir
-                <textarea className="input min-h-20" value={item.pembahasan} onChange={e => update(item.id, "pembahasan", e.target.value)} />
+                <textarea className="input min-h-16 text-xs sm:text-sm" value={item.pembahasan} onChange={e => update(item.id, "pembahasan", e.target.value)} placeholder="Tuliskan langkah penyelesaian masalah..." />
               </label>
               <label className="label">
-                Diagram ASCII / Garis Bilangan (opsional)
-                <textarea className="input min-h-20 font-mono text-sm" value={item.diagram || ""} onChange={e => update(item.id, "diagram", e.target.value)} />
+                Catatan / Representasi Visual (Opsional)
+                <textarea className="input min-h-16 font-mono text-xs" value={item.diagram || ""} onChange={e => update(item.id, "diagram", e.target.value)} placeholder="Tabel rasio, skala, atau ilustrasi kontekstual..." />
               </label>
             </article>
           ))}

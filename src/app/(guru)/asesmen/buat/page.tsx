@@ -53,18 +53,28 @@ export default function BuatAsesmenPage() {
   return (
     <div>
       <ProgresAlur current={1} />
-      <div className="mb-7 flex flex-wrap items-end justify-between gap-4">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-4xl font-semibold">Buat Soal Asesmen</h1>
-          <p className="mt-2 text-[#414753]">Petakan setiap butir soal kemampuan awal matematis ke indikator kompetensi (IK-01 s.d. IK-05).</p>
-          <label className="mt-4 block max-w-xs text-sm font-semibold">Kelas Sasaran
-            <select className="input mt-1" value={kelasSelected?.kelas.id ?? ""} onChange={(e) => setSelectedClassId(e.target.value)}>
+          <h1 className="text-2xl sm:text-3xl font-black text-[#1E1B4B]">Buat Soal Asesmen</h1>
+          <div className="mt-2.5 flex items-center gap-2">
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Kelas Sasaran:</span>
+            <select
+              className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-[#1E1B4B] shadow-2xs focus:border-[#2563EB] focus:outline-none"
+              value={kelasSelected?.kelas.id ?? ""}
+              onChange={(e) => setSelectedClassId(e.target.value)}
+            >
               {classes.length === 0 && <option value="">Belum ada kelas</option>}
-              {classes.map(({ kelas, siswa }) => <option key={kelas.id} value={kelas.id}>{kelas.nama} — {kelas.tahun_ajaran} ({siswa.length} siswa)</option>)}
+              {classes.map(({ kelas, siswa }) => (
+                <option key={kelas.id} value={kelas.id}>
+                  {kelas.nama} — {kelas.tahun_ajaran} ({siswa.length} siswa)
+                </option>
+              ))}
             </select>
-          </label>
+          </div>
         </div>
-        <Button disabled={!kelasSelected || !draft || draft.soal.length === 0} onClick={handlePublish}><Send className="h-4 w-4" />Simpan & Publikasikan ke Kelas</Button>
+        <Button disabled={!kelasSelected || !draft || draft.soal.length === 0} onClick={handlePublish}>
+          <Send className="h-4 w-4" />Publikasikan
+        </Button>
       </div>
       {published && (
         <div role="status" className="mb-6 rounded-2xl border border-green-200 bg-green-50 p-4 text-sm text-green-800">
