@@ -425,14 +425,18 @@ export default function KelasPage() {
       {modalTambahSiswa && (
         <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4">
           <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
-            <div className="flex items-center justify-between border-b pb-3">
-              <h2 className="text-lg font-semibold">Tambah Peserta Didik</h2>
-              <button onClick={() => setModalTambahSiswa(false)} className="rounded-full p-1 hover:bg-black/5">
+            <div className="relative flex items-center justify-center border-b pb-3">
+              <h2 className="text-lg font-bold text-slate-900 text-center">Tambah Peserta Didik</h2>
+              <button
+                onClick={() => setModalTambahSiswa(false)}
+                className="absolute right-0 rounded-full p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors"
+                type="button"
+                aria-label="Tutup modal"
+              >
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <form onSubmit={simpanTambahSiswa} className="mt-4 space-y-4">
-              <p className="text-xs text-[#6b7280]">Menambahkan murid secara manual ke kelas {activeKelas.nama}.</p>
+            <form onSubmit={simpanTambahSiswa} className="mt-5 space-y-4">
               <label className="label mt-0">
                 Nama Lengkap Siswa *
                 <input
