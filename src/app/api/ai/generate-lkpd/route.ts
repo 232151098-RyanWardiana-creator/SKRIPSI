@@ -69,12 +69,12 @@ export async function POST(request: Request) {
     } catch (error) {
       results.push({
         level,
-        status: "error",
-        content: "",
+        status: "fallback",
+        content: `# LEMBAR KERJA PESERTA DIDIK (LKPD)\n\n## A. Identitas Peserta Didik\n| Komponen | Keterangan |\n|---|---|\n| **Nama Siswa** | .................................................... |\n| **Kelas / No. Absen** | VII-.... / ....... |\n| **Hari / Tanggal** | .................................................... |\n\n## B. Tujuan Pembelajaran\n1. Mengidentifikasi hubungan rasio kontekstual.\n2. Menyelesaikan perbandingan secara bertahap.\n\n## C. Petunjuk Pengerjaan\nKerjakan secara bertahap pada ruang jawaban yang disediakan.\n\n## D. Kegiatan Pembelajaran\n### Aktivitas 1: Perbandingan Bahan Masakan (target: IK-01)\nIbu menyiapkan adonan kue dengan perbandingan tepung terigu dan gula pasir adalah 3 : 2. Jika total berat kedua bahan adalah 500 gram, tentukan berat tepung terigu!\n\n> **Ruang Jawaban:**\n> - Jumlah bagian rasio = 3 + 2 = ......\n> - Berat 1 bagian = 500 ÷ ...... = ...... gram\n> - Berat tepung terigu (3 bagian) = 3 × ...... = ...... gram\n\n## E. Refleksi Diri Siswa\n- Apa yang telah kamu pelajari hari ini?\n\n<!-- PEMISAH_KUNCI_GURU -->\n\n# KUNCI JAWABAN & PANDUAN GURU\n## A. Pembahasan & Kunci Jawaban Resmi\n1. **Aktivitas 1:** Total bagian = 5. Nilai 1 bagian = 500 ÷ 5 = 100 gram. Berat tepung = 3 × 100 = **300 gram**.\n\n## B. Pedoman Penskoran\n| Kriteria | Skor Maks |\n|---|:---:|\n| Pemodelan | 50 |\n| Perhitungan | 50 |`,
         source: "mock",
-        model: "tidak tersedia",
-        isFallback: false,
-        error: error instanceof Error ? error.message : "Generator menghasilkan konten kosong.",
+        model: "cadangan",
+        isFallback: true,
+        error: error instanceof Error ? error.message : "Konten cadangan digunakan.",
       });
     }
   }

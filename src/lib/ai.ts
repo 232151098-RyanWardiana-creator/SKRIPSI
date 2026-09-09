@@ -236,8 +236,8 @@ async function requestCompletion(
   timeoutMs: number,
   maxTokens: number = 2000
 ): Promise<{ content: string; model: string }> {
-  // Cap at 55 seconds so serverless functions never hit Vercel 60s gateway timeout while allowing AI enough time to generate full LKPD
-  const effectiveTimeout = Math.min(timeoutMs, 55_000);
+  // Cap at 40 seconds so serverless functions never hit Vercel 60s gateway timeout
+  const effectiveTimeout = Math.min(timeoutMs, 40_000);
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), effectiveTimeout);
   try {
@@ -339,7 +339,7 @@ export async function generateLKPD(params: GenerateLKPDParams): Promise<AIResult
   const randomContext = contexts[Math.floor(Math.random() * contexts.length)];
 
   const levelKeterangan: Record<Level, string> = {
-    dasar: "scaffolding penuh, langkah detail berurutan dengan panduan eksplisit, contoh konkret, dan bahasa sederhana",
+    dasar: "panduan bertahap (memecah langkah kerja menjadi isian titik-titik kosong ...... tanpa membocorkan jawaban), bahasa sederhana, dan angka bulat yang mudah dipahami",
     menengah: "latihan penguatan konsep, scaffolding minimal, dan variasi kontekstual sedang",
     mahir: "tantangan kontekstual analitis, soal HOTS, pemecahan masalah kompleks, dan penalaran matematika mendalam",
   };
@@ -368,9 +368,14 @@ PENTING — STRUKTUR DOKUMEN WAJIB MENGGUNAKAN PEMISAH RESMI BERIKUT:
 
 <!-- PEMISAH_KUNCI_GURU -->
 
-# KUNCI JAWABAN & PANDUAN GURU (CATATAN PEGANGAN)
+# KUNCI JAWABAN & PANDUAN GURU
 ## A. Pembahasan & Kunci Jawaban Resmi (langkah matematis runtut dan jawaban akhir tebal untuk setiap aktivitas)
-## B. Pedoman & Rubrik Penskoran (tabel kriteria penilaian, deskripsi rubrik, dan skor maksimum)`,
+## B. Pedoman & Rubrik Penskoran (tabel kriteria penilaian, deskripsi rubrik, dan skor maksimum)
+
+ATURAN MUTLAK LEMBAR KERJA SISWA (BAGIAN D):
+1. DILARANG KERAS MENULISKAN JAWABAN ATAU HASIL PERHITUNGAN PADA BAGIAN D (KEGIATAN PEMBELAJARAN SISWA)!
+2. Untuk Level Dasar sekalipun: Scaffolding HANYA berupa panduan alur langkah kerja. Setiap langkah pada ruang jawaban siswa WAJIB KOSONG (berupa titik-titik "......" atau garis isian yang harus dikerjakan sendiri oleh siswa). JANGAN PERNAH mengisi ruang jawaban siswa dengan angka atau solusi yang sudah selesai!
+3. Kunci jawaban, solusi matematis lengkap, dan pembahasan HANYA dan WAJIB ditulis pada bagian KUNCI JAWABAN & PANDUAN GURU di bawah tanda pemisah <!-- PEMISAH_KUNCI_GURU -->.`,
     },
     {
       role: "user",
@@ -379,6 +384,7 @@ Karakteristik level: ${levelKeterangan[params.level]}.
 Penyesuaian VAK: ${gayaKeterangan}.
 Indikator target: ${indikator}.
 Buat tepat ${params.jumlahAktivitas} aktivitas kontekstual unik. Instruksi tambahan: ${params.promptTambahan || "tidak ada"}.
+Pastikan pada Bagian D (Kegiatan Pembelajaran), ruang jawaban siswa murni berupa titik-titik kosong tanpa angka jawaban yang terisi!
 Sertakan tanda pembatas <!-- PEMISAH_KUNCI_GURU --> tepat sebelum bagian Kunci Jawaban Guru. Keluarkan langsung teks Markdown tanpa sapaan pembuka/penutup.`,
     },
   ];

@@ -87,18 +87,18 @@ export const AI_PROVIDERS: AIProviderOption[] = [
         badge: "Gratis",
       },
       {
-        id: "deepseek/deepseek-v4-flash",
-        label: "DeepSeek V4 Flash",
+        id: "mistralai/codestral-2508",
+        label: "Codestral",
         badge: "Gratis",
       },
       {
-        id: "deepseek/deepseek-v4-pro",
-        label: "DeepSeek V4 Pro",
+        id: "mistralai/mistral-small-2603",
+        label: "Mistral Small 4",
         badge: "Gratis",
       },
       {
-        id: "mistralai/ministral-3b",
-        label: "Ministral 3 3B",
+        id: "minimax/minimax-m2.5-highspeed:free",
+        label: "MiniMax M2.5 Highspeed",
         badge: "Gratis",
       },
       {
@@ -107,8 +107,18 @@ export const AI_PROVIDERS: AIProviderOption[] = [
         badge: "Gratis",
       },
       {
-        id: "deepseek/deepseek-chat-v3.1",
-        label: "DeepSeek V3.1",
+        id: "mistralai/ministral-3b",
+        label: "Ministral 3 3B",
+        badge: "Gratis",
+      },
+      {
+        id: "deepseek/deepseek-v4-flash",
+        label: "DeepSeek V4 Flash",
+        badge: "Gratis",
+      },
+      {
+        id: "deepseek/deepseek-v4-pro",
+        label: "DeepSeek V4 Pro",
         badge: "Gratis",
       },
       {
