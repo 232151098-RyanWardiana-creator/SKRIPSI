@@ -711,10 +711,11 @@ export function GeneratorWizard() {
 
               {/* Action Bar Atas: Ganti Model & Regenerasi */}
               <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
-                <div className="text-xs font-semibold text-slate-600">
-                  Engine AI: <strong className="text-slate-900">{providerName}</strong> · <span className="text-[#2563EB]">{modelLabel}</span>
+                <div>
                   {current?.validatedAt && (
-                    <span className="ml-2 text-emerald-700 font-bold">· Tervalidasi</span>
+                    <span className="text-xs text-emerald-700 font-bold">
+                      Tervalidasi {new Date(current.validatedAt).toLocaleString("id-ID")}
+                    </span>
                   )}
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
@@ -738,9 +739,6 @@ export function GeneratorWizard() {
                           <h3 className="text-base font-black text-[#1E1B4B]">
                             Dokumen LKPD Siswa (Level {labels[active]})
                           </h3>
-                          <p className="text-xs text-slate-500">
-                            Format resmi untuk dibagikan ke siswa (bebas kunci jawaban).
-                          </p>
                         </div>
                         <button
                           type="button"
@@ -803,9 +801,6 @@ export function GeneratorWizard() {
                             <h3 className="text-base font-black text-amber-950">
                               Kunci Jawaban & Panduan Guru (Level {labels[active]})
                             </h3>
-                            <p className="text-xs text-amber-800">
-                              Pembahasan langkah matematis dan rubrik penskoran.
-                            </p>
                           </div>
                         </div>
                         <button
