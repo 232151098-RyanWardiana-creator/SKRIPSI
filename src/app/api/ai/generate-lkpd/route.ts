@@ -9,6 +9,8 @@ const gayaBelajar = new Set<Exclude<GayaBelajar, null>>(["visual", "auditory", "
 
 type RequestBody = Omit<GenerateLKPDParams, "level"> & {
   level?: Level;
+  modePengerjaan?: "individu" | "kelompok";
+  jumlahAnggota?: number;
   provider?: string;
   model?: string;
   customApiKey?: string;
@@ -45,6 +47,8 @@ export async function POST(request: Request) {
     gayaBelajar: body.gayaBelajar,
     indikatorLemah: body.indikatorLemah.map((item) => item.trim()),
     promptTambahan: body.promptTambahan?.trim(),
+    modePengerjaan: body.modePengerjaan === "kelompok" ? ("kelompok" as const) : ("individu" as const),
+    jumlahAnggota: typeof body.jumlahAnggota === "number" ? body.jumlahAnggota : 4,
     provider: typeof body.provider === "string" ? body.provider : undefined,
     model: typeof body.model === "string" ? body.model : undefined,
     customApiKey: typeof body.customApiKey === "string" ? body.customApiKey : undefined,

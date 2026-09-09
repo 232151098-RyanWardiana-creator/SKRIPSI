@@ -83,6 +83,8 @@ export function GeneratorWizard() {
   const [jumlah, setJumlah] = useState(4);
   const [gaya, setGaya] = useState("Gunakan konteks resep masakan, denah/skala peta, dan perbandingan harga satuan.");
   const [pertimbangkanGaya, setPertimbangkanGaya] = useState(true);
+  const [modePengerjaan, setModePengerjaan] = useState<"individu" | "kelompok">("individu");
+  const [jumlahAnggota, setJumlahAnggota] = useState<number>(4);
 
   // AI Provider & Model selection (default to Xkiro DeepSeek V3.2 for fast online response)
   const [aiProvider, setAiProvider] = useState("xkiro");
@@ -155,6 +157,8 @@ export function GeneratorWizard() {
     setJumlah(4);
     setGaya("Gunakan konteks resep masakan, denah/skala peta, dan perbandingan harga satuan.");
     setPertimbangkanGaya(true);
+    setModePengerjaan("individu");
+    setJumlahAnggota(4);
     setError("");
     setSaved(false);
     setLoadingLevels([]);
@@ -170,6 +174,8 @@ export function GeneratorWizard() {
     promptTambahan: `${gaya}\nKonteks asesmen: ${assessmentJudul}. Rekap TaRL: ${levels.map(level => `${labels[level]} ${counts[level]} siswa; indikator target ${weakByLevel[level].join(", ") || "IK-01, IK-02"}`).join(" | ")}. Distribusi VAK: Visual ${vak.counts.visual}, Auditory ${vak.counts.auditory}, Kinestetik ${vak.counts.kinestetik}.`.slice(0, 1000),
     gayaBelajar: pertimbangkanGaya && vak.total ? vak.dominant : null,
     indikatorLemah: indikatorLemah.length ? indikatorLemah : ["IK-01", "IK-02", "IK-03"],
+    modePengerjaan,
+    jumlahAnggota: modePengerjaan === "kelompok" ? jumlahAnggota : undefined,
   };
 
   function updateDocument(level: Level, document: DocumentState | undefined, _immediate?: boolean) {
@@ -296,7 +302,7 @@ export function GeneratorWizard() {
   const current = documents[active];
 
   // Split current document into student LKPD and teacher answer key
-  const { studentContent, teacherKeyContent } = splitLkpdContent(current?.content || "");
+  const { studentContent, teacherKeyContent } = splitLkpdContent(current?.content || "", labels[active], topik);
 
   if (!dataKelas) {
     return (
@@ -383,6 +389,63 @@ export function GeneratorWizard() {
                 <input className="input" value={topik} onChange={(e) => setTopik(e.target.value)} />
               </label>
 
+              {/* Mode Pengerjaan: Mandiri vs Kelompok */}
+              <div className="space-y-1.5">
+                <label className="label">Bentuk Pengerjaan</label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setModePengerjaan("individu")}
+                    className={cn(
+                      "py-2 px-3 rounded-xl border text-xs font-bold transition cursor-pointer text-center",
+                      modePengerjaan === "individu"
+                        ? "border-[#2563EB] bg-blue-50 text-[#2563EB] shadow-2xs font-black"
+                        : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                    )}
+                  >
+                    Mandiri (Individu)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setModePengerjaan("kelompok")}
+                    className={cn(
+                      "py-2 px-3 rounded-xl border text-xs font-bold transition cursor-pointer text-center",
+                      modePengerjaan === "kelompok"
+                        ? "border-[#2563EB] bg-blue-50 text-[#2563EB] shadow-2xs font-black"
+                        : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                    )}
+                  >
+                    Kelompok
+                  </button>
+                </div>
+              </div>
+
+              {modePengerjaan === "kelompok" && (
+                <div className="space-y-1.5 rounded-xl border border-blue-100 bg-blue-50/50 p-2.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-slate-700">Jumlah Anggota per Kelompok:</span>
+                    <span className="text-xs font-black text-[#2563EB]">{jumlahAnggota} Siswa</span>
+                  </div>
+                  <div className="flex gap-1.5 pt-1">
+                    {[2, 3, 4, 5, 6].map((num) => (
+                      <button
+                        key={num}
+                        type="button"
+                        onClick={() => setJumlahAnggota(num)}
+                        className={cn(
+                          "flex-1 py-1 rounded-lg border text-xs font-bold transition cursor-pointer text-center",
+                          jumlahAnggota === num
+                            ? "border-[#2563EB] bg-[#2563EB] text-white shadow-2xs"
+                            : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                        )}
+                      >
+                        {num}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <label className="label">
                 Jumlah Aktivitas Per Level: {jumlah}
                 <input className="w-full" type="range" min="1" max="6" value={jumlah} onChange={(e) => setJumlah(+e.target.value)} />
@@ -390,7 +453,7 @@ export function GeneratorWizard() {
 
               <label className="label">
                 Prompt / Konteks Tambahan
-                <textarea className="input min-h-28" value={gaya} maxLength={1000} onChange={(e) => setGaya(e.target.value)} />
+                <textarea className="input min-h-24" value={gaya} maxLength={1000} onChange={(e) => setGaya(e.target.value)} />
               </label>
 
               <button
@@ -411,6 +474,7 @@ export function GeneratorWizard() {
               <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-3 space-y-1.5">
                 <p><strong>Kelas:</strong> {dataKelas.kelas.nama}</p>
                 <p><strong>Topik Materi:</strong> {topik}</p>
+                <p><strong>Bentuk:</strong> {modePengerjaan === "kelompok" ? `Kelompok (${jumlahAnggota} Siswa)` : "Mandiri (Individu)"}</p>
                 <p><strong>Aktivitas:</strong> {jumlah} per level</p>
                 <p><strong>Hasil Asesmen:</strong> Dasar {counts.dasar} · Menengah {counts.menengah} · Mahir {counts.mahir}</p>
                 <p><strong>Gaya Belajar:</strong> {pertimbangkanGaya ? `${vakLabel} (${vak.percent(vak.dominant)}%)` : "Nonaktif"}</p>
@@ -434,9 +498,8 @@ export function GeneratorWizard() {
           )}
 
           {step === 3 && (
-            <div className="space-y-2 text-xs text-[#414753]">
-              <p>Dokumen siswa bebas kunci jawaban. Kunci jawaban dan pedoman penskoran berada pada kartu catatan guru di bawah.</p>
-              <p>Klik tombol <strong>Validasi LKPD</strong> untuk menandatangani draf ini sebagai dokumen resmi.</p>
+            <div className="text-xs text-slate-500">
+              <p>Periksa draf dokumen siswa dan kunci jawaban guru sebelum divalidasi atau diunduh.</p>
             </div>
           )}
 

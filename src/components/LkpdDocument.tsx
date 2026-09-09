@@ -6,6 +6,7 @@ import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import { normalizePlainText } from "@/lib/lkpd-history";
+import { sanitizeMathMarkdown } from "@/lib/lkpd-utils";
 
 interface LkpdDocumentProps {
   content: string;
@@ -65,9 +66,9 @@ export function LkpdDocument({ content, level, topic, printId, docTitle, docBadg
             skipHtml
             urlTransform={safeUrl}
             remarkPlugins={[remarkGfm, remarkMath]}
-            rehypePlugins={[rehypeKatex]}
+            rehypePlugins={[[rehypeKatex, { throwOnError: false }]]}
           >
-            {content}
+            {sanitizeMathMarkdown(content)}
           </ReactMarkdown>
         </div>
       </section>

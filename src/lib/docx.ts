@@ -1,4 +1,5 @@
 import { Buffer } from "node:buffer";
+import { sanitizeMathMarkdown } from "./lkpd-utils";
 
 const xml = (value: string) => value.replace(/[&<>"']/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&apos;" })[char]!);
 const text = (value: string) => `<m:r><m:t xml:space="preserve">${xml(value)}</m:t></m:r>`;
@@ -48,9 +49,15 @@ function mathParts(source: string): string {
       const match = source.slice(index + 1).match(/^[A-Za-z]+/);
       if (match) {
         const name = match[0];
-        if (name === "text" && source[index + name.length + 1] === "{") {
+        if ((name === "text" || name === "mathrm" || name === "mathit") && source[index + name.length + 1] === "{") {
           const [value, after] = group(source, index + name.length + 1);
           output += text(value);
+          index = after;
+          continue;
+        }
+        if ((name === "mathbf" || name === "textbf" || name === "boldsymbol") && source[index + name.length + 1] === "{") {
+          const [value, after] = group(source, index + name.length + 1);
+          output += `<m:r><m:rPr><m:b/></m:rPr><m:t xml:space="preserve">${xml(value)}</m:t></m:r>`;
           index = after;
           continue;
         }
@@ -84,7 +91,8 @@ function cell(content: string, header: boolean): string {
 }
 
 export function markdownToWordXml(markdown: string): string {
-  const lines = markdown.replace(/\r/g, "").split("\n");
+  const sanitized = sanitizeMathMarkdown(markdown);
+  const lines = sanitized.replace(/\r/g, "").split("\n");
   const output: string[] = [];
   for (let index = 0; index < lines.length;) {
     const line = lines[index];

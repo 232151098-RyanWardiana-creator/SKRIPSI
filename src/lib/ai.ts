@@ -56,6 +56,8 @@ export interface GenerateLKPDParams {
   materi: string;
   jumlahAktivitas: number;
   promptTambahan?: string;
+  modePengerjaan?: "individu" | "kelompok";
+  jumlahAnggota?: number;
   provider?: string;
   model?: string;
   customApiKey?: string;
@@ -113,7 +115,12 @@ function sanitizePreview(value: unknown): string {
     .slice(0, 500);
 }
 
-function mockContent(kind: "lkpd" | "asesmen", context: string): string {
+function mockContent(
+  kind: "lkpd" | "asesmen",
+  context: string,
+  modePengerjaan: "individu" | "kelompok" = "individu",
+  jumlahAnggota: number = 4
+): string {
   if (kind === "asesmen") return "[]";
 
   const scenarioType = Math.floor(Math.random() * 3);
@@ -139,8 +146,8 @@ function mockContent(kind: "lkpd" | "asesmen", context: string): string {
     act1Answer = `Rasio terigu : ragi = $${n1} : ${n2}$. Total bagian = $${n1 + n2}$. Nilai 1 bagian = $${totalGrams}\\text{ g} \\div ${n1 + n2} = ${multiplier * 40}\\text{ g}$. Tepung terigu = $${n1} \\times ${multiplier * 40}\\text{ g} = \\mathbf{${partA}\\text{ gram}}$.`;
 
     act2Title = "Aktivitas 2: Perbandingan Senilai Belanja Bahan (target: IK-03)";
-    act2Problem = `Untuk membeli $${qty1}\\text{ kg}$ telur ayam, koki tersebut membayar $\\text{Rp}$${(qty1 * priceUnit).toLocaleString("id-ID")}. Berapakah biaya yang harus dibayar jika koki membutuhkan $${qty2}\\text{ kg}$ telur ayam?`;
-    act2Answer = `Harga per kilogram = $\\text{Rp}$${(qty1 * priceUnit).toLocaleString("id-ID")} $\\div ${qty1} = \\text{Rp}$${priceUnit.toLocaleString("id-ID")}. Biaya untuk $${qty2}\\text{ kg}$ = $${qty2} \\times \\text{Rp}$${priceUnit.toLocaleString("id-ID")} = $\\mathbf{\\text{Rp}$${(qty2 * priceUnit).toLocaleString("id-ID")}}$.`;
+    act2Problem = `Untuk membeli $${qty1}\\text{ kg}$ telur ayam, koki tersebut membayar **Rp${(qty1 * priceUnit).toLocaleString("id-ID")}**. Berapakah biaya yang harus dibayar jika koki membutuhkan $${qty2}\\text{ kg}$ telur ayam?`;
+    act2Answer = `Harga per kilogram = **Rp${(qty1 * priceUnit).toLocaleString("id-ID")}** $\\div ${qty1}$ = **Rp${priceUnit.toLocaleString("id-ID")}**. Biaya untuk $${qty2}\\text{ kg}$ = $${qty2} \\times$ **Rp${priceUnit.toLocaleString("id-ID")}** = **Rp${(qty2 * priceUnit).toLocaleString("id-ID")}**.`;
   } else if (scenarioType === 1) {
     const scale = [100, 200, 500][Math.floor(Math.random() * 3)];
     const mapCm = Math.floor(Math.random() * 4) + 4;
@@ -172,23 +179,43 @@ function mockContent(kind: "lkpd" | "asesmen", context: string): string {
     act2Answer = `Efisiensi = $${dist1} \\div ${lit1} = ${kmPerLiter}\\text{ km/liter}$. Jarak untuk $${lit2}\\text{ liter}$ = $${lit2} \\times ${kmPerLiter} = \\mathbf{${dist2}\\text{ km}}$.`;
   }
 
-  return `# LEMBAR KERJA PESERTA DIDIK (LKPD)
+  const isKelompok = modePengerjaan === "kelompok";
+  const rowsAnggota = Array.from({ length: Math.max(2, jumlahAnggota) }, (_, i) => `| ${i === 0 ? "**Anggota Kelompok**" : ""} | ${i + 1}. .................................................... (No: .....) |`).join("\n");
 
-## A. Identitas Peserta Didik
-| Komponen | Keterangan |
+  const identitasBlock = isKelompok
+    ? `| Komponen | Keterangan |
+|---|---|
+| **Kelompok** | Kelompok ........................................... |
+| **Kelas** | VII-.... |
+| **Hari / Tanggal** | .................................................... |
+${rowsAnggota}`
+    : `| Komponen | Keterangan |
 |---|---|
 | **Nama Siswa** | .................................................... |
 | **Kelas / No. Absen** | VII-.... / ....... |
-| **Hari / Tanggal** | .................................................... |
+| **Hari / Tanggal** | .................................................... |`;
+
+  const petunjukBlock = isKelompok
+    ? `1. Berdoalah bersama kelompok sebelum memulai aktivitas belajar.
+2. Diskusikan masalah kontekstual bersama anggota kelompok dan bagi peran secara adil.
+3. Tuliskan langkah pengerjaan secara bertahap pada ruang jawaban yang disediakan.
+4. Tanyakan kepada guru jika kelompok menemui kendala.`
+    : `1. Berdoalah sebelum memulai kegiatan belajar.
+2. Cermati setiap narasi masalah kontekstual yang diberikan.
+3. Kerjakan setiap aktivitas secara bertahap pada ruang jawaban yang disediakan.
+4. Tanyakan kepada guru jika menemui kendala.`;
+
+  return `# LEMBAR KERJA PESERTA DIDIK (LKPD)
+
+## A. Identitas Peserta Didik
+${identitasBlock}
 
 ## B. Tujuan Pembelajaran
 1. Peserta didik dapat memahami dan memodelkan konsep ${context} melalui permasalahan kontekstual.
 2. Peserta didik dapat menyelesaikan masalah perbandingan secara kritis, runtut, dan tepat.
 
 ## C. Petunjuk Pengerjaan
-1. Berdoalah sebelum memulai kegiatan belajar.
-2. Cermati setiap narasi masalah kontekstual yang diberikan.
-3. Kerjakan setiap aktivitas secara bertahap pada ruang jawaban yang disediakan.
+${petunjukBlock}
 
 ## D. Kegiatan Pembelajaran
 ### ${act1Title}
@@ -350,6 +377,22 @@ export async function generateLKPD(params: GenerateLKPDParams): Promise<AIResult
   }[params.gayaBelajar] : "tanpa penyesuaian VAK khusus";
   const indikator = params.indikatorLemah.length ? params.indikatorLemah.join(", ") : "pengayaan seluruh indikator";
 
+  const isKelompok = params.modePengerjaan === "kelompok";
+  const jumlahAnggota = params.jumlahAnggota || 4;
+
+  const identitasInstruksi = isKelompok
+    ? `BENTUK PENGERJAAN: KELOMPOK KOLABORATIF (${jumlahAnggota} Siswa per Kelompok).
+Pada ## A. Identitas Peserta Didik, WAJIB buat tabel identitas kelompok dengan format:
+| Komponen | Keterangan |
+|---|---|
+| **Kelompok** | Kelompok ........................................... |
+| **Kelas** | VII-.... |
+| **Hari / Tanggal** | .................................................... |
+${Array.from({ length: Math.max(2, jumlahAnggota) }, (_, i) => `| ${i === 0 ? "**Anggota Kelompok**" : ""} | ${i + 1}. .................................................... (No: .....) |`).join("\n")}
+Pada bagian C (Petunjuk Pengerjaan), sertakan instruksi pembagian peran diskusi kelompok.`
+    : `BENTUK PENGERJAAN: MANDIRI / INDIVIDU.
+Pada ## A. Identitas Peserta Didik, format tabel identitas siswa perorangan (Nama Siswa, Kelas/No. Absen, Hari/Tanggal).`;
+
   const messages: ChatMessage[] = [
     {
       role: "system",
@@ -358,9 +401,16 @@ TUGAS UTAMA: Susun dokumen LKPD berdiferensiasi kontekstual kehidupan nyata yang
 HINDARI pengulangan angka, narasi cerita, atau studi kasus klise yang sama dengan generasi sebelumnya. Gunakan variasi skenario kehidupan nyata yang unik (terinspirasi dari konteks: ${randomContext}).
 Dokumen harus dalam format Markdown bersih, ramah cetak A4, dan rumus matematika ditulis menggunakan $...$ (inline) atau $$...$$ (blok). JANGAN gunakan fenced code block untuk seluruh isi dokumen.
 
+ATURAN FORMULA & SIMBOL MATEMATIKA (PEDOMAN EQUATION & OMML):
+1. Satuan mata uang Rupiah DILARANG ditulis di dalam format LaTeX ($...$). Jangan gunakan \\text{Rp}, \\mathbf{Rp}, dsb. Tulis selalu satuan Rupiah sebagai teks biasa tebal: **Rp16.000** atau **Rp112.000**.
+2. Rumus matematika WAJIB menggunakan tanda dolar lengkap berpasangan: $...$ untuk inline (contoh: $3 : 5$ atau $\\frac{a}{b}$) dan $$...$$ untuk baris rumus terpisah.
+3. JANGAN PERNAH menyisakan kode LaTeX mentah tanpa penutup atau di dalam backtick inline.
+
+${identitasInstruksi}
+
 PENTING — STRUKTUR DOKUMEN WAJIB MENGGUNAKAN PEMISAH RESMI BERIKUT:
 # LEMBAR KERJA PESERTA DIDIK (LKPD)
-## A. Identitas Peserta Didik (tabel Nama Siswa, Kelas/No. Absen, Hari/Tanggal dengan titik-titik ruang kosong)
+## A. Identitas Peserta Didik
 ## B. Tujuan Pembelajaran (2-3 butir mengacu pada indikator target)
 ## C. Petunjuk Pengerjaan
 ## D. Kegiatan Pembelajaran (aktivitas kontekstual 1 sampai ${params.jumlahAktivitas} yang segar dan berbeda, setiap nomor mencantumkan target indikator dalam tanda kurung misal "(target: IK-01)", diikuti ruang pengerjaan berformat blockquote atau garis titik-titik)
@@ -380,6 +430,7 @@ ATURAN MUTLAK LEMBAR KERJA SISWA (BAGIAN D):
     {
       role: "user",
       content: `Buat LKPD BARU dan BERBEDA (Variasi Token #${seed}) tentang "${params.materi}" untuk tingkat ${params.level}.
+Bentuk pengerjaan: ${isKelompok ? `Kelompok (${jumlahAnggota} orang)` : "Individu"}.
 Karakteristik level: ${levelKeterangan[params.level]}.
 Penyesuaian VAK: ${gayaKeterangan}.
 Indikator target: ${indikator}.
@@ -406,7 +457,11 @@ Sertakan tanda pembatas <!-- PEMISAH_KUNCI_GURU --> tepat sebelum bagian Kunci J
     model: params.model,
   };
 
-  return chatCompletion(messages, mockContent("lkpd", `${params.materi} (${params.level})`), aiOptions);
+  return chatCompletion(
+    messages,
+    mockContent("lkpd", `${params.materi} (${params.level})`, params.modePengerjaan, params.jumlahAnggota),
+    aiOptions
+  );
 }
 
 export interface GeneratedQuestion {
