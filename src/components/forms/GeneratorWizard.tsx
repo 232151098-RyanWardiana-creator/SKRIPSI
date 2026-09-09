@@ -52,7 +52,7 @@ interface DocumentState extends GeneratedLKPD {
 const levels: Level[] = ["dasar", "menengah", "mahir"];
 const labels: Record<Level, string> = { dasar: "Dasar", menengah: "Menengah", mahir: "Mahir" };
 const STORAGE_KEY = "lkpd_generator_saved_state";
-const STORAGE_VERSION = 3;
+const STORAGE_VERSION = 4;
 
 function isLevel(value: unknown): value is Level {
   return levels.includes(value as Level);
@@ -180,13 +180,6 @@ export function GeneratorWizard() {
         const source = value.documents && typeof value.documents === "object" ? value.documents as Record<string, unknown> : {};
         const restored = emptyDocuments();
         levels.forEach(level => { if (validDocument(source[level])) restored[level] = { ...source[level], editing: false }; });
-        const history = getStoredHistory().filter(item => item.topik.trim().toLocaleLowerCase("id-ID") === restoredTopik.trim().toLocaleLowerCase("id-ID") && (item.kelasId ? item.kelasId === restoredKelasId : !!restoredKelas && item.kelas.trim().toLocaleLowerCase("id-ID") === restoredKelas.trim().toLocaleLowerCase("id-ID"))).sort((a, b) => Date.parse(b.dibuat_pada) - Date.parse(a.dibuat_pada));
-        levels.forEach(level => {
-          if (!restored[level]) {
-            const entry = history.find(item => item.level === level && item.content.trim());
-            if (entry) restored[level] = { level, status: entry.isFallback ? "fallback" : "success", content: entry.content, source: entry.source ?? (entry.isFallback ? "mock" : "online"), model: entry.model, isFallback: entry.isFallback ?? false, error: null, draft: entry.content, editing: false, validatedAt: entry.validatedAt ?? null };
-          }
-        });
         documentsRef.current = restored;
         setDocuments(restored);
         setTopik(restoredTopik);
@@ -239,7 +232,11 @@ export function GeneratorWizard() {
   }, [documents, step, topik, kelasId, assessmentId, active, jumlah, gaya, pertimbangkanGaya, aiProvider, aiModel]);
 
   function resetGenerator() {
-    localStorage.removeItem(STORAGE_KEY);
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch {
+      // ignore
+    }
     const cleared = emptyDocuments();
     documentsRef.current = cleared;
     setDocuments(cleared);
@@ -258,6 +255,20 @@ export function GeneratorWizard() {
     setProgress(null);
     setValidationLevel(null);
     setResetOpen(false);
+
+    persistGeneratorState({
+      documents: cleared,
+      step: 0,
+      topik: "Rasio (Perbandingan)",
+      kelasId: classes[0]?.kelas.id ?? "",
+      selectedAssessmentId: "",
+      active: "dasar",
+      jumlah: 4,
+      gaya: "Gunakan konteks resep masakan, denah/skala peta, dan perbandingan harga satuan.",
+      pertimbangkanGaya: true,
+      aiProvider,
+      aiModel,
+    });
   }
 
   const assessmentJudul = assessment?.judul ?? "-";
@@ -307,6 +318,15 @@ export function GeneratorWizard() {
     const targets = only ? [only] : levels;
     setLoadingLevels(targets);
     setError("");
+
+    // Clear documents for target levels so stale content is never shown
+    const clearedTargets = { ...documentsRef.current };
+    targets.forEach((lvl) => {
+      clearedTargets[lvl] = undefined;
+    });
+    documentsRef.current = clearedTargets;
+    setDocuments(clearedTargets);
+
     if (!only) setStep(3);
 
     for (const [index, level] of targets.entries()) {

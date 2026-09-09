@@ -116,18 +116,61 @@ function sanitizePreview(value: unknown): string {
 function mockContent(kind: "lkpd" | "asesmen", context: string): string {
   if (kind === "asesmen") return "[]";
 
+  const scenarioType = Math.floor(Math.random() * 3);
   const n1 = Math.floor(Math.random() * 4) + 2;
   const n2 = n1 + Math.floor(Math.random() * 3) + 2;
   const multiplier = Math.floor(Math.random() * 5) + 3;
-  const totalWeight = (n1 + n2) * multiplier * 50;
-  const partA = n1 * multiplier * 50;
-  const partB = n2 * multiplier * 50;
 
-  const kmPerLiter = Math.floor(Math.random() * 4) + 12;
-  const distance1 = kmPerLiter * (Math.floor(Math.random() * 3) + 4);
-  const liters1 = distance1 / kmPerLiter;
-  const liters2 = liters1 + Math.floor(Math.random() * 4) + 3;
-  const distance2 = liters2 * kmPerLiter;
+  let act1Title = "";
+  let act1Problem = "";
+  let act1Answer = "";
+  let act2Title = "";
+  let act2Problem = "";
+  let act2Answer = "";
+
+  if (scenarioType === 0) {
+    const totalGrams = (n1 + n2) * multiplier * 40;
+    const partA = n1 * multiplier * 40;
+    const priceUnit = (Math.floor(Math.random() * 4) + 6) * 2000;
+    const qty1 = 4;
+    const qty2 = 7;
+    act1Title = "Aktivitas 1: Resep Adonan Roti Tradisional (target: IK-01)";
+    act1Problem = `Seorang koki membuat adonan roti dengan rasio tepung terigu dan ragi basah adalah $${n1} : ${n2}$. Jika total campuran kedua bahan adalah $${totalGrams}\\text{ gram}$, berapakah gram tepung terigu yang digunakan?`;
+    act1Answer = `Rasio terigu : ragi = $${n1} : ${n2}$. Total bagian = $${n1 + n2}$. Nilai 1 bagian = $${totalGrams}\\text{ g} \\div ${n1 + n2} = ${multiplier * 40}\\text{ g}$. Tepung terigu = $${n1} \\times ${multiplier * 40}\\text{ g} = \\mathbf{${partA}\\text{ gram}}$.`;
+
+    act2Title = "Aktivitas 2: Perbandingan Senilai Belanja Bahan (target: IK-03)";
+    act2Problem = `Untuk membeli $${qty1}\\text{ kg}$ telur ayam, koki tersebut membayar $\\text{Rp}$${(qty1 * priceUnit).toLocaleString("id-ID")}. Berapakah biaya yang harus dibayar jika koki membutuhkan $${qty2}\\text{ kg}$ telur ayam?`;
+    act2Answer = `Harga per kilogram = $\\text{Rp}$${(qty1 * priceUnit).toLocaleString("id-ID")} $\\div ${qty1} = \\text{Rp}$${priceUnit.toLocaleString("id-ID")}. Biaya untuk $${qty2}\\text{ kg}$ = $${qty2} \\times \\text{Rp}$${priceUnit.toLocaleString("id-ID")} = $\\mathbf{\\text{Rp}$${(qty2 * priceUnit).toLocaleString("id-ID")}}$.`;
+  } else if (scenarioType === 1) {
+    const scale = [100, 200, 500][Math.floor(Math.random() * 3)];
+    const mapCm = Math.floor(Math.random() * 4) + 4;
+    const realMeters = (mapCm * scale) / 100;
+    const speed = 60;
+    const timeHours = Math.floor(Math.random() * 2) + 2;
+    const distanceKm = speed * timeHours;
+    act1Title = "Aktivitas 1: Skala Peta dan Denah Rumah (target: IK-02)";
+    act1Problem = `Pada denah berskala $1 : ${scale}$, panjang sebuah ruang laboratorium adalah $${mapCm}\\text{ cm}$. Berapakah panjang sebenarnya ruang tersebut dalam meter?`;
+    act1Answer = `Panjang sebenarnya = $${mapCm}\\text{ cm} \\times ${scale} = ${mapCm * scale}\\text{ cm} = \\mathbf{${realMeters}\\text{ meter}}$.`;
+
+    act2Title = "Aktivitas 2: Laju Kecepatan dan Jarak Tempuh (target: IK-04)";
+    act2Problem = `Sebuah mobil melaju dengan kecepatan rata-rata $${speed}\\text{ km/jam}$ selama $${timeHours}\\text{ jam}$. Berapakah jarak yang ditempuh mobil tersebut?`;
+    act2Answer = `Jarak = kecepatan $\\times$ waktu = $${speed} \\times ${timeHours} = \\mathbf{${distanceKm}\\text{ km}}$.`;
+  } else {
+    const totalMl = (n1 + n2) * multiplier * 50;
+    const partA = n1 * multiplier * 50;
+    const kmPerLiter = 15;
+    const dist1 = 90;
+    const lit1 = dist1 / kmPerLiter;
+    const lit2 = 10;
+    const dist2 = lit2 * kmPerLiter;
+    act1Title = "Aktivitas 1: Eksplorasi Rasio Pupuk Tanaman (target: IK-01)";
+    act1Problem = `Petani hidroponik mencampur cairan nutrisi A dan nutrisi B dengan rasio $${n1} : ${n2}$. Total volume racikan adalah $${totalMl}\\text{ ml}$. Tentukan volume cairan nutrisi A:`;
+    act1Answer = `Total bagian = $${n1 + n2}$. Nilai 1 bagian = $${totalMl}\\text{ ml} \\div ${n1 + n2} = ${multiplier * 50}\\text{ ml}$. Nutrisi A = $${n1} \\times ${multiplier * 50}\\text{ ml} = \\mathbf{${partA}\\text{ ml}}$.`;
+
+    act2Title = "Aktivitas 2: Konsumsi Efisiensi Bahan Bakar (target: IK-03)";
+    act2Problem = `Sebuah motor menempuh $${dist1}\\text{ km}$ dengan $${lit1}\\text{ liter}$ bensin. Berapa km jarak yang ditempuh dengan $${lit2}\\text{ liter}$ bensin?`;
+    act2Answer = `Efisiensi = $${dist1} \\div ${lit1} = ${kmPerLiter}\\text{ km/liter}$. Jarak untuk $${lit2}\\text{ liter}$ = $${lit2} \\times ${kmPerLiter} = \\mathbf{${dist2}\\text{ km}}$.`;
+  }
 
   return `# LEMBAR KERJA PESERTA DIDIK (LKPD)
 
@@ -139,54 +182,49 @@ function mockContent(kind: "lkpd" | "asesmen", context: string): string {
 | **Hari / Tanggal** | .................................................... |
 
 ## B. Tujuan Pembelajaran
-1. Peserta didik dapat memahami dan memodelkan konsep ${context} melalui permasalahan kontekstual kehidupan sehari-hari.
-2. Peserta didik dapat menyelesaikan masalah perbandingan secara sistematis, kritis, dan logis.
+1. Peserta didik dapat memahami dan memodelkan konsep ${context} melalui permasalahan kontekstual.
+2. Peserta didik dapat menyelesaikan masalah perbandingan secara kritis, runtut, dan tepat.
 
 ## C. Petunjuk Pengerjaan
 1. Berdoalah sebelum memulai kegiatan belajar.
-2. Bacalah setiap narasi masalah dan cermati informasi besaran yang diberikan.
-3. Kerjakan setiap aktivitas secara bertahap pada ruang jawaban yang telah disediakan.
+2. Cermati setiap narasi masalah kontekstual yang diberikan.
+3. Kerjakan setiap aktivitas secara bertahap pada ruang jawaban yang disediakan.
 
 ## D. Kegiatan Pembelajaran
-### Aktivitas 1: Eksplorasi Rasio Kontekstual (target: IK-01)
-Seorang peracik minuman menyiapkan bahan minuman herbal. Rasio antara sari jahe dan madu murni yang digunakan adalah $${n1} : ${n2}$ dengan total volume racikan $${totalWeight}\\text{ ml}$. Berapakah mililiter sari jahe yang harus dituangkan?
+### ${act1Title}
+${act1Problem}
 
 > **Ruang Jawaban:**
-> - Jumlah bagian perbandingan = $\\dots\\dots\\dots\\dots$
-> - Nilai 1 bagian = $\\dots\\dots\\dots\\dots$
-> - Volume sari jahe = $\\dots\\dots\\dots\\dots$
+> - Bagian perbandingan = $\\dots\\dots\\dots\\dots$
+> - Hasil perhitungan = $\\dots\\dots\\dots\\dots$
 
-### Aktivitas 2: Penerapan Perbandingan Senilai (target: IK-03)
-Sebuah kendaraan operasional menempuh jarak $${distance1}\\text{ km}$ dengan menghabiskan $${liters1}\\text{ liter}$ bensin. Berapakah kilometer jarak yang dapat ditempuh kendaraan tersebut jika diisi $${liters2}\\text{ liter}$ bensin dengan kondisi laju yang sama?
+### ${act2Title}
+${act2Problem}
 
 > **Ruang Jawaban:**
-> - Rasio konsumsi bahan bakar (jarak per liter) = $\\dots\\dots\\dots\\dots$
-> - Jarak yang ditempuh untuk $${liters2}\\text{ liter}$ = $\\dots\\dots\\dots\\dots$
+> - Nilai per satuan = $\\dots\\dots\\dots\\dots$
+> - Hasil akhir = $\\dots\\dots\\dots\\dots$
 
 ## E. Refleksi Diri Siswa
-- Konsep perbandingan apa yang paling membantu dalam menyelesaikan masalah di atas?
-- Langkah mana yang menurutmu perlu diperhatikan lebih teliti agar tidak keliru?
+- Konsep apa yang paling membantu dalam memecahkan soal di atas?
+- Bagian mana yang menurutmu perlu dilatih lebih sering?
 
 <!-- PEMISAH_KUNCI_GURU -->
 
-# KUNCI JAWABAN & PANDUAN GURU (CATATAN PEGANGAN)
+# KUNCI JAWABAN & PANDUAN GURU
 
 ## A. Pembahasan & Kunci Jawaban Resmi
-1. **Aktivitas 1:**
-   - Total bagian perbandingan = $${n1} + ${n2} = ${n1 + n2}$ bagian.
-   - Nilai 1 bagian = $${totalWeight}\\text{ ml} \\div ${n1 + n2} = ${multiplier * 50}\\text{ ml}$.
-   - Kebutuhan sari jahe = $${n1} \\times ${multiplier * 50}\\text{ ml} = \\mathbf{${partA}\\text{ ml}}$.
-   *(Sebagai pelengkap, madu murni = $${n2} \\times ${multiplier * 50}\\text{ ml} = ${partB}\\text{ ml}$)*.
-2. **Aktivitas 2:**
-   - Efisiensi konsumsi = $${distance1}\\text{ km} \\div ${liters1}\\text{ liter} = ${kmPerLiter}\\text{ km/liter}$.
-   - Jarak tempuh baru = $${liters2}\\text{ liter} \\times ${kmPerLiter}\\text{ km/liter} = \\mathbf{${distance2}\\text{ km}}$.
+1. **${act1Title.split("(")[0].trim()}:**
+   - ${act1Answer}
+2. **${act2Title.split("(")[0].trim()}:**
+   - ${act2Answer}
 
 ## B. Pedoman & Rubrik Penskoran
 | Kriteria | Keterangan Rubrik | Skor Maks |
 |---|---|:---:|
-| **Pemodelan Rasio** | Mampu menuliskan bentuk matematis rasio dan bagian yang diketahui secara tepat | 30 |
-| **Kalkulasi & Langkah** | Langkah perhitungan runtut, tidak melewatkan tahapan nilai per satuan | 40 |
-| **Jawaban & Kesimpulan** | Jawaban akhir tepat beserta satuan besaran yang sesuai | 30 |
+| **Pemodelan Masalah** | Menyatakan rasio dan variabel yang diketahui secara tepat | 35 |
+| **Langkah Matematis** | Tahapan perhitungan runtut dan logis | 40 |
+| **Hasil Akhir & Satuan** | Jawaban akhir tepat beserta satuan besaran | 25 |
 | **Total Skor Maksimum** | | **100** |`;
 }
 
@@ -196,10 +234,10 @@ async function requestCompletion(
   model: string,
   messages: ChatMessage[],
   timeoutMs: number,
-  maxTokens: number = 2500
+  maxTokens: number = 2000
 ): Promise<{ content: string; model: string }> {
-  // Cap at 25 seconds so serverless functions never hit Vercel gateway timeout
-  const effectiveTimeout = Math.min(timeoutMs, 25_000);
+  // Cap at 55 seconds so serverless functions never hit Vercel 60s gateway timeout while allowing AI enough time to generate full LKPD
+  const effectiveTimeout = Math.min(timeoutMs, 55_000);
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), effectiveTimeout);
   try {
@@ -259,6 +297,21 @@ async function chatCompletion(
         return { content: res.content, source: "online", model: res.model, isFallback: false };
       } catch (backupError) {
         console.error(`Backup AI key failed (${safeError(backupError)}); using mock fallback.`);
+      }
+    }
+
+    // Auto-failover to Xkiro online if local 9router (127.0.0.1) is unreachable (e.g. running on Vercel cloud)
+    if (baseUrl.includes("127.0.0.1") || baseUrl.includes("localhost")) {
+      const xkiroKey = process.env.XKIRO_API_KEY;
+      const xkiroBase = process.env.XKIRO_BASE_URL || "https://api.xkiro.com/v1";
+      if (xkiroKey) {
+        try {
+          console.info("9Router lokal tidak terjangkau. Otomatis beralih ke Xkiro online...");
+          const res = await requestCompletion(xkiroBase, xkiroKey, "deepseek/deepseek-v3.2", messages, timeoutMs);
+          return { content: res.content, source: "online", model: `${res.model} (Auto Failover)`, isFallback: false };
+        } catch (xkiroErr) {
+          console.error("Failover ke Xkiro online juga gagal:", xkiroErr);
+        }
       }
     }
 
