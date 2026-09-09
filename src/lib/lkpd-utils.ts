@@ -37,51 +37,54 @@ export function sanitizeMathMarkdown(content: string): string {
 }
 
 /**
- * Menghasilkan kunci jawaban dan rubrik penskoran sintetis jika model AI tidak mengeluarkan pemisah.
+ * Memastikan tabel identitas LKPD sesuai 100% dengan mode pengerjaan yang dipilih (Mandiri vs Kelompok)
+ * Menjamin konsistensi di seluruh level (Dasar, Menengah, Mahir).
+ */
+export function ensureCorrectIdentityTable(
+  content: string,
+  isKelompok: boolean,
+  jumlahAnggota: number = 4
+): string {
+  if (!content || typeof content !== "string") return "";
+
+  const rowsAnggota = Array.from(
+    { length: Math.max(2, jumlahAnggota) },
+    (_, i) => `| ${i === 0 ? "**Anggota Kelompok**" : ""} | ${i + 1}. .................................................... (No: .....) |`
+  ).join("\n");
+
+  const groupTable = `| Komponen | Keterangan |
+|---|---|
+| **Kelompok** | Kelompok ........................................... |
+| **Kelas** | VII-.... |
+| **Hari / Tanggal** | .................................................... |
+${rowsAnggota}`;
+
+  const indivTable = `| Komponen | Keterangan |
+|---|---|
+| **Nama Siswa** | .................................................... |
+| **Kelas / No. Absen** | VII-.... / ....... |
+| **Hari / Tanggal** | .................................................... |`;
+
+  const targetTable = isKelompok ? groupTable : indivTable;
+
+  // Regex fleksibel mencakup ## A. Identitas Peserta Didik sampai heading berikutnya
+  const identitasRegex = /(## A\.\s*Identitas Peserta Didik\s*[\r\n]+)([\s\S]*?)([\r\n]+(?:---[\r\n]+)?## B\.)/i;
+  if (identitasRegex.test(content)) {
+    return content.replace(identitasRegex, `$1${targetTable}\n\n$3`);
+  }
+
+  return content;
+}
+
+/**
+ * Kunci jawaban fallback minimal jika LLM terpotong sebelum bagian kunci.
  */
 function createFallbackTeacherKey(studentContent: string, level?: string, topic?: string): string {
   const safeLevel = level ? `(Level ${level.toUpperCase()})` : "";
-  const safeTopic = topic || "Rasio (Perbandingan)";
-
-  // Ekstrak aktivitas yang tertera pada lembar siswa jika ada
-  const activityMatches = Array.from(studentContent.matchAll(/###?\s*(Aktivitas\s*\d+[^:\n]*)/gi)).map(m => m[1].trim());
-
-  let pembahasanText = "";
-  if (activityMatches.length > 0) {
-    pembahasanText = activityMatches.map((act, idx) => `
-### ${act}
-- **Langkah 1 (Pemodelan):** Identifikasi perbandingan dan kuantitas data yang diketahui pada soal.
-- **Langkah 2 (Nilai Satuan):** Tentukan nilai 1 bagian rasio dengan membagi kuantitas total terhadap jumlah bagian rasio ($Nilai = Total / Bagian$).
-- **Langkah 3 (Solusi Akhir):** Kalikan nilai 1 bagian dengan proporsi yang ditanyakan untuk mendapatkan hasil akhir terverifikasi.
-`).join("\n");
-  } else {
-    pembahasanText = `
-### Aktivitas Pembelajaran
-- **Pemodelan Matematis:** Menuliskan relasi rasio kontekstual $a : b$ secara bertahap.
-- **Perhitungan Runtut:** Membagi nilai total dengan jumlah bagian, lalu mengalikan ke masing-masing komponen.
-- **Hasil Akhir:** Seluruh perhitungan diselesaikan dengan langkah terverifikasi dan interpretasi logis.
-`;
-  }
 
   return `# KUNCI JAWABAN & PANDUAN GURU ${safeLevel}
 
-## A. Pembahasan & Kunci Jawaban Resmi
-Berikut adalah pedoman penyelesaian matematis untuk memandu guru saat memeriksa lembar kerja peserta didik materi **${safeTopic}**:
-
-${pembahasanText}
-
----
-
-## B. Pedoman & Rubrik Penskoran
-
-| Kriteria Penilaian | Deskripsi Indikator Kinerja | Skor Maksimal |
-|---|---|:---:|
-| **Pemodelan Rasio** | Mampu menuliskan bentuk perbandingan dan relasi matematika secara tepat dari konteks masalah | 35 |
-| **Prosedur Perhitungan** | Menuntaskan langkah-langkah hitung secara runtut dan sistematis hingga diperoleh hasil akhir | 45 |
-| **Refleksi & Interpretasi** | Memberikan kesimpulan yang logis dan menjawab pertanyaan refleksi pemahaman konsep | 20 |
-| **Total Skor Maksimal** | | **100** |
-
-> **Catatan Guru:** Berikan umpan balik konstruktif bagi peserta didik yang masih mengalami miskonsepsi pada penentuan nilai satu bagian rasio.`;
+> **Kunci Jawaban Guru:** Kunci jawaban belum ter-generate secara utuh untuk level ini. Klik tombol **Regenerasi Level Ini** di atas untuk membuat ulang kunci jawaban lengkap dengan solusi numerik dan langkah matematis terperinci.`;
 }
 
 /**
@@ -135,8 +138,7 @@ export function splitLkpdContent(
     }
   }
 
-  // 3. Jika model AI tidak mengeluarkan bagian kunci jawaban terpisah,
-  // otomatis generate kunci jawaban dan rubrik penskoran resmi agar tab guru TIDAK PERNAH KOSONG
+  // 3. Jika model AI tidak mengeluarkan bagian kunci jawaban terpisah:
   return {
     studentContent: sanitized.trim(),
     teacherKeyContent: createFallbackTeacherKey(sanitized, level, topic),

@@ -1,6 +1,7 @@
 import "server-only";
 
 import type { GayaBelajar, Level } from "@/types";
+import { ensureCorrectIdentityTable } from "./lkpd-utils";
 
 const DEFAULT_BASE_URL = "http://127.0.0.1:20128/v1";
 const DEFAULT_MODEL = "INTELLIGENCE-SKRIPSI";
@@ -261,10 +262,10 @@ async function requestCompletion(
   model: string,
   messages: ChatMessage[],
   timeoutMs: number,
-  maxTokens: number = 2000
+  maxTokens: number = 4000
 ): Promise<{ content: string; model: string }> {
-  // Cap at 40 seconds so serverless functions never hit Vercel 60s gateway timeout
-  const effectiveTimeout = Math.min(timeoutMs, 40_000);
+  // Cap at 55 seconds so serverless functions never hit Vercel 60s gateway timeout while giving LLM plenty of time
+  const effectiveTimeout = Math.min(timeoutMs, 55_000);
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), effectiveTimeout);
   try {
@@ -299,7 +300,8 @@ async function requestCompletion(
 async function chatCompletion(
   messages: ChatMessage[],
   fallback: string,
-  options?: ChatOptions
+  options?: ChatOptions,
+  maxTokens: number = 4000
 ): Promise<AIResult> {
   const cfg = config();
   const baseUrl = options?.baseUrl || cfg.baseUrl;
@@ -311,7 +313,7 @@ async function chatCompletion(
   if (!apiKey) return { content: fallback, source: "mock", model, isFallback: true };
 
   try {
-    const res = await requestCompletion(baseUrl, apiKey, model, messages, timeoutMs);
+    const res = await requestCompletion(baseUrl, apiKey, model, messages, timeoutMs, maxTokens);
     return { content: res.content, source: "online", model: res.model, isFallback: false };
   } catch (primaryError) {
     const reason = primaryError instanceof Error ? primaryError.message : "UnknownError";
@@ -320,7 +322,7 @@ async function chatCompletion(
     if (backupApiKey && backupApiKey !== apiKey) {
       try {
         console.info("Switching to backup AI key...");
-        const res = await requestCompletion(baseUrl, backupApiKey, model, messages, timeoutMs);
+        const res = await requestCompletion(baseUrl, backupApiKey, model, messages, timeoutMs, maxTokens);
         return { content: res.content, source: "online", model: res.model, isFallback: false };
       } catch (backupError) {
         console.error(`Backup AI key failed (${safeError(backupError)}); using mock fallback.`);
@@ -334,7 +336,7 @@ async function chatCompletion(
       if (xkiroKey) {
         try {
           console.info("9Router lokal tidak terjangkau. Otomatis beralih ke Xkiro online...");
-          const res = await requestCompletion(xkiroBase, xkiroKey, "deepseek/deepseek-v3.2", messages, timeoutMs);
+          const res = await requestCompletion(xkiroBase, xkiroKey, "deepseek/deepseek-v3.2", messages, timeoutMs, maxTokens);
           return { content: res.content, source: "online", model: `${res.model} (Auto Failover)`, isFallback: false };
         } catch (xkiroErr) {
           console.error("Failover ke Xkiro online juga gagal:", xkiroErr);
@@ -404,7 +406,8 @@ Dokumen harus dalam format Markdown bersih, ramah cetak A4, dan rumus matematika
 ATURAN FORMULA & SIMBOL MATEMATIKA (PEDOMAN EQUATION & OMML):
 1. Satuan mata uang Rupiah DILARANG ditulis di dalam format LaTeX ($...$). Jangan gunakan \\text{Rp}, \\mathbf{Rp}, dsb. Tulis selalu satuan Rupiah sebagai teks biasa tebal: **Rp16.000** atau **Rp112.000**.
 2. Rumus matematika WAJIB menggunakan tanda dolar lengkap berpasangan: $...$ untuk inline (contoh: $3 : 5$ atau $\\frac{a}{b}$) dan $$...$$ untuk baris rumus terpisah.
-3. JANGAN PERNAH menyisakan kode LaTeX mentah tanpa penutup atau di dalam backtick inline.
+3. HINDARI menulis kalimat deskripsi panjang di dalam pecahan KaTeX \\frac{\\text{...}}{\\text{...}}. Gunakan format perbandingan yang rapi atau variabel/istilah ringkas seperti $\\frac{\\text{Bahan Tersedia}}{\\text{Kebutuhan Resep}}$ agar equation tampil elegan dan garis pecahan tidak menabrak teks.
+4. JANGAN PERNAH menyisakan kode LaTeX mentah tanpa penutup atau di dalam backtick inline.
 
 ${identitasInstruksi}
 
@@ -425,18 +428,22 @@ PENTING — STRUKTUR DOKUMEN WAJIB MENGGUNAKAN PEMISAH RESMI BERIKUT:
 ATURAN MUTLAK LEMBAR KERJA SISWA (BAGIAN D):
 1. DILARANG KERAS MENULISKAN JAWABAN ATAU HASIL PERHITUNGAN PADA BAGIAN D (KEGIATAN PEMBELAJARAN SISWA)!
 2. Untuk Level Dasar sekalipun: Scaffolding HANYA berupa panduan alur langkah kerja. Setiap langkah pada ruang jawaban siswa WAJIB KOSONG (berupa titik-titik "......" atau garis isian yang harus dikerjakan sendiri oleh siswa). JANGAN PERNAH mengisi ruang jawaban siswa dengan angka atau solusi yang sudah selesai!
-3. Kunci jawaban, solusi matematis lengkap, dan pembahasan HANYA dan WAJIB ditulis pada bagian KUNCI JAWABAN & PANDUAN GURU di bawah tanda pemisah <!-- PEMISAH_KUNCI_GURU -->.`,
+
+ATURAN WAJIB KUNCI JAWABAN & PANDUAN GURU:
+1. Kunci jawaban HARUS menjawab SECARA PERSIS, NYATA, dan LENGKAP seluruh ${params.jumlahAktivitas} aktivitas yang dibuat pada Bagian D.
+2. Tuliskan langkah perhitungan numerik yang detail, angka riil, dan hasil akhir tebal (**jawaban**). DILARANG KERAS menulis instruksi umum atau menyuruh guru/siswa mengamati/mencari sendiri! Berikan seluruh solusi matematis tuntas untuk mempermudah guru memeriksa hasil siswa.
+3. Selesaikan seluruh isi dokumen dari awal sampai tuntas tanpa terpotong di tengah jalan.`,
     },
     {
       role: "user",
-      content: `Buat LKPD BARU dan BERBEDA (Variasi Token #${seed}) tentang "${params.materi}" untuk tingkat ${params.level}.
+      content: `Buat LKPD BARU, LENGKAP, dan BERBEDA (Variasi Token #${seed}) tentang "${params.materi}" untuk tingkat ${params.level}.
 Bentuk pengerjaan: ${isKelompok ? `Kelompok (${jumlahAnggota} orang)` : "Individu"}.
 Karakteristik level: ${levelKeterangan[params.level]}.
 Penyesuaian VAK: ${gayaKeterangan}.
 Indikator target: ${indikator}.
 Buat tepat ${params.jumlahAktivitas} aktivitas kontekstual unik. Instruksi tambahan: ${params.promptTambahan || "tidak ada"}.
 Pastikan pada Bagian D (Kegiatan Pembelajaran), ruang jawaban siswa murni berupa titik-titik kosong tanpa angka jawaban yang terisi!
-Sertakan tanda pembatas <!-- PEMISAH_KUNCI_GURU --> tepat sebelum bagian Kunci Jawaban Guru. Keluarkan langsung teks Markdown tanpa sapaan pembuka/penutup.`,
+Sertakan tanda pembatas <!-- PEMISAH_KUNCI_GURU --> tepat sebelum bagian Kunci Jawaban Guru. Tulis kunci jawaban nyata dan lengkap untuk seluruh aktivitas. Keluarkan langsung teks Markdown tanpa sapaan pembuka/penutup.`,
     },
   ];
 
@@ -457,11 +464,23 @@ Sertakan tanda pembatas <!-- PEMISAH_KUNCI_GURU --> tepat sebelum bagian Kunci J
     model: params.model,
   };
 
-  return chatCompletion(
+  const aiResult = await chatCompletion(
     messages,
     mockContent("lkpd", `${params.materi} (${params.level})`, params.modePengerjaan, params.jumlahAnggota),
-    aiOptions
+    aiOptions,
+    4000
   );
+
+  const finalContent = ensureCorrectIdentityTable(
+    aiResult.content,
+    isKelompok,
+    jumlahAnggota
+  );
+
+  return {
+    ...aiResult,
+    content: finalContent,
+  };
 }
 
 export interface GeneratedQuestion {
