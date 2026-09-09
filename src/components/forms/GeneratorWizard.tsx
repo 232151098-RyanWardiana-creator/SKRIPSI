@@ -51,9 +51,6 @@ interface DocumentState extends GeneratedLKPD {
 
 const levels: Level[] = ["dasar", "menengah", "mahir"];
 const labels: Record<Level, string> = { dasar: "Dasar", menengah: "Menengah", mahir: "Mahir" };
-const STORAGE_KEY = "lkpd_generator_saved_state";
-const STORAGE_VERSION = 4;
-
 function isLevel(value: unknown): value is Level {
   return levels.includes(value as Level);
 }
@@ -69,26 +66,6 @@ const emptyDocuments = (): Record<Level, DocumentState | undefined> => ({
   menengah: undefined,
   mahir: undefined,
 });
-
-function persistGeneratorState(state: {
-  documents: Record<Level, DocumentState | undefined>;
-  step: number;
-  topik: string;
-  kelasId: string;
-  selectedAssessmentId: string;
-  active: Level;
-  jumlah: number;
-  gaya: string;
-  pertimbangkanGaya: boolean;
-  aiProvider?: string;
-  aiModel?: string;
-}) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify({
-    ...state,
-    version: STORAGE_VERSION,
-    documents: Object.fromEntries(levels.map(level => [level, state.documents[level] ? { ...state.documents[level], editing: false } : undefined]))
-  }));
-}
 
 function sanitizeFilename(value: string) {
   return value.normalize("NFKD").replace(/[^a-zA-Z0-9\s_-]/g, "").trim().replace(/\s+/g, "-").toLowerCase().slice(0, 80) || "lkpd";
@@ -121,11 +98,9 @@ export function GeneratorWizard() {
   const [error, setError] = useState("");
   const [progress, setProgress] = useState<{ level: Level; index: number } | null>(null);
   const [validationLevel, setValidationLevel] = useState<Level | null>(null);
-  const [storageMessage, setStorageMessage] = useState("");
   const [saved, setSaved] = useState(false);
   const [resetOpen, setResetOpen] = useState(false);
   const [copiedKey, setCopiedKey] = useState(false);
-  const hydrated = useRef(false);
 
   const kelasId = classes.some((item) => item.kelas.id === selectedClassId) ? selectedClassId : classes[0]?.kelas.id ?? "";
   const dataKelas = classes.find((item) => item.kelas.id === kelasId);
@@ -168,75 +143,7 @@ export function GeneratorWizard() {
   const providerName = providerObj.name;
   const modelLabel = modelObj?.label || aiModel;
 
-  useEffect(() => {
-    const timer = window.setTimeout(() => {
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        const value = raw ? JSON.parse(raw) as Record<string, unknown> : {};
-        if (raw && value.version !== STORAGE_VERSION) throw new Error("version");
-        const restoredTopik = typeof value.topik === "string" ? value.topik.slice(0, 200) : "Rasio (Perbandingan)";
-        const restoredKelasId = typeof value.kelasId === "string" ? value.kelasId : classes[0]?.kelas.id ?? "";
-        const restoredKelas = classes.find(item => item.kelas.id === restoredKelasId)?.kelas.nama;
-        const source = value.documents && typeof value.documents === "object" ? value.documents as Record<string, unknown> : {};
-        const restored = emptyDocuments();
-        levels.forEach(level => { if (validDocument(source[level])) restored[level] = { ...source[level], editing: false }; });
-        documentsRef.current = restored;
-        setDocuments(restored);
-        setTopik(restoredTopik);
-        setKelasId(restoredKelasId);
-        if (typeof value.selectedAssessmentId === "string") setAssessmentId(value.selectedAssessmentId);
-        if (typeof value.aiProvider === "string") setAiProvider(value.aiProvider);
-        if (typeof value.aiModel === "string") setAiModel(value.aiModel);
-        const complete = levels.every(level => restored[level]?.status !== "error" && !!restored[level]?.content.trim());
-        setStep(complete ? 3 : Number.isInteger(value.step) && Number(value.step) >= 0 && Number(value.step) <= 3 ? Number(value.step) : 0);
-        setActive(complete ? "dasar" : isLevel(value.active) ? value.active : "dasar");
-        if (Number.isInteger(value.jumlah) && Number(value.jumlah) >= 1 && Number(value.jumlah) <= 10) setJumlah(Number(value.jumlah));
-        if (typeof value.gaya === "string") setGaya(value.gaya.slice(0, 1000));
-        if (typeof value.pertimbangkanGaya === "boolean") setPertimbangkanGaya(value.pertimbangkanGaya);
-      } catch {
-        localStorage.removeItem(STORAGE_KEY);
-        documentsRef.current = emptyDocuments();
-        setStorageMessage("");
-      } finally {
-        hydrated.current = true;
-      }
-    }, 0);
-    return () => window.clearTimeout(timer);
-  }, [classes]);
-
-  useEffect(() => {
-    if (!hydrated.current) return;
-    let ok = true;
-    try {
-      persistGeneratorState({
-        documents: documentsRef.current,
-        step,
-        topik,
-        kelasId,
-        selectedAssessmentId: assessmentId,
-        active,
-        jumlah,
-        gaya,
-        pertimbangkanGaya,
-        aiProvider,
-        aiModel
-      });
-    } catch {
-      ok = false;
-    }
-    const timer = window.setTimeout(() => {
-      setSaved(ok);
-      setStorageMessage(ok ? "" : "Perubahan belum dapat disimpan di perangkat.");
-    }, 0);
-    return () => window.clearTimeout(timer);
-  }, [documents, step, topik, kelasId, assessmentId, active, jumlah, gaya, pertimbangkanGaya, aiProvider, aiModel]);
-
   function resetGenerator() {
-    try {
-      localStorage.removeItem(STORAGE_KEY);
-    } catch {
-      // ignore
-    }
     const cleared = emptyDocuments();
     documentsRef.current = cleared;
     setDocuments(cleared);
@@ -249,26 +156,11 @@ export function GeneratorWizard() {
     setGaya("Gunakan konteks resep masakan, denah/skala peta, dan perbandingan harga satuan.");
     setPertimbangkanGaya(true);
     setError("");
-    setStorageMessage("");
     setSaved(false);
     setLoadingLevels([]);
     setProgress(null);
     setValidationLevel(null);
     setResetOpen(false);
-
-    persistGeneratorState({
-      documents: cleared,
-      step: 0,
-      topik: "Rasio (Perbandingan)",
-      kelasId: classes[0]?.kelas.id ?? "",
-      selectedAssessmentId: "",
-      active: "dasar",
-      jumlah: 4,
-      gaya: "Gunakan konteks resep masakan, denah/skala peta, dan perbandingan harga satuan.",
-      pertimbangkanGaya: true,
-      aiProvider,
-      aiModel,
-    });
   }
 
   const assessmentJudul = assessment?.judul ?? "-";
@@ -280,31 +172,10 @@ export function GeneratorWizard() {
     indikatorLemah: indikatorLemah.length ? indikatorLemah : ["IK-01", "IK-02", "IK-03"],
   };
 
-  function updateDocument(level: Level, document: DocumentState | undefined, immediate = false) {
+  function updateDocument(level: Level, document: DocumentState | undefined, _immediate?: boolean) {
     const next = { ...documentsRef.current, [level]: document };
     documentsRef.current = next;
     setDocuments(next);
-    if (immediate) {
-      try {
-        persistGeneratorState({
-          documents: next,
-          step: 3,
-          topik,
-          kelasId,
-          selectedAssessmentId: assessmentId,
-          active: level,
-          jumlah,
-          gaya,
-          pertimbangkanGaya,
-          aiProvider,
-          aiModel
-        });
-        setSaved(true);
-      } catch {
-        setSaved(false);
-        setStorageMessage("Hasil selesai, tetapi belum dapat disimpan di perangkat.");
-      }
-    }
   }
 
   async function generate(only?: Level, customConfig?: { provider: string; model: string }) {
@@ -448,8 +319,6 @@ export function GeneratorWizard() {
           <div className="mt-2 flex flex-wrap items-center gap-2">
             {saved && <span className="text-xs font-medium text-emerald-700">Tersimpan otomatis</span>}
           </div>
-
-          {storageMessage && <p role="alert" className="mt-2 text-sm text-amber-700">{storageMessage}</p>}
         </div>
 
         <Button variant="ghost" onClick={() => setResetOpen(true)}>
