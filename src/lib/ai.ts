@@ -120,65 +120,67 @@ function mockContent(
   kind: "lkpd" | "asesmen",
   context: string,
   modePengerjaan: "individu" | "kelompok" = "individu",
-  jumlahAnggota: number = 4
+  jumlahAnggota: number = 4,
+  jumlahAktivitas: number = 4
 ): string {
   if (kind === "asesmen") return "[]";
 
-  const scenarioType = Math.floor(Math.random() * 3);
+  const count = Math.min(6, Math.max(1, jumlahAktivitas));
   const n1 = Math.floor(Math.random() * 4) + 2;
   const n2 = n1 + Math.floor(Math.random() * 3) + 2;
-  const multiplier = Math.floor(Math.random() * 5) + 3;
+  const mult = Math.floor(Math.random() * 5) + 3;
 
-  let act1Title = "";
-  let act1Problem = "";
-  let act1Answer = "";
-  let act2Title = "";
-  let act2Problem = "";
-  let act2Answer = "";
+  const allActivities = [
+    {
+      title: "Aktivitas 1: Resep Adonan Roti Tradisional (target: IK-01)",
+      problem: `Seorang koki membuat adonan roti dengan rasio tepung terigu dan ragi basah adalah $${n1} : ${n2}$. Jika total campuran kedua bahan adalah $${(n1 + n2) * mult * 40}\\text{ gram}$, berapakah gram tepung terigu yang digunakan?`,
+      answer: `Rasio terigu : ragi = $${n1} : ${n2}$. Total bagian = $${n1 + n2}$. Nilai 1 bagian = $${(n1 + n2) * mult * 40}\\text{ g} \\div ${n1 + n2} = ${mult * 40}\\text{ g}$. Tepung terigu = $${n1} \\times ${mult * 40}\\text{ g} = \\mathbf{${n1 * mult * 40}\\text{ gram}}$.`,
+    },
+    {
+      title: "Aktivitas 2: Perbandingan Senilai Belanja Bahan (target: IK-02)",
+      problem: `Untuk membeli $4\\text{ kg}$ telur ayam, koki tersebut membayar **Rp${(4 * (mult + 5) * 2000).toLocaleString("id-ID")}**. Berapakah biaya yang harus dibayar jika koki membutuhkan $7\\text{ kg}$ telur ayam?`,
+      answer: `Harga per kilogram = **Rp${(4 * (mult + 5) * 2000).toLocaleString("id-ID")}** $\\div 4$ = **Rp${((mult + 5) * 2000).toLocaleString("id-ID")}**. Biaya untuk $7\\text{ kg}$ = $7 \\times$ **Rp${((mult + 5) * 2000).toLocaleString("id-ID")}** = **Rp${(7 * (mult + 5) * 2000).toLocaleString("id-ID")}**.`,
+    },
+    {
+      title: "Aktivitas 3: Skala Peta dan Denah Rumah (target: IK-03)",
+      problem: `Pada denah berskala $1 : 200$, panjang sebuah ruang laboratorium adalah $${mult + 3}\\text{ cm}$. Berapakah panjang sebenarnya ruang tersebut dalam meter?`,
+      answer: `Panjang sebenarnya = $${mult + 3}\\text{ cm} \\times 200 = ${(mult + 3) * 200}\\text{ cm} = \\mathbf{${((mult + 3) * 200) / 100}\\text{ meter}}$.`,
+    },
+    {
+      title: "Aktivitas 4: Laju Kecepatan dan Jarak Tempuh (target: IK-04)",
+      problem: `Sebuah mobil melaju dengan kecepatan rata-rata $60\\text{ km/jam}$ selama $${mult - 1 || 2}\\text{ jam}$. Berapakah jarak yang ditempuh mobil tersebut?`,
+      answer: `Jarak = kecepatan $\\times$ waktu = $60 \\times ${mult - 1 || 2} = \\mathbf{${60 * (mult - 1 || 2)}\\text{ km}}$.`,
+    },
+    {
+      title: "Aktivitas 5: Eksplorasi Rasio Pupuk Tanaman Hidroponik (target: IK-05)",
+      problem: `Petani hidroponik mencampur cairan nutrisi A dan nutrisi B dengan rasio $${n1} : ${n2}$. Total volume racikan adalah $${(n1 + n2) * mult * 50}\\text{ ml}$. Tentukan volume cairan nutrisi A:`,
+      answer: `Total bagian = $${n1 + n2}$. Nilai 1 bagian = $${(n1 + n2) * mult * 50}\\text{ ml} \\div ${n1 + n2} = ${mult * 50}\\text{ ml}$. Nutrisi A = $${n1} \\times ${mult * 50}\\text{ ml} = \\mathbf{${n1 * mult * 50}\\text{ ml}}$.`,
+    },
+    {
+      title: "Aktivitas 6: Analisis Efisiensi Konsumsi Energi (target: IK-03)",
+      problem: `Sebuah kendaraan menempuh $90\\text{ km}$ dengan $6\\text{ liter}$ bensin. Berapa km jarak yang ditempuh dengan $10\\text{ liter}$ bensin?`,
+      answer: `Efisiensi = $90 \\div 6 = 15\\text{ km/liter}$. Jarak untuk $10\\text{ liter}$ = $10 \\times 15 = \\mathbf{150\\text{ km}}$.`,
+    },
+  ];
 
-  if (scenarioType === 0) {
-    const totalGrams = (n1 + n2) * multiplier * 40;
-    const partA = n1 * multiplier * 40;
-    const priceUnit = (Math.floor(Math.random() * 4) + 6) * 2000;
-    const qty1 = 4;
-    const qty2 = 7;
-    act1Title = "Aktivitas 1: Resep Adonan Roti Tradisional (target: IK-01)";
-    act1Problem = `Seorang koki membuat adonan roti dengan rasio tepung terigu dan ragi basah adalah $${n1} : ${n2}$. Jika total campuran kedua bahan adalah $${totalGrams}\\text{ gram}$, berapakah gram tepung terigu yang digunakan?`;
-    act1Answer = `Rasio terigu : ragi = $${n1} : ${n2}$. Total bagian = $${n1 + n2}$. Nilai 1 bagian = $${totalGrams}\\text{ g} \\div ${n1 + n2} = ${multiplier * 40}\\text{ g}$. Tepung terigu = $${n1} \\times ${multiplier * 40}\\text{ g} = \\mathbf{${partA}\\text{ gram}}$.`;
+  const selectedActs = allActivities.slice(0, count);
 
-    act2Title = "Aktivitas 2: Perbandingan Senilai Belanja Bahan (target: IK-03)";
-    act2Problem = `Untuk membeli $${qty1}\\text{ kg}$ telur ayam, koki tersebut membayar **Rp${(qty1 * priceUnit).toLocaleString("id-ID")}**. Berapakah biaya yang harus dibayar jika koki membutuhkan $${qty2}\\text{ kg}$ telur ayam?`;
-    act2Answer = `Harga per kilogram = **Rp${(qty1 * priceUnit).toLocaleString("id-ID")}** $\\div ${qty1}$ = **Rp${priceUnit.toLocaleString("id-ID")}**. Biaya untuk $${qty2}\\text{ kg}$ = $${qty2} \\times$ **Rp${priceUnit.toLocaleString("id-ID")}** = **Rp${(qty2 * priceUnit).toLocaleString("id-ID")}**.`;
-  } else if (scenarioType === 1) {
-    const scale = [100, 200, 500][Math.floor(Math.random() * 3)];
-    const mapCm = Math.floor(Math.random() * 4) + 4;
-    const realMeters = (mapCm * scale) / 100;
-    const speed = 60;
-    const timeHours = Math.floor(Math.random() * 2) + 2;
-    const distanceKm = speed * timeHours;
-    act1Title = "Aktivitas 1: Skala Peta dan Denah Rumah (target: IK-02)";
-    act1Problem = `Pada denah berskala $1 : ${scale}$, panjang sebuah ruang laboratorium adalah $${mapCm}\\text{ cm}$. Berapakah panjang sebenarnya ruang tersebut dalam meter?`;
-    act1Answer = `Panjang sebenarnya = $${mapCm}\\text{ cm} \\times ${scale} = ${mapCm * scale}\\text{ cm} = \\mathbf{${realMeters}\\text{ meter}}$.`;
+  const activitiesContent = selectedActs
+    .map(
+      (act) => `### ${act.title}
+${act.problem}
 
-    act2Title = "Aktivitas 2: Laju Kecepatan dan Jarak Tempuh (target: IK-04)";
-    act2Problem = `Sebuah mobil melaju dengan kecepatan rata-rata $${speed}\\text{ km/jam}$ selama $${timeHours}\\text{ jam}$. Berapakah jarak yang ditempuh mobil tersebut?`;
-    act2Answer = `Jarak = kecepatan $\\times$ waktu = $${speed} \\times ${timeHours} = \\mathbf{${distanceKm}\\text{ km}}$.`;
-  } else {
-    const totalMl = (n1 + n2) * multiplier * 50;
-    const partA = n1 * multiplier * 50;
-    const kmPerLiter = 15;
-    const dist1 = 90;
-    const lit1 = dist1 / kmPerLiter;
-    const lit2 = 10;
-    const dist2 = lit2 * kmPerLiter;
-    act1Title = "Aktivitas 1: Eksplorasi Rasio Pupuk Tanaman (target: IK-01)";
-    act1Problem = `Petani hidroponik mencampur cairan nutrisi A dan nutrisi B dengan rasio $${n1} : ${n2}$. Total volume racikan adalah $${totalMl}\\text{ ml}$. Tentukan volume cairan nutrisi A:`;
-    act1Answer = `Total bagian = $${n1 + n2}$. Nilai 1 bagian = $${totalMl}\\text{ ml} \\div ${n1 + n2} = ${multiplier * 50}\\text{ ml}$. Nutrisi A = $${n1} \\times ${multiplier * 50}\\text{ ml} = \\mathbf{${partA}\\text{ ml}}$.`;
+> **Ruang Jawaban:**
+> - Bagian perbandingan / nilai per satuan = $\\dots\\dots\\dots\\dots$
+> - Langkah perhitungan = $\\dots\\dots\\dots\\dots$
+> - Hasil akhir = $\\dots\\dots\\dots\\dots$
+`
+    )
+    .join("\n");
 
-    act2Title = "Aktivitas 2: Konsumsi Efisiensi Bahan Bakar (target: IK-03)";
-    act2Problem = `Sebuah motor menempuh $${dist1}\\text{ km}$ dengan $${lit1}\\text{ liter}$ bensin. Berapa km jarak yang ditempuh dengan $${lit2}\\text{ liter}$ bensin?`;
-    act2Answer = `Efisiensi = $${dist1} \\div ${lit1} = ${kmPerLiter}\\text{ km/liter}$. Jarak untuk $${lit2}\\text{ liter}$ = $${lit2} \\times ${kmPerLiter} = \\mathbf{${dist2}\\text{ km}}$.`;
-  }
+  const answersContent = selectedActs
+    .map((act, idx) => `${idx + 1}. **${act.title.split("(")[0].trim()}:**\n   - ${act.answer}`)
+    .join("\n");
 
   const isKelompok = modePengerjaan === "kelompok";
   const rowsAnggota = Array.from({ length: Math.max(2, jumlahAnggota) }, (_, i) => `| ${i === 0 ? "**Anggota Kelompok**" : ""} | ${i + 1}. .................................................... (No: .....) |`).join("\n");
@@ -219,19 +221,7 @@ ${identitasBlock}
 ${petunjukBlock}
 
 ## D. Kegiatan Pembelajaran
-### ${act1Title}
-${act1Problem}
-
-> **Ruang Jawaban:**
-> - Bagian perbandingan = $\\dots\\dots\\dots\\dots$
-> - Hasil perhitungan = $\\dots\\dots\\dots\\dots$
-
-### ${act2Title}
-${act2Problem}
-
-> **Ruang Jawaban:**
-> - Nilai per satuan = $\\dots\\dots\\dots\\dots$
-> - Hasil akhir = $\\dots\\dots\\dots\\dots$
+${activitiesContent}
 
 ## E. Refleksi Diri Siswa
 - Konsep apa yang paling membantu dalam memecahkan soal di atas?
@@ -242,10 +232,7 @@ ${act2Problem}
 # KUNCI JAWABAN & PANDUAN GURU
 
 ## A. Pembahasan & Kunci Jawaban Resmi
-1. **${act1Title.split("(")[0].trim()}:**
-   - ${act1Answer}
-2. **${act2Title.split("(")[0].trim()}:**
-   - ${act2Answer}
+${answersContent}
 
 ## B. Pedoman & Rubrik Penskoran
 | Kriteria | Keterangan Rubrik | Skor Maks |
@@ -297,6 +284,37 @@ async function requestCompletion(
   }
 }
 
+async function requestWithModelFallback(
+  baseUrl: string,
+  apiKey: string,
+  primaryModel: string,
+  messages: ChatMessage[],
+  timeoutMs: number,
+  maxTokens: number = 4000
+): Promise<{ content: string; model: string }> {
+  // Model-model sehat yang terbukti 200 OK di Xkiro
+  const candidateModels = [
+    primaryModel,
+    "mistralai/mistral-small-2603",
+    "mistralai/codestral-2508",
+    "mistralai/ministral-8b",
+    "deepseek/deepseek-v3.2",
+  ].filter((m, i, arr) => arr.indexOf(m) === i);
+
+  let lastError: unknown = null;
+  for (const m of candidateModels) {
+    try {
+      developmentLog(`AI request: ${baseUrl}/chat/completions (model: ${m})`);
+      return await requestCompletion(baseUrl, apiKey, m, messages, timeoutMs, maxTokens);
+    } catch (err) {
+      lastError = err;
+      const msg = err instanceof Error ? err.message : String(err);
+      console.warn(`Model ${m} gagal (${msg}). Mencoba kandidat berikutnya...`);
+    }
+  }
+  throw lastError;
+}
+
 async function chatCompletion(
   messages: ChatMessage[],
   fallback: string,
@@ -305,15 +323,56 @@ async function chatCompletion(
 ): Promise<AIResult> {
   const cfg = config();
   const baseUrl = options?.baseUrl || cfg.baseUrl;
-  const apiKey = options?.apiKey || cfg.apiKey;
+  const apiKey = options?.apiKey || cfg.apiKey || "";
   const backupApiKey = options?.backupApiKey;
   const model = options?.model || cfg.model;
   const timeoutMs = cfg.timeoutMs;
 
-  if (!apiKey) return { content: fallback, source: "mock", model, isFallback: true };
+  const xkiroKey = process.env.XKIRO_API_KEY || "";
+  const xkiroBase = process.env.XKIRO_BASE_URL || "https://api.xkiro.com/v1";
 
+  const isLocalEndpoint = baseUrl.includes("127.0.0.1") || baseUrl.includes("localhost");
+  const isVercelCloud = process.env.VERCEL === "1" || !!process.env.VERCEL_ENV;
+
+  const resolveXkiroModel = (m: string) => {
+    if (m.startsWith("xkiro/")) return m.replace(/^xkiro\//, "");
+    if (m.includes("deepseek") || m.includes("mistral") || m.includes("qwen") || m.includes("minimax")) return m;
+    return "mistralai/mistral-small-2603";
+  };
+
+  // 1. Jika di cloud Vercel atau API key 9Router lokal tidak diset,
+  // otomatis alihkan langsung ke Xkiro online agar AI SELALU generate real-time (bukan mock/cache)
+  if (isLocalEndpoint && (isVercelCloud || !apiKey) && xkiroKey) {
+    const targetModel = resolveXkiroModel(model);
+    try {
+      developmentLog(`Beralih dari 9Router lokal ke Xkiro online: ${targetModel}`);
+      const res = await requestWithModelFallback(xkiroBase, xkiroKey, targetModel, messages, timeoutMs, maxTokens);
+      return { content: res.content, source: "online", model: `${res.model} (Xkiro Online)`, isFallback: false };
+    } catch (onlineErr) {
+      console.warn("Panggilan langsung Xkiro online gagal, mencoba cadangan:", onlineErr);
+      const xkiroBackup = process.env.XKIRO_API_KEY_BACKUP || "";
+      if (xkiroBackup && xkiroBackup !== xkiroKey) {
+        try {
+          const res = await requestWithModelFallback(xkiroBase, xkiroBackup, targetModel, messages, timeoutMs, maxTokens);
+          return { content: res.content, source: "online", model: `${res.model} (Xkiro Backup)`, isFallback: false };
+        } catch {
+          // ignore
+        }
+      }
+    }
+  }
+
+  // 2. Jika tidak ada API key sama sekali dan Xkiro juga tidak ada:
+  if (!apiKey && !xkiroKey) {
+    return { content: fallback, source: "mock", model, isFallback: true };
+  }
+
+  // 3. Coba panggil endpoint utama (misal 9router lokal di laptop atau Xkiro direct)
   try {
-    const res = await requestCompletion(baseUrl, apiKey, model, messages, timeoutMs, maxTokens);
+    const isDirectXkiro = baseUrl.includes("xkiro");
+    const res = isDirectXkiro
+      ? await requestWithModelFallback(baseUrl, apiKey, model, messages, timeoutMs, maxTokens)
+      : await requestCompletion(baseUrl, apiKey || "sk-dummy", model, messages, isLocalEndpoint ? 4000 : timeoutMs, maxTokens);
     return { content: res.content, source: "online", model: res.model, isFallback: false };
   } catch (primaryError) {
     const reason = primaryError instanceof Error ? primaryError.message : "UnknownError";
@@ -322,24 +381,33 @@ async function chatCompletion(
     if (backupApiKey && backupApiKey !== apiKey) {
       try {
         console.info("Switching to backup AI key...");
-        const res = await requestCompletion(baseUrl, backupApiKey, model, messages, timeoutMs, maxTokens);
+        const isDirectXkiro = baseUrl.includes("xkiro");
+        const res = isDirectXkiro
+          ? await requestWithModelFallback(baseUrl, backupApiKey, model, messages, timeoutMs, maxTokens)
+          : await requestCompletion(baseUrl, backupApiKey, model, messages, timeoutMs, maxTokens);
         return { content: res.content, source: "online", model: res.model, isFallback: false };
       } catch (backupError) {
         console.error(`Backup AI key failed (${safeError(backupError)}); using mock fallback.`);
       }
     }
 
-    // Auto-failover to Xkiro online if local 9router (127.0.0.1) is unreachable (e.g. running on Vercel cloud)
-    if (baseUrl.includes("127.0.0.1") || baseUrl.includes("localhost")) {
-      const xkiroKey = process.env.XKIRO_API_KEY;
-      const xkiroBase = process.env.XKIRO_BASE_URL || "https://api.xkiro.com/v1";
-      if (xkiroKey) {
-        try {
-          console.info("9Router lokal tidak terjangkau. Otomatis beralih ke Xkiro online...");
-          const res = await requestCompletion(xkiroBase, xkiroKey, "deepseek/deepseek-v3.2", messages, timeoutMs, maxTokens);
-          return { content: res.content, source: "online", model: `${res.model} (Auto Failover)`, isFallback: false };
-        } catch (xkiroErr) {
-          console.error("Failover ke Xkiro online juga gagal:", xkiroErr);
+    // Auto-failover ke Xkiro online jika 9Router lokal mati / gagal koneksi
+    if (isLocalEndpoint && xkiroKey) {
+      const targetModel = resolveXkiroModel(model);
+      try {
+        console.info("9Router lokal tidak terjangkau. Otomatis beralih ke Xkiro online...");
+        const res = await requestWithModelFallback(xkiroBase, xkiroKey, targetModel, messages, timeoutMs, maxTokens);
+        return { content: res.content, source: "online", model: `${res.model} (Auto Failover)`, isFallback: false };
+      } catch (xkiroErr) {
+        console.error("Failover ke Xkiro online juga gagal:", xkiroErr);
+        const xkiroBackup = process.env.XKIRO_API_KEY_BACKUP || "";
+        if (xkiroBackup && xkiroBackup !== xkiroKey) {
+          try {
+            const res = await requestWithModelFallback(xkiroBase, xkiroBackup, targetModel, messages, timeoutMs, maxTokens);
+            return { content: res.content, source: "online", model: `${res.model} (Auto Failover Backup)`, isFallback: false };
+          } catch {
+            // ignore
+          }
         }
       }
     }
@@ -411,18 +479,23 @@ ATURAN FORMULA & SIMBOL MATEMATIKA (PEDOMAN EQUATION & OMML):
 
 ${identitasInstruksi}
 
-PENTING — STRUKTUR DOKUMEN WAJIB MENGGUNAKAN PEMISAH RESMI BERIKUT:
+PENTING — JUMLAH AKTIVITAS HARUS TEPAT ${params.jumlahAktivitas} NOMOR:
+Pada ## D. Kegiatan Pembelajaran, WAJIB buat TEPAT ${params.jumlahAktivitas} nomor aktivitas kontekstual berbeda (Aktivitas 1, Aktivitas 2, ... hingga Aktivitas ${params.jumlahAktivitas}).
+Setiap nomor mencantumkan target indikator dalam tanda kurung misal "(target: IK-01)", diikuti ruang pengerjaan bertahap isian titik-titik.
+DILARANG KERAS membuat hanya 2 aktivitas jika diminta ${params.jumlahAktivitas} aktivitas!
+
+STRUKTUR DOKUMEN WAJIB MENGGUNAKAN PEMISAH RESMI BERIKUT:
 # LEMBAR KERJA PESERTA DIDIK (LKPD)
 ## A. Identitas Peserta Didik
 ## B. Tujuan Pembelajaran (2-3 butir mengacu pada indikator target)
 ## C. Petunjuk Pengerjaan
-## D. Kegiatan Pembelajaran (aktivitas kontekstual 1 sampai ${params.jumlahAktivitas} yang segar dan berbeda, setiap nomor mencantumkan target indikator dalam tanda kurung misal "(target: IK-01)", diikuti ruang pengerjaan berformat blockquote atau garis titik-titik)
+## D. Kegiatan Pembelajaran (tepat ${params.jumlahAktivitas} aktivitas: Aktivitas 1 sampai ${params.jumlahAktivitas})
 ## E. Refleksi Diri Siswa (2 pertanyaan refleksi singkat pemahaman konsep)
 
 <!-- PEMISAH_KUNCI_GURU -->
 
 # KUNCI JAWABAN & PANDUAN GURU
-## A. Pembahasan & Kunci Jawaban Resmi (langkah matematis runtut dan jawaban akhir tebal untuk setiap aktivitas)
+## A. Pembahasan & Kunci Jawaban Resmi (langkah matematis runtut dan jawaban akhir tebal untuk seluruh ${params.jumlahAktivitas} aktivitas)
 ## B. Pedoman & Rubrik Penskoran (tabel kriteria penilaian, deskripsi rubrik, dan skor maksimum)
 
 ATURAN MUTLAK LEMBAR KERJA SISWA (BAGIAN D):
@@ -430,7 +503,7 @@ ATURAN MUTLAK LEMBAR KERJA SISWA (BAGIAN D):
 2. Untuk Level Dasar sekalipun: Scaffolding HANYA berupa panduan alur langkah kerja. Setiap langkah pada ruang jawaban siswa WAJIB KOSONG (berupa titik-titik "......" atau garis isian yang harus dikerjakan sendiri oleh siswa). JANGAN PERNAH mengisi ruang jawaban siswa dengan angka atau solusi yang sudah selesai!
 
 ATURAN WAJIB KUNCI JAWABAN & PANDUAN GURU:
-1. Kunci jawaban HARUS menjawab SECARA PERSIS, NYATA, dan LENGKAP seluruh ${params.jumlahAktivitas} aktivitas yang dibuat pada Bagian D.
+1. Kunci jawaban HARUS menjawab SECARA PERSIS, NYATA, dan LENGKAP seluruh ${params.jumlahAktivitas} aktivitas yang dibuat pada Bagian D (Aktivitas 1 sampai Aktivitas ${params.jumlahAktivitas}).
 2. Tuliskan langkah perhitungan numerik yang detail, angka riil, dan hasil akhir tebal (**jawaban**). DILARANG KERAS menulis instruksi umum atau menyuruh guru/siswa mengamati/mencari sendiri! Berikan seluruh solusi matematis tuntas untuk mempermudah guru memeriksa hasil siswa.
 3. Selesaikan seluruh isi dokumen dari awal sampai tuntas tanpa terpotong di tengah jalan.`,
     },
@@ -438,12 +511,12 @@ ATURAN WAJIB KUNCI JAWABAN & PANDUAN GURU:
       role: "user",
       content: `Buat LKPD BARU, LENGKAP, dan BERBEDA (Variasi Token #${seed}) tentang "${params.materi}" untuk tingkat ${params.level}.
 Bentuk pengerjaan: ${isKelompok ? `Kelompok (${jumlahAnggota} orang)` : "Individu"}.
+JUMLAH AKTIVITAS: TEPAT ${params.jumlahAktivitas} nomor aktivitas kontekstual berbeda (Aktivitas 1 s.d Aktivitas ${params.jumlahAktivitas}).
 Karakteristik level: ${levelKeterangan[params.level]}.
 Penyesuaian VAK: ${gayaKeterangan}.
 Indikator target: ${indikator}.
-Buat tepat ${params.jumlahAktivitas} aktivitas kontekstual unik. Instruksi tambahan: ${params.promptTambahan || "tidak ada"}.
 Pastikan pada Bagian D (Kegiatan Pembelajaran), ruang jawaban siswa murni berupa titik-titik kosong tanpa angka jawaban yang terisi!
-Sertakan tanda pembatas <!-- PEMISAH_KUNCI_GURU --> tepat sebelum bagian Kunci Jawaban Guru. Tulis kunci jawaban nyata dan lengkap untuk seluruh aktivitas. Keluarkan langsung teks Markdown tanpa sapaan pembuka/penutup.`,
+Sertakan tanda pembatas <!-- PEMISAH_KUNCI_GURU --> tepat sebelum bagian Kunci Jawaban Guru. Tulis kunci jawaban nyata dan lengkap untuk SELURUH ${params.jumlahAktivitas} aktivitas. Keluarkan langsung teks Markdown tanpa sapaan pembuka/penutup.`,
     },
   ];
 
@@ -466,7 +539,7 @@ Sertakan tanda pembatas <!-- PEMISAH_KUNCI_GURU --> tepat sebelum bagian Kunci J
 
   const aiResult = await chatCompletion(
     messages,
-    mockContent("lkpd", `${params.materi} (${params.level})`, params.modePengerjaan, params.jumlahAnggota),
+    mockContent("lkpd", `${params.materi} (${params.level})`, params.modePengerjaan, params.jumlahAnggota, params.jumlahAktivitas),
     aiOptions,
     4000
   );

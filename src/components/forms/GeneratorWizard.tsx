@@ -86,9 +86,9 @@ export function GeneratorWizard() {
   const [modePengerjaan, setModePengerjaan] = useState<"individu" | "kelompok">("individu");
   const [jumlahAnggota, setJumlahAnggota] = useState<number>(4);
 
-  // AI Provider & Model selection (default to Xkiro DeepSeek V3.2 for fast online response)
+  // AI Provider & Model selection (default to Xkiro Mistral Small 4 for ultra reliable 200 OK online response)
   const [aiProvider, setAiProvider] = useState("xkiro");
-  const [aiModel, setAiModel] = useState("deepseek/deepseek-v3.2");
+  const [aiModel, setAiModel] = useState("mistralai/mistral-small-2603");
   const [modalAIOpen, setModalAIOpen] = useState(false);
 
   const [documents, setDocuments] = useState<Record<Level, DocumentState | undefined>>(emptyDocuments);

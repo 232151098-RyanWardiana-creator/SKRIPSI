@@ -77,13 +77,8 @@ export const AI_PROVIDERS: AIProviderOption[] = [
     name: "Xkiro (Direct Online)",
     models: [
       {
-        id: "deepseek/deepseek-v3.2",
-        label: "DeepSeek V3.2",
-        badge: "Gratis",
-      },
-      {
-        id: "deepseek/deepseek-chat-v3.1",
-        label: "DeepSeek V3.1",
+        id: "mistralai/mistral-small-2603",
+        label: "Mistral Small 4",
         badge: "Gratis",
       },
       {
@@ -92,8 +87,18 @@ export const AI_PROVIDERS: AIProviderOption[] = [
         badge: "Gratis",
       },
       {
-        id: "mistralai/mistral-small-2603",
-        label: "Mistral Small 4",
+        id: "mistralai/ministral-8b",
+        label: "Ministral 3 8B",
+        badge: "Gratis",
+      },
+      {
+        id: "deepseek/deepseek-v3.2",
+        label: "DeepSeek V3.2",
+        badge: "Gratis",
+      },
+      {
+        id: "deepseek/deepseek-chat-v3.1",
+        label: "DeepSeek V3.1",
         badge: "Gratis",
       },
       {
