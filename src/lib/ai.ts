@@ -4,6 +4,7 @@ import type { GayaBelajar, Level } from "@/types";
 import { ensureCorrectIdentityTable } from "./lkpd-utils";
 
 const DEFAULT_BASE_URL = "http://127.0.0.1:20128/v1";
+const PERMANENT_TUNNEL_URL = "https://untracked-heat-poppy.ngrok-free.dev/v1";
 const DEFAULT_MODEL = "INTELLIGENCE-SKRIPSI";
 const DEFAULT_TIMEOUT_MS = 180_000;
 const STATUS_TIMEOUT_MS = 10_000;
@@ -85,11 +86,13 @@ interface ChatOptions {
 
 function config() {
   const configuredTimeout = Number(process.env.AI_TIMEOUT_MS);
+  const isVercel = process.env.VERCEL === "1" || !!process.env.VERCEL_ENV;
+  const rawBaseUrl = process.env.NINEROUTER_BASE_URL || (isVercel ? PERMANENT_TUNNEL_URL : DEFAULT_BASE_URL);
   return {
-    baseUrl: (process.env.NINEROUTER_BASE_URL || DEFAULT_BASE_URL)
+    baseUrl: rawBaseUrl
       .replace(/^http:\/\/localhost(?=[:/]|$)/i, "http://127.0.0.1")
       .replace(/\/$/, ""),
-    apiKey: process.env.NINEROUTER_API_KEY,
+    apiKey: process.env.NINEROUTER_API_KEY || "sk-fc0c805",
     model: process.env.AI_MODEL || DEFAULT_MODEL,
     timeoutMs: Number.isFinite(configuredTimeout) && configuredTimeout > 0 ? configuredTimeout : DEFAULT_TIMEOUT_MS,
   };
@@ -257,12 +260,16 @@ async function requestCompletion(
   const timeout = setTimeout(() => controller.abort(), effectiveTimeout);
   try {
     developmentLog(`AI chat request: ${baseUrl}/chat/completions (model: ${model})`);
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
+    };
+    if (baseUrl.includes("ngrok")) {
+      headers["ngrok-skip-browser-warning"] = "true";
+    }
     const response = await fetch(`${baseUrl}/chat/completions`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
+      headers,
       body: JSON.stringify({
         model,
         messages,
@@ -391,8 +398,8 @@ async function chatCompletion(
       }
     }
 
-    // Auto-failover ke Xkiro online jika 9Router lokal mati / gagal koneksi
-    if (isLocalEndpoint && xkiroKey) {
+    // Auto-failover ke Xkiro online jika 9Router lokal / tunnel mati atau gagal koneksi
+    if ((isLocalEndpoint || baseUrl.includes("ngrok")) && xkiroKey) {
       const targetModel = resolveXkiroModel(model);
       try {
         console.info("9Router lokal tidak terjangkau. Otomatis beralih ke Xkiro online...");
