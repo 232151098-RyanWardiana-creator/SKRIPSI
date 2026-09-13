@@ -14,8 +14,11 @@ export function sanitizeMathMarkdown(content: string): string {
 
   let cleaned = content;
 
-  // 1. Bersihkan notasi mata uang Rupiah LaTeX yang sering dirusak AI
-  // Contoh: \mathbf{\text{Rp} 112.000}$ atau $\mathbf{\text{Rp} 112.000}$
+  // 1. Perbaiki artefak subscript markdown: e.g. "t $_ $a" -> "t_{a}", "v $_ $2" -> "v_{2}"
+  cleaned = cleaned.replace(/([a-zA-Z])\s*\$_\s*\$([a-zA-Z0-9]+)/g, "$1_{$2}");
+  cleaned = cleaned.replace(/([a-zA-Z])\s*\\_\s*([a-zA-Z0-9]+)/g, "$1_{$2}");
+
+  // 2. Bersihkan notasi mata uang Rupiah LaTeX yang sering dirusak AI
   cleaned = cleaned.replace(/\\mathbf\{\\text\{Rp\}\s*([\d.,]+)\}\$?/gi, "**Rp$1**");
   cleaned = cleaned.replace(/\$?\\mathbf\{\\text\{Rp\}\s*([\d.,]+)\}\$?/gi, "**Rp$1**");
   cleaned = cleaned.replace(/\\text\{Rp\}\s*([\d.,]+)\$?/gi, "Rp$1");
@@ -23,15 +26,39 @@ export function sanitizeMathMarkdown(content: string): string {
   cleaned = cleaned.replace(/\\mathbf\{Rp\s*([\d.,]+)\}\$?/gi, "**Rp$1**");
   cleaned = cleaned.replace(/\$\s*Rp\s*([\d.,]+)\s*\$/gi, "**Rp$1**");
 
-  // 2. Hilangkan backticks di sekeliling math delimiter: `$...$` -> $...$
+  // 3. Normalisasi mata uang di dalam rumus matematika: \text{Rp16.000.000} -> \text{Rp } 16.000.000
+  cleaned = cleaned.replace(/\\text\{Rp\s*(\d[\d.,]*)\}/gi, "\\text{Rp } $1");
+
+  // 4. Hilangkan backticks di sekeliling math delimiter: `$...$` -> $...$
   cleaned = cleaned.replace(/`(\$[^`\n]+\$)`/g, "$1");
 
-  // 3. Perbaiki rumus yang memiliki penutup $ tetapi lupa tanda pembuka $
-  // Contoh: ... = 7 \times 16.000 = 112.000$ -> ... = $7 \times 16.000 = 112.000$
+  // 5. Bungkus formula yang diawali \text{...} atau variabel = \frac{...} dan berujung $ tanpa pembuka
+  // Contoh: \text{Modal Pak Joko} = \frac{......}{......} \times \text{Rp 16.000.000} = Rp..................$
   cleaned = cleaned.replace(
-    /(?:^|[^\$])([a-zA-Z0-9_]+\s*=\s*[^$\n]*?(?:\\times|\\div|\\frac|\\cdot)[^$\n]*?)\$/gm,
-    (match, formula) => match.replace(formula, ` $${formula.trim()}`)
+    /(?:^|(?<=[:\n\s]))((?:\\text\{[^}]*\}|[a-zA-Z0-9_{}\s]+)\s*=\s*(?:\\frac\{|\\dfrac\{)[^\n$]*?)(?:\$|\n|$)/g,
+    (match, formula) => {
+      const clean = formula.replace(/\$/g, "").trim();
+      return ` $${clean}$ `;
+    }
   );
+
+  // 6. Bungkus persamaan bare \frac{...}{...} yang sama sekali belum memiliki tanda dolar
+  // Contoh: " = \frac{\dots}{\dots} = \dots\text{ jam}"
+  cleaned = cleaned.replace(
+    /(?:^|[^\$])((?:[a-zA-Z0-9_{}]+\s*=\s*)?(?:\\frac\{|\\dfrac\{)(?:[^{}]*|\{[^{}]*\})*\}(?:[^{}]*|\{[^{}]*\})*(?:\s*(?:=|\times|\div|\+|-)\s*(?:[^\s,;:()\[\]\n]|\s(?![a-z]{3,}))*)*)(?:\$|\n|$)/g,
+    (match, formula) => {
+      if (!formula || formula.includes("$")) return match;
+      const clean = formula.trim();
+      return match.replace(formula, ` $${clean}$ `);
+    }
+  );
+
+  // 7. Ubah \frac menjadi \dfrac saat berada di dalam formula KaTeX agar pembilang & penyebut memiliki spasi vertikal lapang dan tidak menabrak garis
+  cleaned = cleaned.replace(/(\$(?!\$)[^\$\n]*?)\\frac\{/g, "$1\\dfrac{");
+  cleaned = cleaned.replace(/(\$\$[\s\S]*?)\\frac\{/g, "$1\\dfrac{");
+
+  // 8. Bersihkan spasi ganda
+  cleaned = cleaned.replace(/ {2,}/g, " ");
 
   return cleaned;
 }

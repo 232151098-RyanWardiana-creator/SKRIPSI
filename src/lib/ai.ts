@@ -483,9 +483,10 @@ Dokumen harus dalam format Markdown bersih, ramah cetak A4, dan rumus matematika
 
 ATURAN FORMULA & SIMBOL MATEMATIKA (PEDOMAN EQUATION & OMML):
 1. Satuan mata uang Rupiah DILARANG ditulis di dalam format LaTeX ($...$). Jangan gunakan \\text{Rp}, \\mathbf{Rp}, dsb. Tulis selalu satuan Rupiah sebagai teks biasa tebal: **Rp16.000** atau **Rp112.000**.
-2. Rumus matematika WAJIB menggunakan tanda dolar lengkap berpasangan: $...$ untuk inline (contoh: $3 : 5$ atau $\\frac{a}{b}$) dan $$...$$ untuk baris rumus terpisah.
-3. HINDARI menulis kalimat deskripsi panjang di dalam pecahan KaTeX \\frac{\\text{...}}{\\text{...}}. Gunakan format perbandingan yang rapi atau variabel/istilah ringkas seperti $\\frac{\\text{Bahan Tersedia}}{\\text{Kebutuhan Resep}}$ agar equation tampil elegan dan garis pecahan tidak menabrak teks.
-4. JANGAN PERNAH menyisakan kode LaTeX mentah tanpa penutup atau di dalam backtick inline.
+2. Rumus matematika WAJIB menggunakan tanda dolar lengkap berpasangan: $...$ untuk inline (contoh: $3 : 5$ atau $\\dfrac{a}{b}$) dan $$...$$ untuk baris rumus terpisah. Gunakan selalu \\dfrac untuk pecahan agar pembilang dan penyebut memiliki jarak yang lapang dan nyaman dibaca.
+3. HINDARI menulis kalimat deskripsi panjang di dalam pecahan KaTeX \\frac{\\text{...}}{\\text{...}}. Gunakan variabel atau istilah ringkas seperti $\\dfrac{\\text{Bahan A}}{\\text{Bahan B}}$ atau $\\text{L} = \\dfrac{\\text{Total}}{\\text{Volume}}$ agar garis pecahan tidak menabrak huruf.
+4. JANGAN PERNAH menyisakan kode LaTeX mentah (seperti \\frac, \\text, \\times, \\dots, \\_) di luar tanda dolar! Seluruh persamaan WAJIB diapit tanda dolar $...$.
+5. Simbol variabel berindeks/subskrip WAJIB ditulis utuh di dalam tanda dolar: $v_2$, $t_a$, $t_{\\min}$, DILARANG menulis terpisah seperti 'v $_ $2' atau 't $_ $a'.
 
 ${identitasInstruksi}
 

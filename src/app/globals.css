@@ -131,11 +131,11 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
 .lkpd-markdown tr { break-inside:avoid; page-break-inside:avoid; }
 .lkpd-markdown pre { max-width:100%; overflow:hidden; overflow-wrap:anywhere; white-space:pre-wrap; margin:12px 0; padding:12px; border-radius:4px; background:#172033; color:#f8fafc; font:clamp(7pt,1.5vw,10pt)/1.5 Consolas,monospace; break-inside:avoid; page-break-inside:avoid; }
 .lkpd-markdown code:not(pre code) { overflow-wrap:anywhere; white-space:normal; padding:1px 4px; border-radius:3px; background:#edf1f6; font-family:Consolas,monospace; }
-.lkpd-markdown .katex-display { display:block !important; overflow-x:auto !important; overflow-y:visible !important; margin:16px 0 !important; padding:6px 0 !important; line-height:normal !important; text-align:center !important; break-inside:avoid !important; page-break-inside:avoid !important; }
-.lkpd-markdown .katex { overflow:visible !important; font-size:1.05em !important; line-height:normal !important; }
+.lkpd-markdown .katex-display { display:block !important; overflow-x:auto !important; overflow-y:visible !important; margin:18px 0 !important; padding:10px 0 !important; line-height:normal !important; text-align:center !important; break-inside:avoid !important; page-break-inside:avoid !important; }
+.lkpd-markdown .katex { overflow:visible !important; font-size:1.06em !important; line-height:normal !important; }
 .lkpd-markdown .katex .accent,.lkpd-markdown .katex .x-arrow,.lkpd-markdown .katex .vlist-t,.lkpd-markdown .katex .vlist-r { overflow:visible !important; }
-.lkpd-markdown .katex .frac-line { margin:3px 0 !important; }
-.lkpd-markdown .katex .mord.text { padding:0 1.5px; }
+.lkpd-markdown .katex .mfrac { margin: 0 3px !important; }
+.lkpd-markdown .katex .mord.text { padding:0 2px; }
 .print-browser-hint { flex-basis:100%; margin:0; color:#526174; font-size:12px; line-height:1.4; }
 @media (max-width:640px) { .lkpd-preview-container { padding:12px 6px; } .lkpd-paper { min-height:0; padding:12mm 9mm; } .lkpd-document-header { align-items:flex-start; flex-direction:column; } .lkpd-document-header .subtitle { text-align:left; } .lkpd-markdown { font-size:11pt; } }
 @media print {

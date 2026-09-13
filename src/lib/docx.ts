@@ -19,8 +19,9 @@ function group(source: string, start: number): [string, number] {
 function mathParts(source: string): string {
   let output = "";
   for (let index = 0; index < source.length;) {
-    if (source.startsWith("\\frac", index)) {
-      let cursor = index + 5;
+    if (source.startsWith("\\frac", index) || source.startsWith("\\dfrac", index)) {
+      const isDfrac = source.startsWith("\\dfrac", index);
+      let cursor = index + (isDfrac ? 6 : 5);
       while (/\s/.test(source[cursor] || "")) cursor++;
       const [numerator, afterNumerator] = group(source, cursor);
       cursor = afterNumerator;
