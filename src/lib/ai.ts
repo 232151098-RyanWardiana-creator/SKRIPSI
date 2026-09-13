@@ -379,7 +379,7 @@ async function chatCompletion(
     const isDirectXkiro = baseUrl.includes("xkiro");
     const res = isDirectXkiro
       ? await requestWithModelFallback(baseUrl, apiKey, model, messages, timeoutMs, maxTokens)
-      : await requestCompletion(baseUrl, apiKey || "sk-dummy", model, messages, isLocalEndpoint ? 4000 : timeoutMs, maxTokens);
+      : await requestCompletion(baseUrl, apiKey || "sk-dummy", model, messages, timeoutMs, maxTokens);
     return { content: res.content, source: "online", model: res.model, isFallback: false };
   } catch (primaryError) {
     const reason = primaryError instanceof Error ? primaryError.message : "UnknownError";

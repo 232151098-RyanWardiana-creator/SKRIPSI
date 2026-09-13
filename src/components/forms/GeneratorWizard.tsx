@@ -14,7 +14,7 @@ import { downloadDocx } from "@/lib/docx-client";
 import { getStoredHistory, saveHistoryEntry } from "@/lib/lkpd-history";
 import { AI_PROVIDERS } from "@/constants/ai-providers";
 import { ModalGenerateAI } from "@/components/forms/ModalGenerateAI";
-import { splitLkpdContent } from "@/lib/lkpd-utils";
+import { splitLkpdContent, createDynamicFallbackLKPD } from "@/lib/lkpd-utils";
 import { cn } from "@/lib/utils";
 import {
   ArrowLeft,
@@ -252,7 +252,13 @@ export function GeneratorWizard() {
         });
       } catch (cause) {
         const message = cause instanceof Error ? cause.message : "Layanan belum dapat digunakan.";
-        const fallbackDraft = `# LEMBAR KERJA PESERTA DIDIK (LKPD)\n\n## A. Identitas Peserta Didik\n| Komponen | Keterangan |\n|---|---|\n| **Nama Siswa** | .................................................... |\n| **Kelas / No. Absen** | VII-.... / ....... |\n| **Hari / Tanggal** | .................................................... |\n\n## B. Tujuan Pembelajaran\n1. Mengidentifikasi hubungan rasio kontekstual pada masalah kehidupan sehari-hari.\n2. Menyelesaikan perbandingan secara bertahap pada level ${labels[level]}.\n\n## C. Petunjuk Pengerjaan\nKerjakan secara bertahap pada ruang jawaban yang disediakan.\n\n## D. Kegiatan Pembelajaran\n### Aktivitas 1: Perbandingan Bahan Masakan (target: IK-01)\nIbu menyiapkan adonan kue dengan perbandingan tepung terigu dan gula pasir adalah 3 : 2. Jika total berat kedua bahan adalah 500 gram, tentukan berat tepung terigu!\n\n> **Ruang Jawaban:**\n> - Jumlah bagian rasio = 3 + 2 = ......\n> - Berat 1 bagian = 500 ÷ ...... = ...... gram\n> - Berat tepung terigu (3 bagian) = 3 × ...... = ...... gram\n\n### Aktivitas 2: Perbandingan Jarak Tempuh (target: IK-02)\nSebuah kendaraan menempuh jarak 90 km dengan 3 liter bensin. Tentukan jarak yang ditempuh jika bensin yang tersedia adalah 5 liter!\n\n> **Ruang Jawaban:**\n> - Jarak per 1 liter = ...... ÷ ...... = ...... km\n> - Jarak untuk 5 liter = 5 × ...... = ...... km\n\n## E. Refleksi Diri Siswa\n1. Bagian mana yang paling mudah dipahami?\n2. Langkah mana yang masih membutuhkan bantuan guru?\n\n<!-- PEMISAH_KUNCI_GURU -->\n\n# KUNCI JAWABAN & PANDUAN GURU\n## A. Pembahasan & Kunci Jawaban Resmi\n1. **Aktivitas 1:**\n   - Jumlah bagian = 3 + 2 = 5 bagian.\n   - Nilai 1 bagian = 500 ÷ 5 = 100 gram.\n   - Berat tepung terigu = 3 × 100 = **300 gram**.\n\n2. **Aktivitas 2:**\n   - Efisiensi bahan bakar = 90 ÷ 3 = 30 km/liter.\n   - Jarak tempuh = 5 × 30 = **150 km**.\n\n## B. Pedoman & Rubrik Penskoran\n| Kriteria | Indikator | Skor Maks |\n|---|---|:---:|\n| Pemodelan | Menuliskan model perbandingan dengan tepat | 50 |\n| Perhitungan | Menyelesaikan perkalian/pembagian hingga hasil akhir | 50 |`;
+        const fallbackDraft = createDynamicFallbackLKPD(
+          labels[level],
+          topik,
+          jumlah,
+          modePengerjaan,
+          jumlahAnggota
+        );
 
         updateDocument(level, {
           level,

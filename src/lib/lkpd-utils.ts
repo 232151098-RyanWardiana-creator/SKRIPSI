@@ -180,3 +180,109 @@ export function splitLkpdContent(
     teacherKeyContent: createFallbackTeacherKey(sanitized, level, topic),
   };
 }
+
+/**
+ * Membangun draf cadangan kontekstual dinamis jika koneksi AI gagal,
+ * 100% patuh pada jumlah aktivitas (1-6) dan mode pengerjaan (kelompok/individu).
+ */
+export function createDynamicFallbackLKPD(
+  level: string,
+  topik: string,
+  jumlahAktivitas: number,
+  modePengerjaan: "individu" | "kelompok" = "individu",
+  jumlahAnggota: number = 4
+): string {
+  const count = Math.min(6, Math.max(1, jumlahAktivitas));
+  const n1 = Math.floor(Math.random() * 4) + 2;
+  const n2 = n1 + Math.floor(Math.random() * 3) + 2;
+  const mult = Math.floor(Math.random() * 5) + 3;
+
+  const allActivities = [
+    {
+      title: "Aktivitas 1: Resep Adonan Tradisional (target: IK-01)",
+      problem: `Seorang koki membuat adonan dengan rasio bahan A dan bahan B adalah $${n1} : ${n2}$. Jika total campuran kedua bahan adalah $${(n1 + n2) * mult * 40}\\text{ gram}$, berapakah gram bahan A yang digunakan?`,
+      answer: `Rasio A : B = $${n1} : ${n2}$. Total bagian = $${n1 + n2}$. Nilai 1 bagian = $${(n1 + n2) * mult * 40}\\text{ g} \\div ${n1 + n2} = ${mult * 40}\\text{ g}$. Bahan A = $${n1} \\times ${mult * 40}\\text{ g} = \\mathbf{${n1 * mult * 40}\\text{ gram}}$.`,
+    },
+    {
+      title: "Aktivitas 2: Perbandingan Senilai Belanja Bahan (target: IK-02)",
+      problem: `Untuk membeli $4\\text{ kg}$ bahan pokok, seorang pembeli membayar **Rp${(4 * (mult + 5) * 2000).toLocaleString("id-ID")}**. Berapakah biaya yang harus dibayar jika pembeli membutuhkan $7\\text{ kg}$ bahan pokok?`,
+      answer: `Harga per kilogram = **Rp${(4 * (mult + 5) * 2000).toLocaleString("id-ID")}** $\\div 4$ = **Rp${((mult + 5) * 2000).toLocaleString("id-ID")}**. Biaya untuk $7\\text{ kg}$ = $7 \\times$ **Rp${((mult + 5) * 2000).toLocaleString("id-ID")}** = **Rp${(7 * (mult + 5) * 2000).toLocaleString("id-ID")}**.`,
+    },
+    {
+      title: "Aktivitas 3: Skala Peta dan Denah Rumah (target: IK-03)",
+      problem: `Pada denah berskala $1 : 200$, panjang sebuah ruang adalah $${mult + 3}\\text{ cm}$. Berapakah panjang sebenarnya ruang tersebut dalam meter?`,
+      answer: `Panjang sebenarnya = $${mult + 3}\\text{ cm} \\times 200 = ${(mult + 3) * 200}\\text{ cm} = \\mathbf{${((mult + 3) * 200) / 100}\\text{ meter}}$.`,
+    },
+    {
+      title: "Aktivitas 4: Laju Kecepatan dan Jarak Tempuh (target: IK-04)",
+      problem: `Sebuah mobil melaju dengan kecepatan rata-rata $60\\text{ km/jam}$ selama $${mult - 1 || 2}\\text{ jam}$. Berapakah jarak yang ditempuh mobil tersebut?`,
+      answer: `Jarak = kecepatan $\\times$ waktu = $60 \\times ${mult - 1 || 2} = \\mathbf{${60 * (mult - 1 || 2)}\\text{ km}}$.`,
+    },
+    {
+      title: "Aktivitas 5: Eksplorasi Rasio Pupuk Tanaman (target: IK-05)",
+      problem: `Petani mencampur cairan nutrisi A dan nutrisi B dengan rasio $${n1} : ${n2}$. Total volume racikan adalah $${(n1 + n2) * mult * 50}\\text{ ml}$. Tentukan volume cairan nutrisi A:`,
+      answer: `Total bagian = $${n1 + n2}$. Nilai 1 bagian = $${(n1 + n2) * mult * 50}\\text{ ml} \\div ${n1 + n2} = ${mult * 50}\\text{ ml}$. Nutrisi A = $${n1} \\times ${mult * 50}\\text{ ml} = \\mathbf{${n1 * mult * 50}\\text{ ml}}$.`,
+    },
+    {
+      title: "Aktivitas 6: Analisis Efisiensi Konsumsi Energi (target: IK-03)",
+      problem: `Sebuah kendaraan menempuh $90\\text{ km}$ dengan $6\\text{ liter}$ bensin. Berapa km jarak yang ditempuh dengan $10\\text{ liter}$ bensin?`,
+      answer: `Efisiensi = $90 \\div 6 = 15\\text{ km/liter}$. Jarak untuk $10\\text{ liter}$ = $10 \\times 15 = \\mathbf{150\\text{ km}}$.`,
+    },
+  ];
+
+  const selectedActs = allActivities.slice(0, count);
+
+  const activitiesContent = selectedActs
+    .map(
+      (act) => `### ${act.title}
+${act.problem}
+
+> **Ruang Jawaban:**
+> - Bagian perbandingan / nilai per satuan = $\\dots\\dots\\dots\\dots$
+> - Langkah perhitungan = $\\dots\\dots\\dots\\dots$
+> - Hasil akhir = $\\dots\\dots\\dots\\dots$
+`
+    )
+    .join("\n");
+
+  const answersContent = selectedActs
+    .map((act, idx) => `${idx + 1}. **${act.title.split("(")[0].trim()}:**\n   - ${act.answer}`)
+    .join("\n");
+
+  const raw = `# LEMBAR KERJA PESERTA DIDIK (LKPD)
+
+## A. Identitas Peserta Didik
+| Komponen | Keterangan |
+|---|---|
+| **Nama Siswa** | .................................................... |
+
+## B. Tujuan Pembelajaran
+1. Peserta didik dapat memahami dan memodelkan konsep ${topik} melalui masalah kontekstual.
+2. Peserta didik dapat menyelesaikan masalah perbandingan secara bertahap dan tepat.
+
+## C. Petunjuk Pengerjaan
+Kerjakan setiap aktivitas secara bertahap pada ruang jawaban yang disediakan.
+
+## D. Kegiatan Pembelajaran
+${activitiesContent}
+
+## E. Refleksi Diri Siswa
+Jawablah pertanyaan refleksi berikut dengan jujur:
+1. Dari seluruh aktivitas yang telah diselesaikan, konsep mana yang paling mudah dan mana yang masih menantang bagimu?
+2. Bagaimana konsep rasio ini membantumu menyelesaikan masalah dalam kehidupan nyata?
+
+<!-- PEMISAH_KUNCI_GURU -->
+
+# KUNCI JAWABAN & PANDUAN GURU
+
+## A. Pembahasan & Kunci Jawaban Resmi
+${answersContent}
+
+## B. Pedoman & Rubrik Penskoran
+| Kriteria | Keterangan Rubrik | Skor Maks |
+|---|---|:---:|
+| Pemodelan Rasio | Menuliskan bentuk perbandingan secara tepat | 50 |
+| Perhitungan | Menuntaskan langkah hitung hingga hasil akhir | 50 |`;
+
+  return ensureFullLkpdStructure(raw, modePengerjaan === "kelompok", jumlahAnggota);
+}
