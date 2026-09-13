@@ -37,6 +37,20 @@ export function sanitizeMathMarkdown(content: string): string {
 }
 
 /**
+ * Memastikan lembar LKPD siswa selalu memiliki bagian ## E. Refleksi Diri Siswa.
+ * Jika model AI terpotong atau lupa menulis refleksi setelah aktivitas panjang,
+ * sistem otomatis menyematkan 2 pertanyaan refleksi konsep standar.
+ */
+export function ensureStudentReflection(student: string): string {
+  if (!student || typeof student !== "string") return student;
+  const hasRefleksi = /##\s*[A-Z]?\.?\s*Refleksi\s*Diri/i.test(student) || /\bRefleksi\s*Diri\s*Siswa\b/i.test(student);
+  if (hasRefleksi) return student;
+
+  const reflectionBlock = `\n\n---\n\n## E. Refleksi Diri Siswa\nJawablah pertanyaan refleksi berikut dengan jujur:\n1. Dari seluruh aktivitas yang telah kamu selesaikan, bagian konsep mana yang paling mudah dipahami dan bagian mana yang masih membutuhkan latihan tambahan? Jelaskan alasannya!\n   ................................................................................................................................\n   ................................................................................................................................\n\n2. Bagaimana konsep perbandingan/rasio dalam LKPD ini dapat membantumu mengambil keputusan dalam kehidupan sehari-hari?\n   ................................................................................................................................\n   ................................................................................................................................\n`;
+  return student.trim() + reflectionBlock;
+}
+
+/**
  * Memastikan tabel identitas LKPD sesuai 100% dengan mode pengerjaan yang dipilih (Mandiri vs Kelompok)
  * Menjamin konsistensi di seluruh level (Dasar, Menengah, Mahir).
  */
@@ -77,6 +91,28 @@ ${rowsAnggota}`;
 }
 
 /**
+ * Menjamin 100% struktur LKPD lengkap:
+ * 1. Tabel identitas kelompok/individu sesuai pilihan
+ * 2. Refleksi diri siswa (## E) terjamin ada sebelum pemisah kunci guru
+ */
+export function ensureFullLkpdStructure(
+  content: string,
+  isKelompok: boolean,
+  jumlahAnggota: number = 4
+): string {
+  let res = ensureCorrectIdentityTable(content, isKelompok, jumlahAnggota);
+  const splitIdx = res.indexOf("<!-- PEMISAH_KUNCI_GURU -->");
+  if (splitIdx !== -1) {
+    const student = res.slice(0, splitIdx).trim();
+    const teacher = res.slice(splitIdx);
+    res = `${ensureStudentReflection(student)}\n\n${teacher}`;
+  } else {
+    res = ensureStudentReflection(res);
+  }
+  return res;
+}
+
+/**
  * Kunci jawaban fallback minimal jika LLM terpotong sebelum bagian kunci.
  */
 function createFallbackTeacherKey(studentContent: string, level?: string, topic?: string): string {
@@ -109,7 +145,7 @@ export function splitLkpdContent(
   // 1. Cek delimiter komentar resmi (fleksibel whitespace dan case)
   const commentMatch = sanitized.match(/<!--\s*PEMISAH_KUNCI_GURU\s*-->/i);
   if (commentMatch && commentMatch.index !== undefined) {
-    const student = sanitized.slice(0, commentMatch.index).trim();
+    const student = ensureStudentReflection(sanitized.slice(0, commentMatch.index).trim());
     const teacher = sanitized.slice(commentMatch.index + commentMatch[0].length).trim();
     return {
       studentContent: student,
@@ -126,7 +162,7 @@ export function splitLkpdContent(
   for (const pattern of headerPatterns) {
     const match = sanitized.match(pattern);
     if (match && match.index !== undefined && match.index > 50) {
-      const student = sanitized.slice(0, match.index).trim();
+      const student = ensureStudentReflection(sanitized.slice(0, match.index).trim());
       let teacher = sanitized.slice(match.index).trim();
       if (!teacher.startsWith("#")) {
         teacher = `# KUNCI JAWABAN & PANDUAN GURU\n\n${teacher}`;
@@ -140,7 +176,7 @@ export function splitLkpdContent(
 
   // 3. Jika model AI tidak mengeluarkan bagian kunci jawaban terpisah:
   return {
-    studentContent: sanitized.trim(),
+    studentContent: ensureStudentReflection(sanitized.trim()),
     teacherKeyContent: createFallbackTeacherKey(sanitized, level, topic),
   };
 }

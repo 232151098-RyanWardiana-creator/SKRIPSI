@@ -1,7 +1,7 @@
 import "server-only";
 
 import type { GayaBelajar, Level } from "@/types";
-import { ensureCorrectIdentityTable } from "./lkpd-utils";
+import { ensureFullLkpdStructure } from "./lkpd-utils";
 
 const DEFAULT_BASE_URL = "http://127.0.0.1:20128/v1";
 const PERMANENT_TUNNEL_URL = "https://untracked-heat-poppy.ngrok-free.dev/v1";
@@ -551,7 +551,7 @@ Sertakan tanda pembatas <!-- PEMISAH_KUNCI_GURU --> tepat sebelum bagian Kunci J
     4000
   );
 
-  const finalContent = ensureCorrectIdentityTable(
+  const finalContent = ensureFullLkpdStructure(
     aiResult.content,
     isKelompok,
     jumlahAnggota
