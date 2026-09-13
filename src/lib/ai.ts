@@ -87,7 +87,10 @@ interface ChatOptions {
 function config() {
   const configuredTimeout = Number(process.env.AI_TIMEOUT_MS);
   const isVercel = process.env.VERCEL === "1" || !!process.env.VERCEL_ENV;
-  const rawBaseUrl = process.env.NINEROUTER_BASE_URL || (isVercel ? PERMANENT_TUNNEL_URL : DEFAULT_BASE_URL);
+  let rawBaseUrl = process.env.NINEROUTER_BASE_URL || (isVercel ? PERMANENT_TUNNEL_URL : DEFAULT_BASE_URL);
+  if (isVercel && (rawBaseUrl.includes("127.0.0.1") || rawBaseUrl.includes("localhost"))) {
+    rawBaseUrl = PERMANENT_TUNNEL_URL;
+  }
   return {
     baseUrl: rawBaseUrl
       .replace(/^http:\/\/localhost(?=[:/]|$)/i, "http://127.0.0.1")
@@ -347,9 +350,9 @@ async function chatCompletion(
     return "mistralai/mistral-small-2603";
   };
 
-  // 1. Jika di cloud Vercel atau API key 9Router lokal tidak diset,
+  // 1. Jika di cloud Vercel DAN endpoint masih berupa localhost/127.0.0.1 (tanpa tunnel),
   // otomatis alihkan langsung ke Xkiro online agar AI SELALU generate real-time (bukan mock/cache)
-  if (isLocalEndpoint && (isVercelCloud || !apiKey) && xkiroKey) {
+  if (isLocalEndpoint && isVercelCloud && !baseUrl.includes("ngrok") && xkiroKey) {
     const targetModel = resolveXkiroModel(model);
     try {
       developmentLog(`Beralih dari 9Router lokal ke Xkiro online: ${targetModel}`);
@@ -535,6 +538,10 @@ Sertakan tanda pembatas <!-- PEMISAH_KUNCI_GURU --> tepat sebelum bagian Kunci J
     baseUrl = process.env.XKIRO_BASE_URL || "https://api.xkiro.com/v1";
     apiKey = process.env.XKIRO_API_KEY || "";
     backupApiKey = process.env.XKIRO_API_KEY_BACKUP || "";
+  } else if (params.provider === "9router") {
+    const isVercel = process.env.VERCEL === "1" || !!process.env.VERCEL_ENV;
+    baseUrl = isVercel ? PERMANENT_TUNNEL_URL : (process.env.NINEROUTER_BASE_URL || DEFAULT_BASE_URL);
+    apiKey = process.env.NINEROUTER_API_KEY || "sk-fc0c805";
   }
 
   const aiOptions = {
@@ -789,6 +796,10 @@ Format setiap objek dalam array:
     baseUrl = process.env.XKIRO_BASE_URL || "https://api.xkiro.com/v1";
     apiKey = process.env.XKIRO_API_KEY || "";
     backupApiKey = process.env.XKIRO_API_KEY_BACKUP || "";
+  } else if (params.provider === "9router") {
+    const isVercel = process.env.VERCEL === "1" || !!process.env.VERCEL_ENV;
+    baseUrl = isVercel ? PERMANENT_TUNNEL_URL : (process.env.NINEROUTER_BASE_URL || DEFAULT_BASE_URL);
+    apiKey = process.env.NINEROUTER_API_KEY || "sk-fc0c805";
   }
 
   const aiOptions = {
