@@ -434,18 +434,18 @@ export function GeneratorWizard() {
                 <input className="input" value={topik} onChange={(e) => setTopik(e.target.value)} />
               </label>
 
-              {/* Mode Pengerjaan: Mandiri vs Kelompok */}
+              {/* Mode Pengerjaan: Mandiri vs Kelompok dengan Card Border Hitam Elegan */}
               <div className="space-y-1.5">
                 <label className="label">Bentuk Pengerjaan</label>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-2.5">
                   <button
                     type="button"
                     onClick={() => setModePengerjaan("individu")}
                     className={cn(
-                      "py-2 px-3 rounded-xl border text-xs font-bold transition cursor-pointer text-center",
+                      "py-2.5 px-3 rounded-xl border-2 text-xs font-black transition-all cursor-pointer text-center",
                       modePengerjaan === "individu"
-                        ? "border-[#2563EB] bg-blue-50 text-[#2563EB] shadow-2xs font-black"
-                        : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                        ? "border-slate-950 bg-blue-50 text-[#1E1B4B] shadow-sm ring-2 ring-slate-950/10"
+                        : "border-slate-800/40 bg-white text-slate-700 hover:border-slate-950 hover:bg-slate-50"
                     )}
                   >
                     Mandiri (Individu)
@@ -454,10 +454,10 @@ export function GeneratorWizard() {
                     type="button"
                     onClick={() => setModePengerjaan("kelompok")}
                     className={cn(
-                      "py-2 px-3 rounded-xl border text-xs font-bold transition cursor-pointer text-center",
+                      "py-2.5 px-3 rounded-xl border-2 text-xs font-black transition-all cursor-pointer text-center",
                       modePengerjaan === "kelompok"
-                        ? "border-[#2563EB] bg-blue-50 text-[#2563EB] shadow-2xs font-black"
-                        : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                        ? "border-slate-950 bg-blue-50 text-[#1E1B4B] shadow-sm ring-2 ring-slate-950/10"
+                        : "border-slate-800/40 bg-white text-slate-700 hover:border-slate-950 hover:bg-slate-50"
                     )}
                   >
                     Kelompok
@@ -466,10 +466,12 @@ export function GeneratorWizard() {
               </div>
 
               {modePengerjaan === "kelompok" && (
-                <div className="space-y-1.5 rounded-xl border border-blue-100 bg-blue-50/50 p-2.5">
+                <div className="space-y-2 rounded-xl border-2 border-slate-900 bg-blue-50/40 p-3 shadow-xs">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-slate-700">Jumlah Anggota per Kelompok:</span>
-                    <span className="text-xs font-black text-[#2563EB]">{jumlahAnggota} Siswa</span>
+                    <span className="text-xs font-bold text-slate-800">Jumlah Anggota per Kelompok:</span>
+                    <span className="text-xs font-black text-slate-950 bg-white px-2 py-0.5 rounded-md border border-slate-900 shadow-2xs">
+                      {jumlahAnggota} Siswa
+                    </span>
                   </div>
                   <div className="flex gap-1.5 pt-1">
                     {[2, 3, 4, 5, 6].map((num) => (
@@ -478,10 +480,10 @@ export function GeneratorWizard() {
                         type="button"
                         onClick={() => setJumlahAnggota(num)}
                         className={cn(
-                          "flex-1 py-1 rounded-lg border text-xs font-bold transition cursor-pointer text-center",
+                          "flex-1 py-1.5 rounded-lg border-2 text-xs font-black transition-all cursor-pointer text-center",
                           jumlahAnggota === num
-                            ? "border-[#2563EB] bg-[#2563EB] text-white shadow-2xs"
-                            : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                            ? "border-slate-950 bg-slate-950 text-white shadow-2xs"
+                            : "border-slate-800/40 bg-white text-slate-800 hover:border-slate-950 hover:bg-slate-100"
                         )}
                       >
                         {num}
@@ -498,7 +500,24 @@ export function GeneratorWizard() {
 
               <label className="label">
                 Prompt / Konteks Tambahan
-                <textarea className="input min-h-24" value={gaya} maxLength={1000} onChange={(e) => setGaya(e.target.value)} />
+                <textarea
+                  ref={(el) => {
+                    if (el) {
+                      el.style.height = "auto";
+                      el.style.height = `${Math.max(96, el.scrollHeight)}px`;
+                    }
+                  }}
+                  rows={3}
+                  className="input resize-y leading-relaxed transition-all"
+                  value={gaya}
+                  maxLength={1000}
+                  placeholder="Contoh: Gunakan konteks resep masakan, denah/skala peta, atau perbandingan harga pasar..."
+                  onChange={(e) => {
+                    setGaya(e.target.value);
+                    e.target.style.height = "auto";
+                    e.target.style.height = `${Math.max(96, e.target.scrollHeight)}px`;
+                  }}
+                />
               </label>
 
               <button
