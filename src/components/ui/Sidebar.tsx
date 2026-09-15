@@ -176,40 +176,8 @@ export function CollapsibleSidebar({
           className="relative flex h-full w-full flex-col justify-between overflow-hidden text-slate-700"
           variants={contentVariants}
         >
-          {/* Top Organization/Portal Badge */}
-          <div className="flex h-14 w-full shrink-0 items-center border-b border-slate-100 px-2.5">
-            <div className="flex w-full items-center gap-2 overflow-hidden rounded-xl px-2 py-1.5 transition-colors hover:bg-slate-50">
-              <div className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-gradient-to-br from-[#2563EB] to-indigo-600 text-white shadow-2xs">
-                {role === "Guru" ? (
-                  <GraduationCap className="h-4 w-4" />
-                ) : (
-                  <Sparkles className="h-4 w-4" />
-                )}
-              </div>
-
-              <AnimatePresence>
-                {!isCollapsed && (
-                  <motion.div
-                    initial={{ opacity: 0, x: -8 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -8 }}
-                    transition={{ duration: 0.15 }}
-                    className="flex min-w-0 flex-1 flex-col text-left"
-                  >
-                    <p className="truncate text-xs font-black text-slate-900">
-                      {role === "Guru" ? "Portal Guru SMP" : "Portal Siswa"}
-                    </p>
-                    <p className="truncate text-[10px] font-medium text-slate-400">
-                      Rasio & Diferensiasi
-                    </p>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          </div>
-
           {/* Navigation Links Scrollable Area */}
-          <div className="flex flex-1 flex-col overflow-hidden">
+          <div className="flex flex-1 flex-col overflow-hidden pt-1">
             <ScrollArea className="h-full flex-1 p-2">
               {renderNavLinks(false)}
             </ScrollArea>

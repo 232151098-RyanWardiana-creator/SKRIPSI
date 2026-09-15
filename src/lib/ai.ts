@@ -265,6 +265,7 @@ async function requestCompletion(
     developmentLog(`AI chat request: ${baseUrl}/chat/completions (model: ${model})`);
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
+      Accept: "application/json",
       Authorization: `Bearer ${apiKey}`,
     };
     if (baseUrl.includes("ngrok")) {
@@ -495,7 +496,11 @@ STRUKTUR DOKUMEN WAJIB MENGGUNAKAN PEMISAH RESMI BERIKUT:
 
 # KUNCI JAWABAN & PANDUAN GURU
 ## A. Pembahasan & Kunci Jawaban Resmi (langkah matematis runtut dan jawaban akhir tebal untuk seluruh ${params.jumlahAktivitas} aktivitas)
-## B. Pedoman & Rubrik Penskoran (tabel kriteria penilaian, deskripsi rubrik, dan skor maksimum)
+## B. Pedoman & Rubrik Penskoran
+Tabel rubrik penskoran WAJIB rapi menggunakan format 4 kolom:
+| No | Aktivitas / Aspek | Kriteria Penskoran | Skor Maks |
+|:---:|:---|:---|:---:|
+Sertakan per nomor aktivitas (Aktivitas 1 sampai ${params.jumlahAktivitas}) dengan total skor tepat 100 poin. Kolom No wajib ringkas (hanya angka 1, 2, ...), nama aktivitas ditulis rapi utuh (contoh: 'Aktivitas 1'), dan kriteria penskoran dijabarkan jelas.
 
 ATURAN MUTLAK LEMBAR KERJA SISWA (BAGIAN D):
 1. DILARANG KERAS MENULISKAN JAWABAN ATAU HASIL PERHITUNGAN PADA BAGIAN D (KEGIATAN PEMBELAJARAN SISWA)!

@@ -71,38 +71,102 @@ function sanitizeFilename(value: string) {
   return value.normalize("NFKD").replace(/[^a-zA-Z0-9\s_-]/g, "").trim().replace(/\s+/g, "-").toLowerCase().slice(0, 80) || "lkpd";
 }
 
+interface GeneratorCachedState {
+  step: number;
+  selectedClassId: string;
+  selectedAssessmentId: string;
+  topik: string;
+  jumlah: number;
+  gaya: string;
+  pertimbangkanGaya: boolean;
+  modePengerjaan: "individu" | "kelompok";
+  jumlahAnggota: number;
+  aiProvider: string;
+  aiModel: string;
+  documents: Record<Level, DocumentState | undefined>;
+  active: Level;
+  docType: "siswa" | "kunci";
+  loadingLevels: Level[];
+  progress: { level: Level; index: number } | null;
+  saved: boolean;
+}
+
+// State in-memory di tingkat modul (0% localStorage, bertahan saat berpindah menu/halaman SPA)
+let _cachedState: GeneratorCachedState | null = null;
+
 export function GeneratorWizard() {
   const { classes } = useClassStore();
   const { assessments } = useAssessmentStore();
   const { submissions } = useSubmissionStore();
 
-  const [step, setStep] = useState(0);
-  const [selectedClassId, setKelasId] = useState("");
-  const [selectedAssessmentId, setAssessmentId] = useState("");
-  const [topik, setTopik] = useState("Rasio (Perbandingan)");
-  const [jumlah, setJumlah] = useState(4);
-  const [gaya, setGaya] = useState("Gunakan konteks resep masakan, denah/skala peta, dan perbandingan harga satuan.");
-  const [pertimbangkanGaya, setPertimbangkanGaya] = useState(true);
-  const [modePengerjaan, setModePengerjaan] = useState<"individu" | "kelompok">("individu");
-  const [jumlahAnggota, setJumlahAnggota] = useState<number>(4);
+  const [step, setStep] = useState(() => _cachedState?.step ?? 0);
+  const [selectedClassId, setKelasId] = useState(() => _cachedState?.selectedClassId ?? "");
+  const [selectedAssessmentId, setAssessmentId] = useState(() => _cachedState?.selectedAssessmentId ?? "");
+  const [topik, setTopik] = useState(() => _cachedState?.topik ?? "Rasio (Perbandingan)");
+  const [jumlah, setJumlah] = useState(() => _cachedState?.jumlah ?? 4);
+  const [gaya, setGaya] = useState(() => _cachedState?.gaya ?? "Gunakan konteks resep masakan, denah/skala peta, dan perbandingan harga satuan.");
+  const [pertimbangkanGaya, setPertimbangkanGaya] = useState(() => _cachedState?.pertimbangkanGaya ?? true);
+  const [modePengerjaan, setModePengerjaan] = useState<"individu" | "kelompok">(() => _cachedState?.modePengerjaan ?? "individu");
+  const [jumlahAnggota, setJumlahAnggota] = useState<number>(() => _cachedState?.jumlahAnggota ?? 4);
 
   // AI Provider & Model selection: default ke Lokal Laptop (Gemini 3.8 Flash High)
-  const [aiProvider, setAiProvider] = useState("9router");
-  const [aiModel, setAiModel] = useState("ag/gemini-3.8-flash-high");
+  const [aiProvider, setAiProvider] = useState(() => _cachedState?.aiProvider ?? "9router");
+  const [aiModel, setAiModel] = useState(() => _cachedState?.aiModel ?? "ag/gemini-3.8-flash-high");
   const [modalAIOpen, setModalAIOpen] = useState(false);
 
-  const [documents, setDocuments] = useState<Record<Level, DocumentState | undefined>>(emptyDocuments);
-  const documentsRef = useRef<Record<Level, DocumentState | undefined>>(emptyDocuments());
-  const [active, setActive] = useState<Level>("dasar");
-  const [docType, setDocType] = useState<"siswa" | "kunci">("siswa");
+  const [documents, setDocuments] = useState<Record<Level, DocumentState | undefined>>(() => _cachedState?.documents ?? emptyDocuments());
+  const documentsRef = useRef<Record<Level, DocumentState | undefined>>(_cachedState?.documents ?? emptyDocuments());
+  const [active, setActive] = useState<Level>(() => _cachedState?.active ?? "dasar");
+  const [docType, setDocType] = useState<"siswa" | "kunci">(() => _cachedState?.docType ?? "siswa");
 
-  const [loadingLevels, setLoadingLevels] = useState<Level[]>([]);
+  const [loadingLevels, setLoadingLevels] = useState<Level[]>(() => _cachedState?.loadingLevels ?? []);
   const [error, setError] = useState("");
-  const [progress, setProgress] = useState<{ level: Level; index: number } | null>(null);
+  const [progress, setProgress] = useState<{ level: Level; index: number } | null>(() => _cachedState?.progress ?? null);
   const [validationLevel, setValidationLevel] = useState<Level | null>(null);
-  const [saved, setSaved] = useState(false);
+  const [saved, setSaved] = useState(() => _cachedState?.saved ?? false);
   const [resetOpen, setResetOpen] = useState(false);
   const [copiedKey, setCopiedKey] = useState(false);
+
+  // Sinkronkan state ke memori modul agar saat navigasi ke menu lain draf & hasil tetap terjaga
+  useEffect(() => {
+    _cachedState = {
+      step,
+      selectedClassId,
+      selectedAssessmentId,
+      topik,
+      jumlah,
+      gaya,
+      pertimbangkanGaya,
+      modePengerjaan,
+      jumlahAnggota,
+      aiProvider,
+      aiModel,
+      documents,
+      active,
+      docType,
+      loadingLevels,
+      progress,
+      saved,
+    };
+  }, [
+    step,
+    selectedClassId,
+    selectedAssessmentId,
+    topik,
+    jumlah,
+    gaya,
+    pertimbangkanGaya,
+    modePengerjaan,
+    jumlahAnggota,
+    aiProvider,
+    aiModel,
+    documents,
+    active,
+    docType,
+    loadingLevels,
+    progress,
+    saved,
+  ]);
 
   const kelasId = classes.some((item) => item.kelas.id === selectedClassId) ? selectedClassId : classes[0]?.kelas.id ?? "";
   const dataKelas = classes.find((item) => item.kelas.id === kelasId);
@@ -146,6 +210,7 @@ export function GeneratorWizard() {
   const modelLabel = modelObj?.label || aiModel;
 
   function resetGenerator() {
+    _cachedState = null;
     const cleared = emptyDocuments();
     documentsRef.current = cleared;
     setDocuments(cleared);
@@ -182,6 +247,9 @@ export function GeneratorWizard() {
     const next = { ...documentsRef.current, [level]: document };
     documentsRef.current = next;
     setDocuments(next);
+    if (_cachedState) {
+      _cachedState.documents = next;
+    }
   }
 
   async function generate(only?: Level, customConfig?: { provider: string; model: string }) {
