@@ -91,7 +91,27 @@ interface GeneratorCachedState {
   saved: boolean;
 }
 
-// State in-memory di tingkat modul (0% localStorage, bertahan saat berpindah menu/halaman SPA)
+const SESSION_KEY = "lkpd_generator_session_state";
+
+function loadSessionState(): GeneratorCachedState | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = sessionStorage.getItem(SESSION_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function saveSessionState(state: GeneratorCachedState | null) {
+  if (typeof window === "undefined") return;
+  try {
+    if (!state) sessionStorage.removeItem(SESSION_KEY);
+    else sessionStorage.setItem(SESSION_KEY, JSON.stringify(state));
+  } catch {}
+}
+
+// State in-memory di tingkat modul (0% localStorage, bertahan saat berpindah menu/halaman SPA & F5)
 let _cachedState: GeneratorCachedState | null = null;
 
 export function GeneratorWizard() {
@@ -99,37 +119,39 @@ export function GeneratorWizard() {
   const { assessments } = useAssessmentStore();
   const { submissions } = useSubmissionStore();
 
-  const [step, setStep] = useState(() => _cachedState?.step ?? 0);
-  const [selectedClassId, setKelasId] = useState(() => _cachedState?.selectedClassId ?? "");
-  const [selectedAssessmentId, setAssessmentId] = useState(() => _cachedState?.selectedAssessmentId ?? "");
-  const [topik, setTopik] = useState(() => _cachedState?.topik ?? "Rasio (Perbandingan)");
-  const [jumlah, setJumlah] = useState(() => _cachedState?.jumlah ?? 4);
-  const [gaya, setGaya] = useState(() => _cachedState?.gaya ?? "Gunakan konteks resep masakan, denah/skala peta, dan perbandingan harga satuan.");
-  const [pertimbangkanGaya, setPertimbangkanGaya] = useState(() => _cachedState?.pertimbangkanGaya ?? true);
-  const [modePengerjaan, setModePengerjaan] = useState<"individu" | "kelompok">(() => _cachedState?.modePengerjaan ?? "individu");
-  const [jumlahAnggota, setJumlahAnggota] = useState<number>(() => _cachedState?.jumlahAnggota ?? 4);
+  const getInitial = () => _cachedState || loadSessionState();
+
+  const [step, setStep] = useState(() => getInitial()?.step ?? 0);
+  const [selectedClassId, setKelasId] = useState(() => getInitial()?.selectedClassId ?? "");
+  const [selectedAssessmentId, setAssessmentId] = useState(() => getInitial()?.selectedAssessmentId ?? "");
+  const [topik, setTopik] = useState(() => getInitial()?.topik ?? "Rasio (Perbandingan)");
+  const [jumlah, setJumlah] = useState(() => getInitial()?.jumlah ?? 4);
+  const [gaya, setGaya] = useState(() => getInitial()?.gaya ?? "Gunakan konteks resep masakan, denah/skala peta, dan perbandingan harga satuan.");
+  const [pertimbangkanGaya, setPertimbangkanGaya] = useState(() => getInitial()?.pertimbangkanGaya ?? true);
+  const [modePengerjaan, setModePengerjaan] = useState<"individu" | "kelompok">(() => getInitial()?.modePengerjaan ?? "individu");
+  const [jumlahAnggota, setJumlahAnggota] = useState<number>(() => getInitial()?.jumlahAnggota ?? 4);
 
   // AI Provider & Model selection: default ke Lokal Laptop (Gemini 3.8 Flash High)
-  const [aiProvider, setAiProvider] = useState(() => _cachedState?.aiProvider ?? "9router");
-  const [aiModel, setAiModel] = useState(() => _cachedState?.aiModel ?? "ag/gemini-3.8-flash-high");
+  const [aiProvider, setAiProvider] = useState(() => getInitial()?.aiProvider ?? "9router");
+  const [aiModel, setAiModel] = useState(() => getInitial()?.aiModel ?? "ag/gemini-3.8-flash-high");
   const [modalAIOpen, setModalAIOpen] = useState(false);
 
-  const [documents, setDocuments] = useState<Record<Level, DocumentState | undefined>>(() => _cachedState?.documents ?? emptyDocuments());
-  const documentsRef = useRef<Record<Level, DocumentState | undefined>>(_cachedState?.documents ?? emptyDocuments());
-  const [active, setActive] = useState<Level>(() => _cachedState?.active ?? "dasar");
-  const [docType, setDocType] = useState<"siswa" | "kunci">(() => _cachedState?.docType ?? "siswa");
+  const [documents, setDocuments] = useState<Record<Level, DocumentState | undefined>>(() => getInitial()?.documents ?? emptyDocuments());
+  const documentsRef = useRef<Record<Level, DocumentState | undefined>>(getInitial()?.documents ?? emptyDocuments());
+  const [active, setActive] = useState<Level>(() => getInitial()?.active ?? "dasar");
+  const [docType, setDocType] = useState<"siswa" | "kunci">(() => getInitial()?.docType ?? "siswa");
 
-  const [loadingLevels, setLoadingLevels] = useState<Level[]>(() => _cachedState?.loadingLevels ?? []);
+  const [loadingLevels, setLoadingLevels] = useState<Level[]>(() => getInitial()?.loadingLevels ?? []);
   const [error, setError] = useState("");
-  const [progress, setProgress] = useState<{ level: Level; index: number } | null>(() => _cachedState?.progress ?? null);
+  const [progress, setProgress] = useState<{ level: Level; index: number } | null>(() => getInitial()?.progress ?? null);
   const [validationLevel, setValidationLevel] = useState<Level | null>(null);
-  const [saved, setSaved] = useState(() => _cachedState?.saved ?? false);
+  const [saved, setSaved] = useState(() => getInitial()?.saved ?? false);
   const [resetOpen, setResetOpen] = useState(false);
   const [copiedKey, setCopiedKey] = useState(false);
 
-  // Sinkronkan state ke memori modul agar saat navigasi ke menu lain draf & hasil tetap terjaga
+  // Sinkronkan state ke memori modul & sessionStorage (0% localStorage, aman F5 dan aman navigasi)
   useEffect(() => {
-    _cachedState = {
+    const nextState = {
       step,
       selectedClassId,
       selectedAssessmentId,
@@ -148,6 +170,8 @@ export function GeneratorWizard() {
       progress,
       saved,
     };
+    _cachedState = nextState;
+    saveSessionState(nextState);
   }, [
     step,
     selectedClassId,
@@ -211,6 +235,7 @@ export function GeneratorWizard() {
 
   function resetGenerator() {
     _cachedState = null;
+    saveSessionState(null);
     const cleared = emptyDocuments();
     documentsRef.current = cleared;
     setDocuments(cleared);
