@@ -370,8 +370,8 @@ export function GeneratorWizard() {
                       </strong>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
-                      {/* Tingkat Pemahaman (TaRL) - Ke Bawah Poin / Strip */}
+                    <div className="space-y-2.5 text-xs">
+                      {/* Tingkat Pemahaman (TaRL) - 1 Baris Per Keterangan */}
                       <div className="space-y-1.5 bg-white/80 rounded-lg p-2.5 border border-blue-100">
                         <span className="font-bold text-slate-800 block text-[11px] uppercase tracking-wide">
                           Tingkat Pemahaman:
@@ -380,32 +380,32 @@ export function GeneratorWizard() {
                           {levels.map((level) => {
                             const count = assessmentSubmissions.filter((item) => item.level === level).length;
                             return (
-                              <li key={level} className="flex items-center justify-between">
+                              <li key={level} className="flex items-center justify-between whitespace-nowrap">
                                 <span>- {labels[level]}</span>
-                                <span className="font-bold text-[#1E1B4B]">{count} siswa</span>
+                                <span className="font-bold text-[#1E1B4B] shrink-0">{count} siswa</span>
                               </li>
                             );
                           })}
                         </ul>
                       </div>
 
-                      {/* Gaya Belajar (VAK) - Ke Bawah Poin / Strip */}
+                      {/* Gaya Belajar (VAK) - 1 Baris Per Keterangan */}
                       <div className="space-y-1.5 bg-white/80 rounded-lg p-2.5 border border-blue-100">
                         <span className="font-bold text-slate-800 block text-[11px] uppercase tracking-wide">
                           Gaya Belajar Siswa:
                         </span>
                         <ul className="space-y-1 text-slate-700">
-                          <li className="flex items-center justify-between">
+                          <li className="flex items-center justify-between whitespace-nowrap">
                             <span>- Visual</span>
-                            <span className="font-bold text-[#1E1B4B]">{vak.counts.visual} siswa</span>
+                            <span className="font-bold text-[#1E1B4B] shrink-0">{vak.counts.visual} siswa</span>
                           </li>
-                          <li className="flex items-center justify-between">
+                          <li className="flex items-center justify-between whitespace-nowrap">
                             <span>- Auditory</span>
-                            <span className="font-bold text-[#1E1B4B]">{vak.counts.auditory} siswa</span>
+                            <span className="font-bold text-[#1E1B4B] shrink-0">{vak.counts.auditory} siswa</span>
                           </li>
-                          <li className="flex items-center justify-between">
+                          <li className="flex items-center justify-between whitespace-nowrap">
                             <span>- Kinestetik</span>
-                            <span className="font-bold text-[#1E1B4B]">{vak.counts.kinestetik} siswa</span>
+                            <span className="font-bold text-[#1E1B4B] shrink-0">{vak.counts.kinestetik} siswa</span>
                           </li>
                         </ul>
                       </div>
@@ -522,18 +522,27 @@ export function GeneratorWizard() {
                 <p><strong>Bentuk:</strong> {modePengerjaan === "kelompok" ? `Kelompok (${jumlahAnggota} Siswa)` : "Mandiri (Individu)"}</p>
                 <p><strong>Aktivitas:</strong> {jumlah} per level</p>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2 border-t border-slate-200/80 text-xs">
+                <div className="space-y-2.5 pt-2 border-t border-slate-200/80 text-xs">
                   <div className="bg-white/80 rounded-lg p-2.5 border border-slate-200">
                     <strong className="text-slate-800 block mb-1">Hasil Asesmen (TaRL):</strong>
-                    <ul className="space-y-0.5 text-slate-700">
-                      <li>- Dasar: {counts.dasar} siswa</li>
-                      <li>- Menengah: {counts.menengah} siswa</li>
-                      <li>- Mahir: {counts.mahir} siswa</li>
+                    <ul className="space-y-1 text-slate-700">
+                      <li className="flex items-center justify-between whitespace-nowrap">
+                        <span>- Dasar:</span>
+                        <span className="font-bold text-[#1E1B4B] shrink-0">{counts.dasar} siswa</span>
+                      </li>
+                      <li className="flex items-center justify-between whitespace-nowrap">
+                        <span>- Menengah:</span>
+                        <span className="font-bold text-[#1E1B4B] shrink-0">{counts.menengah} siswa</span>
+                      </li>
+                      <li className="flex items-center justify-between whitespace-nowrap">
+                        <span>- Mahir:</span>
+                        <span className="font-bold text-[#1E1B4B] shrink-0">{counts.mahir} siswa</span>
+                      </li>
                     </ul>
                   </div>
                   <div className="bg-white/80 rounded-lg p-2.5 border border-slate-200">
                     <strong className="text-slate-800 block mb-1">Gaya Belajar Siswa:</strong>
-                    <p className="text-slate-700">
+                    <p className="text-slate-700 whitespace-nowrap">
                       {pertimbangkanGaya ? `${vakLabel} (${vak.percent(vak.dominant)}%)` : "Nonaktif"}
                     </p>
                   </div>
