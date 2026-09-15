@@ -14,18 +14,30 @@ export function sanitizeMathMarkdown(content: string): string {
 
   let text = content;
 
-  // 1. Perbaiki artefak subscript markdown: e.g. "t $_ $a" -> "$t_a$", "v $_ $2" -> "$v_2$"
+  // 1. Sembuhkan artefak cacat "ext..." dan "dfracext..." yang dihasilkan LLM tertentu tanpa backslash
+  // Contoh: "dfracextairextcat" -> "\dfrac{\text{air}}{\text{cat}}", "ext1bagian" -> "\text{1 bagian}"
+  text = text.replace(/\\?dfracext([a-zA-Z]+)ext([a-zA-Z]+)/gi, "\\dfrac{\\text{$1}}{\\text{$2}}");
+  text = text.replace(/\bext1bagian\b/gi, "\\text{1 bagian}");
+  text = text.replace(/\bextsepakbola\b/gi, "\\text{sepak bola}");
+  text = text.replace(/\bextbijijagung\b/gi, "\\text{biji jagung}");
+  text = text.replace(/\bextbulutangkis\b/gi, "\\text{bulu tangkis}");
+  text = text.replace(/\bextbasket\b/gi, "\\text{basket}");
+  text = text.replace(/\bextgandum\b/gi, "\\text{gandum}");
+  text = text.replace(/\bextkacang\b/gi, "\\text{kacang}");
+  text = text.replace(/(?:\$|\b)ext([a-zA-Z]{3,})\b/g, (_m, word) => `\\text{${word}}`);
+
+  // 2. Perbaiki artefak subscript markdown: e.g. "t $_ $a" -> "$t_a$", "v $_ $2" -> "$v_2$"
   text = text.replace(/([a-zA-Z])\s*\$_\s*\$([a-zA-Z0-9]+)/g, "$$$1_{$2}$");
   text = text.replace(/([a-zA-Z])\s*\\_\s*([a-zA-Z0-9]+)/g, "$$$1_{$2}$");
 
-  // 2. Perbaiki tanda bintang atau format markdown di dalam \text{...}, dan bersihkan $ liar di dalam \text{...}
+  // 3. Perbaiki tanda bintang atau format markdown di dalam \text{...}, dan bersihkan $ liar di dalam \text{...}
   // Contoh: \text{Konsentrasi *TangkiA*} -> \text{Konsentrasi Tangki A}, \text{Banyak $paket} -> \text{Banyak paket}
   text = text.replace(/\\text\{([^}]*)\}/g, (_m, inner) => {
     const cleanInner = inner.replace(/\*/g, " ").replace(/\$/g, "").replace(/\s{2,}/g, " ");
     return `\\text{${cleanInner}}`;
   });
 
-  // 3. Bersihkan notasi mata uang Rupiah LaTeX yang sering dirusak AI
+  // 4. Bersihkan notasi mata uang Rupiah LaTeX yang sering dirusak AI
   text = text.replace(/\\mathbf\{\\text\{Rp\}\s*([\d.,]+)\}\$?/gi, "**Rp$1**");
   text = text.replace(/\$?\\mathbf\{\\text\{Rp\}\s*([\d.,]+)\}\$?/gi, "**Rp$1**");
   text = text.replace(/\\text\{Rp\}\s*([\d.,]+)\$?/gi, "Rp$1");
@@ -36,10 +48,10 @@ export function sanitizeMathMarkdown(content: string): string {
   // Normalisasi mata uang di dalam rumus matematika: \text{Rp16.000.000} -> \text{Rp } 16.000.000
   text = text.replace(/\\text\{Rp\s*(\d[\d.,]*)\}/gi, "\\text{Rp } $1");
 
-  // 4. Hilangkan backticks di sekeliling math delimiter: `$...$` -> $...$
+  // 5. Hilangkan backticks di sekeliling math delimiter: `$...$` -> $...$
   text = text.replace(/`(\$[^`\n]+\$)`/g, "$1");
 
-  // 5. Pemrosesan per baris (linear time, bebas ReDoS) untuk memastikan keselarasan delimiter
+  // 6. Pemrosesan per baris (linear time, bebas ReDoS) untuk memastikan keselarasan delimiter
   const lines = text.split("\n");
   const processedLines = lines.map((line) => {
     let l = line.trimEnd();
@@ -61,7 +73,6 @@ export function sanitizeMathMarkdown(content: string): string {
     }
 
     // Pola 2: Rumus diawali bare LaTeX tanpa pembuka $, namun diakhiri $
-    // Contoh: "\text{Banyak paket} = \dfrac{15\text{ kg}}{3\text{ kg}} = ...... \text{ paket}$"
     if (l.includes("$") && !l.trimStart().startsWith("$$")) {
       const parts = l.split("$");
       if (parts.length >= 2 && /\\(?:d?frac|text)\b/.test(parts[0])) {
@@ -76,13 +87,25 @@ export function sanitizeMathMarkdown(content: string): string {
     }
 
     // Pola 3: Rumus matematika bare tanpa tanda $ sama sekali
-    // Contoh: "b. \text{Rasio} = \dfrac{...}{...}"
+    // Contoh: "b. \text{Rasio} = \dfrac{...}{...}" atau "(Tulis rumus: \text{1 bagian} = ...... kg)"
     if (!l.includes("$") && /\\(?:d?frac|text)\b/.test(l)) {
-      const prefixMatch = l.match(/^(\s*(?:[-*]|\d+\.|\([a-z0-9]+\)|[a-z]\.)\s*(?:[A-Za-z\s]+[:=])?\s*)([\s\S]+)$/);
-      if (prefixMatch) {
-        l = `${prefixMatch[1]}$${prefixMatch[2]}$`;
+      const eqStartMatch = l.match(/^(.*?(?:\([Tt]ulis rumus:\s*|[:=]\s*|\badalah\s*))(\\.*)$/);
+      if (eqStartMatch) {
+        let prefix = eqStartMatch[1];
+        let mathPart = eqStartMatch[2];
+        let suffix = "";
+        if (mathPart.endsWith(")") && !mathPart.endsWith("\\)")) {
+          mathPart = mathPart.slice(0, -1);
+          suffix = ")";
+        }
+        l = `${prefix}$${mathPart}$${suffix}`;
       } else {
-        l = `$${l}$`;
+        const prefixMatch = l.match(/^(\s*(?:[-*]|\d+\.|\([a-z0-9]+\)|[a-z]\.)\s*(?:[A-Za-z\s]+[:=])?\s*)([\s\S]+)$/);
+        if (prefixMatch) {
+          l = `${prefixMatch[1]}$${prefixMatch[2]}$`;
+        } else {
+          l = `$${l}$`;
+        }
       }
     }
 

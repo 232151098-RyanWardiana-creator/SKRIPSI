@@ -302,27 +302,14 @@ async function requestWithModelFallback(
   timeoutMs: number,
   maxTokens: number = 4000
 ): Promise<{ content: string; model: string }> {
-  // Model-model sehat yang terbukti 200 OK di Xkiro
-  const candidateModels = [
-    primaryModel,
-    "mistralai/mistral-small-2603",
-    "mistralai/codestral-2508",
-    "mistralai/ministral-8b",
-    "deepseek/deepseek-v3.2",
-  ].filter((m, i, arr) => arr.indexOf(m) === i);
-
-  let lastError: unknown = null;
-  for (const m of candidateModels) {
-    try {
-      developmentLog(`AI request: ${baseUrl}/chat/completions (model: ${m})`);
-      return await requestCompletion(baseUrl, apiKey, m, messages, timeoutMs, maxTokens);
-    } catch (err) {
-      lastError = err;
-      const msg = err instanceof Error ? err.message : String(err);
-      console.warn(`Model ${m} gagal (${msg}). Mencoba kandidat berikutnya...`);
-    }
+  // Hanya panggil model yang diminta pengguna (anti-loncat diam-diam ke model lain)
+  try {
+    developmentLog(`AI request: ${baseUrl}/chat/completions (model: ${primaryModel})`);
+    return await requestCompletion(baseUrl, apiKey, primaryModel, messages, timeoutMs, maxTokens);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    throw new Error(`Model AI '${primaryModel}' gagal merespons (${msg}).`);
   }
-  throw lastError;
 }
 
 async function chatCompletion(
@@ -346,8 +333,7 @@ async function chatCompletion(
 
   const resolveXkiroModel = (m: string) => {
     if (m.startsWith("xkiro/")) return m.replace(/^xkiro\//, "");
-    if (m.includes("deepseek") || m.includes("mistral") || m.includes("qwen") || m.includes("minimax")) return m;
-    return "mistralai/mistral-small-2603";
+    return m;
   };
 
   // 1. Jika di cloud Vercel DAN endpoint masih berupa localhost/127.0.0.1 (tanpa tunnel),

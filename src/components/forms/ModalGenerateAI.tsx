@@ -45,7 +45,7 @@ export function ModalGenerateAI({
     AI_PROVIDERS.find((p) => p.id === selectedProviderId) || AI_PROVIDERS[0];
 
   const [selectedModelId, setSelectedModelId] = useState<string>(
-    currentModelId || currentProvider.models[0]?.id || "INTELLIGENCE-SKRIPSI"
+    currentModelId || currentProvider.models[0]?.id || "ag/gemini-3.8-flash-high"
   );
 
   useEffect(() => {
