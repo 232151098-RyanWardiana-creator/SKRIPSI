@@ -90,13 +90,32 @@ export function useLkpdPenilaian() {
     void ambilPenilaian().then((hasil) => {
       if (hidup) setData(hasil);
     });
-    if (!isSupabaseConfigured) return () => { hidup = false; };
+
+    // Polling berkala 5 detik agar selalu tersinkronisasi real-time saat siswa mengerjakan di dashboard
+    const interval = setInterval(() => {
+      if (hidup) {
+        void ambilPenilaian().then((hasil) => {
+          if (hidup) setData(hasil);
+        });
+      }
+    }, 5000);
+
+    if (!isSupabaseConfigured) {
+      return () => {
+        hidup = false;
+        clearInterval(interval);
+      };
+    }
+
     const channel = supabase
       .channel(`penilaian-lkpd-${Math.random().toString(36).slice(2, 9)}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "lkpd_submissions" }, muatUlang)
+      .on("postgres_changes", { event: "*", schema: "public", table: "lkpd_documents" }, muatUlang)
       .subscribe();
+
     return () => {
       hidup = false;
+      clearInterval(interval);
       void supabase.removeChannel(channel);
     };
   }, [tick, muatUlang]);

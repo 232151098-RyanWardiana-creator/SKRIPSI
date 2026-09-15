@@ -62,9 +62,6 @@ export default function RiwayatPage() {
             <History className="h-8 w-8 text-[#0066cc]" />
             Riwayat & Arsip LKPD
           </h1>
-          <p className="mt-2 text-[#414753]">
-            Arsip seluruh LKPD berdiferensiasi yang telah di-generate, disunting, dan divalidasi oleh guru.
-          </p>
         </div>
         <Button href="/generator">
           <FileText className="h-4 w-4" />Buat LKPD Baru
@@ -105,34 +102,36 @@ export default function RiwayatPage() {
         </div>
       </Card>
 
-      {/* Tabel Riwayat */}
-      <Card>
+      {/* Tabel Riwayat dengan Sekat Antar Kolom Presisi */}
+      <Card className="overflow-hidden p-0">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
+          <table className="w-full text-left text-sm border-collapse">
             <thead>
-              <tr className="border-b text-[#7a7a7a]">
-                <th className="pb-3">Judul Dokumen</th>
-                <th className="pb-3">Level (TaRL)</th>
-                <th className="pb-3">Kelas</th>
-                <th className="pb-3">Tanggal Dibuat</th>
-                <th className="pb-3">Status</th>
-                <th className="pb-3">Dibagikan</th>
-                <th className="pb-3 text-right">Aksi</th>
+              <tr className="border-b border-slate-200 bg-slate-50/80 text-slate-700">
+                <th className="py-3 px-3.5 border-r border-slate-200 font-bold">Judul Dokumen</th>
+                <th className="py-3 px-3.5 border-r border-slate-200 font-bold">Level (TaRL)</th>
+                <th className="py-3 px-3.5 border-r border-slate-200 font-bold">Kelas</th>
+                <th className="py-3 px-3.5 border-r border-slate-200 font-bold">Tanggal Dibuat</th>
+                <th className="py-3 px-3.5 border-r border-slate-200 font-bold">Status</th>
+                <th className="py-3 px-3.5 border-r border-slate-200 font-bold">Dibagikan</th>
+                <th className="py-3 px-3.5 text-right font-bold">Aksi</th>
               </tr>
             </thead>
             <tbody>
               {filtered.map(item => (
-                <tr className="border-t border-[#e0e0e0] hover:bg-slate-50/50" key={item.id}>
-                  <td className="py-4 font-semibold text-[#172033]">
+                <tr className="border-t border-slate-200 hover:bg-slate-50/60 transition-colors" key={item.id}>
+                  <td className="py-3.5 px-3.5 font-semibold text-[#172033] border-r border-slate-200">
                     {item.judul}
-                    <span className="block text-xs font-normal text-[#64748b]">{item.topik}</span>
+                    {item.topik && !item.judul.toLowerCase().includes(item.topik.toLowerCase()) && (
+                      <span className="block text-xs font-normal text-[#64748b]">{item.topik}</span>
+                    )}
                   </td>
-                  <td className="py-4">
+                  <td className="py-3.5 px-3.5 border-r border-slate-200">
                     <Badge level={item.level as Level}>{item.level}</Badge>
                   </td>
-                  <td className="py-4 font-medium">{item.kelas}</td>
-                  <td className="py-4 text-xs text-[#526174]">{item.tanggal}</td>
-                  <td className="py-4">
+                  <td className="py-3.5 px-3.5 font-medium border-r border-slate-200">{item.kelas}</td>
+                  <td className="py-3.5 px-3.5 text-xs text-[#526174] border-r border-slate-200">{item.tanggal}</td>
+                  <td className="py-3.5 px-3.5 border-r border-slate-200">
                     <span
                       className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
                         item.status === "Tervalidasi"
@@ -143,7 +142,7 @@ export default function RiwayatPage() {
                       {item.status}
                     </span>
                   </td>
-                  <td className="py-4">
+                  <td className="py-3.5 px-3.5 border-r border-slate-200">
                     <button
                       aria-pressed={Boolean(item.dibagikan)}
                       className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold transition ${

@@ -11,7 +11,6 @@ const items: NavItem[] = [
   { label: "Hasil Asesmen", href: "/asesmen/hasil", icon: BarChart3 },
   { label: "Riwayat LKPD", href: "/riwayat", icon: History },
   { label: "Penilaian LKPD", href: "/penilaian-lkpd", icon: ClipboardCheck },
-  { label: "Panduan", href: "/onboarding", icon: BookOpen },
   { label: "Pengaturan", href: "/pengaturan", icon: Settings },
 ];
 export function GuruSidebar() { return <Sidebar items={items} role="Guru" />; }

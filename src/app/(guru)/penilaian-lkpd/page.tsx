@@ -51,10 +51,6 @@ export default function PenilaianLkpdPage() {
     <div>
       <header className="mb-7">
         <h1 className="text-2xl font-semibold md:text-3xl">Penilaian LKPD</h1>
-        <p className="mt-2 text-[#414753]">
-          Lembar kerja yang sudah dikumpulkan siswa. Klik nama siswa untuk membaca jawabannya lalu
-          memberi nilai dan catatan.
-        </p>
       </header>
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-5">
