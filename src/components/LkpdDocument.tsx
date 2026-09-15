@@ -30,22 +30,14 @@ export function LkpdDocument({ content, level, topic, printId, docTitle, docBadg
   const [pages, setPages] = useState(1);
   useEffect(() => {
     const paper = paperRef.current;
-    if (!paper || typeof ResizeObserver === "undefined") return;
-    let frame = 0;
-    const measure = () => {
-      cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(() => {
-        const style = getComputedStyle(paper);
-        const printableHeight = (paper.clientWidth / 210) * 257;
-        const padding = parseFloat(style.paddingTop) + parseFloat(style.paddingBottom);
-        const next = Math.max(1, Math.ceil((paper.scrollHeight - padding) / Math.max(printableHeight, 1)));
-        setPages((current) => current === next ? current : next);
-      });
-    };
-    const observer = new ResizeObserver(measure);
-    observer.observe(paper);
-    measure();
-    return () => { observer.disconnect(); cancelAnimationFrame(frame); };
+    if (!paper) return;
+    const timer = setTimeout(() => {
+      const printableHeight = (paper.clientWidth / 210) * 257;
+      const padding = 64; // estimasi padding atas dan bawah lembar A4
+      const next = Math.max(1, Math.ceil((paper.scrollHeight - padding) / Math.max(printableHeight, 1)));
+      setPages((current) => (current === next ? current : next));
+    }, 120);
+    return () => clearTimeout(timer);
   }, [content]);
   return (
     <div className="lkpd-preview-container">

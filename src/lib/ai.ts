@@ -482,11 +482,13 @@ HINDARI pengulangan angka, narasi cerita, atau studi kasus klise yang sama denga
 Dokumen harus dalam format Markdown bersih, ramah cetak A4, dan rumus matematika ditulis menggunakan $...$ (inline) atau $$...$$ (blok). JANGAN gunakan fenced code block untuk seluruh isi dokumen.
 
 ATURAN FORMULA & SIMBOL MATEMATIKA (PEDOMAN EQUATION & OMML):
-1. Satuan mata uang Rupiah DILARANG ditulis di dalam format LaTeX ($...$). Jangan gunakan \\text{Rp}, \\mathbf{Rp}, dsb. Tulis selalu satuan Rupiah sebagai teks biasa tebal: **Rp16.000** atau **Rp112.000**.
-2. Rumus matematika WAJIB menggunakan tanda dolar lengkap berpasangan: $...$ untuk inline (contoh: $3 : 5$ atau $\\dfrac{a}{b}$) dan $$...$$ untuk baris rumus terpisah. Gunakan selalu \\dfrac untuk pecahan agar pembilang dan penyebut memiliki jarak yang lapang dan nyaman dibaca.
-3. HINDARI menulis kalimat deskripsi panjang di dalam pecahan KaTeX \\frac{\\text{...}}{\\text{...}}. Gunakan variabel atau istilah ringkas seperti $\\dfrac{\\text{Bahan A}}{\\text{Bahan B}}$ atau $\\text{L} = \\dfrac{\\text{Total}}{\\text{Volume}}$ agar garis pecahan tidak menabrak huruf.
-4. JANGAN PERNAH menyisakan kode LaTeX mentah (seperti \\frac, \\text, \\times, \\dots, \\_) di luar tanda dolar! Seluruh persamaan WAJIB diapit tanda dolar $...$.
-5. Simbol variabel berindeks/subskrip WAJIB ditulis utuh di dalam tanda dolar: $v_2$, $t_a$, $t_{\\min}$, DILARANG menulis terpisah seperti 'v $_ $2' atau 't $_ $a'.
+1. Satuan mata uang Rupiah DILARANG ditulis di dalam format LaTeX ($...$). Jangan gunakan \text{Rp}, \mathbf{Rp}, dsb. Tulis selalu satuan Rupiah sebagai teks biasa tebal: **Rp16.000** atau **Rp112.000**.
+2. Rumus matematika WAJIB menggunakan tanda dolar lengkap berpasangan: $...$ untuk inline (contoh: $3 : 5$ atau $\dfrac{a}{b}$) dan $$...$$ untuk baris rumus terpisah. Gunakan selalu \dfrac untuk pecahan agar pembilang dan penyebut memiliki jarak yang lapang dan nyaman dibaca.
+3. JANGAN PERNAH membuat delimiter pincang/mismatched: jika diawali $$ maka WAJIB ditutup $$ di baris yang sama (DILARANG membuka dengan $$ lalu menutup dengan $ saja atau lupa menutup sama sekali).
+4. JANGAN gunakan tanda format markdown (seperti tanda bintang * atau **) di DALAM formula matematika KaTeX atau di dalam \text{...}. Gunakan teks polos di dalam teks rumus: contoh \text{Konsentrasi Tangki A}.
+5. HINDARI menulis kalimat deskripsi panjang di dalam pecahan KaTeX \dfrac{\text{...}}{\text{...}}. Gunakan variabel atau istilah ringkas seperti $\dfrac{\text{Bahan A}}{\text{Bahan B}}$ atau $\text{L} = \dfrac{\text{Total}}{\text{Volume}}$ agar garis pecahan tidak menabrak huruf.
+6. JANGAN PERNAH menyisakan kode LaTeX mentah (seperti \dfrac, \text, \times, \dots, \_) di luar tanda dolar! Seluruh persamaan WAJIB diapit tanda dolar $...$.
+7. Simbol variabel berindeks/subskrip WAJIB ditulis utuh di dalam tanda dolar: $v_2$, $t_a$, $t_{\min}$, DILARANG menulis terpisah seperti 'v $_ $2' atau 't $_ $a'.
 
 ${identitasInstruksi}
 

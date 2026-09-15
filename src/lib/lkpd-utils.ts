@@ -12,55 +12,87 @@
 export function sanitizeMathMarkdown(content: string): string {
   if (!content || typeof content !== "string") return "";
 
-  let cleaned = content;
+  let text = content;
 
-  // 1. Perbaiki artefak subscript markdown: e.g. "t $_ $a" -> "t_{a}", "v $_ $2" -> "v_{2}"
-  cleaned = cleaned.replace(/([a-zA-Z])\s*\$_\s*\$([a-zA-Z0-9]+)/g, "$1_{$2}");
-  cleaned = cleaned.replace(/([a-zA-Z])\s*\\_\s*([a-zA-Z0-9]+)/g, "$1_{$2}");
+  // 1. Perbaiki artefak subscript markdown: e.g. "t $_ $a" -> "$t_a$", "v $_ $2" -> "$v_2$"
+  text = text.replace(/([a-zA-Z])\s*\$_\s*\$([a-zA-Z0-9]+)/g, "$$$1_{$2}$");
+  text = text.replace(/([a-zA-Z])\s*\\_\s*([a-zA-Z0-9]+)/g, "$$$1_{$2}$");
 
-  // 2. Bersihkan notasi mata uang Rupiah LaTeX yang sering dirusak AI
-  cleaned = cleaned.replace(/\\mathbf\{\\text\{Rp\}\s*([\d.,]+)\}\$?/gi, "**Rp$1**");
-  cleaned = cleaned.replace(/\$?\\mathbf\{\\text\{Rp\}\s*([\d.,]+)\}\$?/gi, "**Rp$1**");
-  cleaned = cleaned.replace(/\\text\{Rp\}\s*([\d.,]+)\$?/gi, "Rp$1");
-  cleaned = cleaned.replace(/\$?\\text\{Rp\}\s*([\d.,]+)\$?/gi, "Rp$1");
-  cleaned = cleaned.replace(/\\mathbf\{Rp\s*([\d.,]+)\}\$?/gi, "**Rp$1**");
-  cleaned = cleaned.replace(/\$\s*Rp\s*([\d.,]+)\s*\$/gi, "**Rp$1**");
+  // 2. Perbaiki tanda bintang atau format markdown di dalam \text{...}, dan bersihkan $ liar di dalam \text{...}
+  // Contoh: \text{Konsentrasi *TangkiA*} -> \text{Konsentrasi Tangki A}, \text{Banyak $paket} -> \text{Banyak paket}
+  text = text.replace(/\\text\{([^}]*)\}/g, (_m, inner) => {
+    const cleanInner = inner.replace(/\*/g, " ").replace(/\$/g, "").replace(/\s{2,}/g, " ");
+    return `\\text{${cleanInner}}`;
+  });
 
-  // 3. Normalisasi mata uang di dalam rumus matematika: \text{Rp16.000.000} -> \text{Rp } 16.000.000
-  cleaned = cleaned.replace(/\\text\{Rp\s*(\d[\d.,]*)\}/gi, "\\text{Rp } $1");
+  // 3. Bersihkan notasi mata uang Rupiah LaTeX yang sering dirusak AI
+  text = text.replace(/\\mathbf\{\\text\{Rp\}\s*([\d.,]+)\}\$?/gi, "**Rp$1**");
+  text = text.replace(/\$?\\mathbf\{\\text\{Rp\}\s*([\d.,]+)\}\$?/gi, "**Rp$1**");
+  text = text.replace(/\\text\{Rp\}\s*([\d.,]+)\$?/gi, "Rp$1");
+  text = text.replace(/\$?\\text\{Rp\}\s*([\d.,]+)\$?/gi, "Rp$1");
+  text = text.replace(/\\mathbf\{Rp\s*([\d.,]+)\}\$?/gi, "**Rp$1**");
+  text = text.replace(/\$\s*Rp\s*([\d.,]+)\s*\$/gi, "**Rp$1**");
+
+  // Normalisasi mata uang di dalam rumus matematika: \text{Rp16.000.000} -> \text{Rp } 16.000.000
+  text = text.replace(/\\text\{Rp\s*(\d[\d.,]*)\}/gi, "\\text{Rp } $1");
 
   // 4. Hilangkan backticks di sekeliling math delimiter: `$...$` -> $...$
-  cleaned = cleaned.replace(/`(\$[^`\n]+\$)`/g, "$1");
+  text = text.replace(/`(\$[^`\n]+\$)`/g, "$1");
 
-  // 5. Bungkus formula yang diawali \text{...} atau variabel = \frac{...} dan berujung $ tanpa pembuka
-  // Contoh: \text{Modal Pak Joko} = \frac{......}{......} \times \text{Rp 16.000.000} = Rp..................$
-  cleaned = cleaned.replace(
-    /(?:^|(?<=[:\n\s]))((?:\\text\{[^}]*\}|[a-zA-Z0-9_{}\s]+)\s*=\s*(?:\\frac\{|\\dfrac\{)[^\n$]*?)(?:\$|\n|$)/g,
-    (match, formula) => {
-      const clean = formula.replace(/\$/g, "").trim();
-      return ` $${clean}$ `;
+  // 5. Pemrosesan per baris (linear time, bebas ReDoS) untuk memastikan keselarasan delimiter
+  const lines = text.split("\n");
+  const processedLines = lines.map((line) => {
+    let l = line.trimEnd();
+
+    const hasLatex = /\\(?:d?frac|text|times|div|cdot|pm|sqrt|approx|ne|le|ge)\b/.test(l);
+    if (!hasLatex) {
+      return l.replace(/(\$(?!\$)[^\$\n]*?)\\frac\{/g, "$1\\dfrac{");
     }
-  );
 
-  // 6. Bungkus persamaan bare \frac{...}{...} yang sama sekali belum memiliki tanda dolar
-  // Contoh: " = \frac{\dots}{\dots} = \dots\text{ jam}"
-  cleaned = cleaned.replace(
-    /(?:^|[^\$])((?:[a-zA-Z0-9_{}]+\s*=\s*)?(?:\\frac\{|\\dfrac\{)(?:[^{}]*|\{[^{}]*\})*\}(?:[^{}]*|\{[^{}]*\})*(?:\s*(?:=|\times|\div|\+|-)\s*(?:[^\s,;:()\[\]\n]|\s(?![a-z]{3,}))*)*)(?:\$|\n|$)/g,
-    (match, formula) => {
-      if (!formula || formula.includes("$")) return match;
-      const clean = formula.trim();
-      return match.replace(formula, ` $${clean}$ `);
+    const trimmed = l.trim();
+
+    // Pola 1: Baris diawali $$ namun hanya ditutup single $ atau lupa ditutup sama sekali
+    if (trimmed.startsWith("$$") && !trimmed.slice(2).includes("$$")) {
+      if (trimmed.endsWith("$")) {
+        l = l.replace(/\$\s*$/, () => "$$");
+      } else {
+        l = l + " $$";
+      }
     }
-  );
 
-  // 7. Ubah \frac menjadi \dfrac saat berada di dalam formula KaTeX agar pembilang & penyebut memiliki spasi vertikal lapang dan tidak menabrak garis
-  cleaned = cleaned.replace(/(\$(?!\$)[^\$\n]*?)\\frac\{/g, "$1\\dfrac{");
-  cleaned = cleaned.replace(/(\$\$[\s\S]*?)\\frac\{/g, "$1\\dfrac{");
+    // Pola 2: Rumus diawali bare LaTeX tanpa pembuka $, namun diakhiri $
+    // Contoh: "\text{Banyak paket} = \dfrac{15\text{ kg}}{3\text{ kg}} = ...... \text{ paket}$"
+    if (l.includes("$") && !l.trimStart().startsWith("$$")) {
+      const parts = l.split("$");
+      if (parts.length >= 2 && /\\(?:d?frac|text)\b/.test(parts[0])) {
+        const match = parts[0].match(/((?:\\text\{[^{}]*\}|[a-zA-Z0-9\s()=+\-*\/])*(?:\\(?:d?frac|text))\b[\s\S]*)$/);
+        if (match && match.index !== undefined) {
+          const prefix = parts[0].slice(0, match.index);
+          const mathStart = match[1];
+          parts[0] = prefix + "$" + mathStart;
+          l = parts.join("$");
+        }
+      }
+    }
 
-  // 8. Bersihkan spasi ganda
-  cleaned = cleaned.replace(/ {2,}/g, " ");
+    // Pola 3: Rumus matematika bare tanpa tanda $ sama sekali
+    // Contoh: "b. \text{Rasio} = \dfrac{...}{...}"
+    if (!l.includes("$") && /\\(?:d?frac|text)\b/.test(l)) {
+      const prefixMatch = l.match(/^(\s*(?:[-*]|\d+\.|\([a-z0-9]+\)|[a-z]\.)\s*(?:[A-Za-z\s]+[:=])?\s*)([\s\S]+)$/);
+      if (prefixMatch) {
+        l = `${prefixMatch[1]}$${prefixMatch[2]}$`;
+      } else {
+        l = `$${l}$`;
+      }
+    }
 
-  return cleaned;
+    // Naikkan \frac menjadi \dfrac agar spasi pembilang-penyebut lapang
+    l = l.replace(/\\frac\{/g, "\\dfrac{");
+
+    return l;
+  });
+
+  return processedLines.join("\n");
 }
 
 /**

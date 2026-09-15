@@ -363,14 +363,53 @@ export function GeneratorWizard() {
 
               {assessment ? (
                 <div className="space-y-3">
-                  <div className="rounded-xl bg-blue-50/70 border border-blue-100 p-3.5 text-sm space-y-1">
-                    <strong className="text-[#1E1B4B]">{assessmentSubmissions.length} siswa telah menyelesaikan asesmen</strong>
-                    <p className="text-xs text-slate-700">
-                      {levels.map((level) => `${labels[level]}: ${assessmentSubmissions.filter((item) => item.level === level).length} siswa`).join(" · ")}
-                    </p>
-                    <p className="text-xs text-slate-600">
-                      Gaya Belajar: Visual {vak.counts.visual} · Auditory {vak.counts.auditory} · Kinestetik {vak.counts.kinestetik}
-                    </p>
+                  <div className="rounded-xl bg-blue-50/70 border border-blue-100 p-3.5 text-sm space-y-3">
+                    <div className="border-b border-blue-100/80 pb-2">
+                      <strong className="text-[#1E1B4B] text-sm block">
+                        {assessmentSubmissions.length} siswa telah menyelesaikan asesmen
+                      </strong>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
+                      {/* Tingkat Pemahaman (TaRL) - Ke Bawah Poin / Strip */}
+                      <div className="space-y-1.5 bg-white/80 rounded-lg p-2.5 border border-blue-100">
+                        <span className="font-bold text-slate-800 block text-[11px] uppercase tracking-wide">
+                          Tingkat Pemahaman:
+                        </span>
+                        <ul className="space-y-1 text-slate-700">
+                          {levels.map((level) => {
+                            const count = assessmentSubmissions.filter((item) => item.level === level).length;
+                            return (
+                              <li key={level} className="flex items-center justify-between">
+                                <span>- {labels[level]}</span>
+                                <span className="font-bold text-[#1E1B4B]">{count} siswa</span>
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      </div>
+
+                      {/* Gaya Belajar (VAK) - Ke Bawah Poin / Strip */}
+                      <div className="space-y-1.5 bg-white/80 rounded-lg p-2.5 border border-blue-100">
+                        <span className="font-bold text-slate-800 block text-[11px] uppercase tracking-wide">
+                          Gaya Belajar Siswa:
+                        </span>
+                        <ul className="space-y-1 text-slate-700">
+                          <li className="flex items-center justify-between">
+                            <span>- Visual</span>
+                            <span className="font-bold text-[#1E1B4B]">{vak.counts.visual} siswa</span>
+                          </li>
+                          <li className="flex items-center justify-between">
+                            <span>- Auditory</span>
+                            <span className="font-bold text-[#1E1B4B]">{vak.counts.auditory} siswa</span>
+                          </li>
+                          <li className="flex items-center justify-between">
+                            <span>- Kinestetik</span>
+                            <span className="font-bold text-[#1E1B4B]">{vak.counts.kinestetik} siswa</span>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
                   </div>
 
                   {assessmentSubmissions.length === 0 && (
@@ -477,13 +516,28 @@ export function GeneratorWizard() {
 
           {step === 2 && (
             <div className="space-y-3 text-sm">
-              <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-3 space-y-1.5">
+              <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-3.5 space-y-2.5">
                 <p><strong>Kelas:</strong> {dataKelas.kelas.nama}</p>
                 <p><strong>Topik Materi:</strong> {topik}</p>
                 <p><strong>Bentuk:</strong> {modePengerjaan === "kelompok" ? `Kelompok (${jumlahAnggota} Siswa)` : "Mandiri (Individu)"}</p>
                 <p><strong>Aktivitas:</strong> {jumlah} per level</p>
-                <p><strong>Hasil Asesmen:</strong> Dasar {counts.dasar} · Menengah {counts.menengah} · Mahir {counts.mahir}</p>
-                <p><strong>Gaya Belajar:</strong> {pertimbangkanGaya ? `${vakLabel} (${vak.percent(vak.dominant)}%)` : "Nonaktif"}</p>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2 border-t border-slate-200/80 text-xs">
+                  <div className="bg-white/80 rounded-lg p-2.5 border border-slate-200">
+                    <strong className="text-slate-800 block mb-1">Hasil Asesmen (TaRL):</strong>
+                    <ul className="space-y-0.5 text-slate-700">
+                      <li>- Dasar: {counts.dasar} siswa</li>
+                      <li>- Menengah: {counts.menengah} siswa</li>
+                      <li>- Mahir: {counts.mahir} siswa</li>
+                    </ul>
+                  </div>
+                  <div className="bg-white/80 rounded-lg p-2.5 border border-slate-200">
+                    <strong className="text-slate-800 block mb-1">Gaya Belajar Siswa:</strong>
+                    <p className="text-slate-700">
+                      {pertimbangkanGaya ? `${vakLabel} (${vak.percent(vak.dominant)}%)` : "Nonaktif"}
+                    </p>
+                  </div>
+                </div>
               </div>
 
               {/* Chosen AI engine summary card with change button */}
