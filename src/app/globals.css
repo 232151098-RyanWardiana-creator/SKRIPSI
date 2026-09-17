@@ -126,44 +126,16 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
 .lkpd-markdown blockquote p { margin:0; }
 .lkpd-markdown blockquote hr { margin-top:36px !important; margin-bottom:8px !important; border:0 !important; border-top:1.5px solid #64748b !important; }
 .lkpd-markdown table { width:100%; margin:14px 0 20px; border-collapse:collapse; font-family:Arial,Helvetica,sans-serif; font-size:10pt; table-layout:auto; break-inside:avoid; page-break-inside:avoid; }
-.lkpd-markdown th { padding:8px 10px; border:1px solid #94a3b8; background:#f1f5f9; color:#0f172a; font-weight:700; text-align:left; }
-.lkpd-markdown td { padding:8px 10px; border:1px solid #cbd5e1; vertical-align:top; }
+.lkpd-markdown th { padding:8px 10px; border:1px solid #94a3b8; background:#f1f5f9; color:#0f172a; font-weight:700; text-align:left; vertical-align:middle; overflow-wrap:break-word; word-break:normal; }
+.lkpd-markdown td { padding:8px 10px; border:1px solid #cbd5e1; vertical-align:top; overflow-wrap:break-word; word-break:normal; }
 .lkpd-markdown tr { break-inside:avoid; page-break-inside:avoid; }
 
-/* Presisi Kolom Tabel Rubrik 4 Kolom: No | Aktivitas | Kriteria | Skor */
-.lkpd-markdown table:has(th:nth-child(4):last-child) th:nth-child(1),
-.lkpd-markdown table:has(th:nth-child(4):last-child) td:nth-child(1) {
-  width: 50px !important;
-  min-width: 45px !important;
-  max-width: 58px !important;
-  text-align: center !important;
-  white-space: nowrap !important;
-}
-.lkpd-markdown table:has(th:nth-child(4):last-child) th:nth-child(2),
-.lkpd-markdown table:has(th:nth-child(4):last-child) td:nth-child(2) {
-  width: 140px !important;
-  min-width: 130px !important;
-  white-space: nowrap !important;
-  font-weight: 600 !important;
-}
-.lkpd-markdown table:has(th:nth-child(4):last-child) th:nth-child(4),
-.lkpd-markdown table:has(th:nth-child(4):last-child) td:nth-child(4) {
-  width: 95px !important;
-  min-width: 85px !important;
-  max-width: 110px !important;
-  text-align: center !important;
-  white-space: nowrap !important;
-  font-weight: 700 !important;
-}
+/* Penyelarasan kolom tabel markdown (:---: dan :---) */
+.lkpd-markdown th[align="center"], .lkpd-markdown td[align="center"] { text-align:center; }
+.lkpd-markdown th[align="right"], .lkpd-markdown td[align="right"] { text-align:right; }
 
-/* Presisi Kolom Tabel Identitas 2 Kolom: Komponen | Keterangan */
-.lkpd-markdown table:has(th:nth-child(2):last-child) th:nth-child(1),
-.lkpd-markdown table:has(th:nth-child(2):last-child) td:nth-child(1) {
-  width: 165px !important;
-  min-width: 145px !important;
-  max-width: 195px !important;
-  white-space: nowrap !important;
-}
+/* Simbol visual rasio & titik proporsi agar berjarak rapi bebas artefak blok sensor */
+.lkpd-markdown td:has(span.visual-dot), .lkpd-markdown span.visual-dot { letter-spacing:0.25em; font-weight:700; }
 .lkpd-markdown pre { max-width:100%; overflow:hidden; overflow-wrap:anywhere; white-space:pre-wrap; margin:12px 0; padding:12px; border-radius:4px; background:#172033; color:#f8fafc; font:clamp(7pt,1.5vw,10pt)/1.5 Consolas,monospace; break-inside:avoid; page-break-inside:avoid; }
 .lkpd-markdown code:not(pre code) { overflow-wrap:anywhere; white-space:normal; padding:1px 4px; border-radius:3px; background:#edf1f6; font-family:Consolas,monospace; }
 .lkpd-markdown .katex-display { display:block !important; overflow-x:auto !important; overflow-y:visible !important; margin:18px 0 !important; padding:10px 0 !important; line-height:normal !important; text-align:center !important; break-inside:avoid !important; page-break-inside:avoid !important; }

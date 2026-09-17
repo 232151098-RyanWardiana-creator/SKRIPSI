@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { saveStoredTeacherProfile, getStoredTeacherProfile } from "@/lib/teacher-profile";
+import { StudentIdentityPicker } from "@/components/forms/StudentIdentityPicker";
 
 export function AuthForm({ mode = "login" }: { mode?: "login" | "register" }) {
   const router = useRouter();
@@ -139,63 +140,8 @@ export function AuthForm({ mode = "login" }: { mode?: "login" | "register" }) {
       </div>
 
       {role === "siswa" ? (
-        <div className="space-y-4 rounded-2xl border-2 border-slate-200/90 bg-slate-50/60 p-5 shadow-xs">
-          {/* Header: Pure Words, No Icon, Subtitle Removed */}
-          <div>
-            <h3 className="text-base font-black text-[#1E1B4B] tracking-tight">
-              Masuk Tanpa Password
-            </h3>
-          </div>
-
-          {/* Connected Stepper Timeline for Steps 1, 2, 3 (Clean, Human Design, No AI Slop) */}
-          <div className="relative pl-7 space-y-2.5 before:absolute before:left-[11px] before:top-3 before:bottom-3 before:w-[2px] before:bg-slate-200">
-            {/* Step 1 */}
-            <div className="relative flex items-center">
-              <span className="absolute -left-7 flex h-6 w-6 items-center justify-center rounded-full bg-white border-2 border-[#2563EB] text-[11px] font-black text-[#2563EB] shadow-xs">
-                1
-              </span>
-              <div className="flex-1 rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs shadow-2xs">
-                <span className="font-bold text-slate-900">Kode Kelas</span>
-                <span className="text-slate-500 ml-1.5">— Dari gurumu</span>
-              </div>
-            </div>
-
-            {/* Step 2 */}
-            <div className="relative flex items-center">
-              <span className="absolute -left-7 flex h-6 w-6 items-center justify-center rounded-full bg-white border-2 border-indigo-600 text-[11px] font-black text-indigo-600 shadow-xs">
-                2
-              </span>
-              <div className="flex-1 rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs shadow-2xs">
-                <span className="font-bold text-slate-900">Pilih Nama</span>
-                <span className="text-slate-500 ml-1.5">— Dari daftar rombel</span>
-              </div>
-            </div>
-
-            {/* Step 3 */}
-            <div className="relative flex items-center">
-              <span className="absolute -left-7 flex h-6 w-6 items-center justify-center rounded-full bg-white border-2 border-purple-600 text-[11px] font-black text-purple-600 shadow-xs">
-                3
-              </span>
-              <div className="flex-1 rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs shadow-2xs">
-                <span className="font-bold text-slate-900">PIN 4 Angka</span>
-                <span className="text-slate-500 ml-1.5">— Kunci privasi siswa</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2 rounded-xl bg-emerald-50 border border-emerald-200/80 px-3 py-2 text-[11px] font-medium text-emerald-900">
-            <ShieldCheck className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
-            <span>PIN menjaga agar siswa lain tidak dapat mengisi atas namamu.</span>
-          </div>
-
-          <button
-            className="flex w-full items-center justify-center gap-2 rounded-full bg-[#2563EB] hover:bg-[#1D4ED8] px-6 py-3.5 text-sm font-black text-white shadow-md shadow-blue-600/20 transition-all hover:shadow-lg hover:-translate-y-0.5 active:scale-95 cursor-pointer"
-            onClick={() => router.push("/dashboard-siswa")}
-            type="button"
-          >
-            Buka Portal Siswa
-            <ArrowRight className="h-4 w-4" />
-          </button>
+        <div className="space-y-4 pt-1">
+          <StudentIdentityPicker redirectTarget={redirectTarget} />
         </div>
       ) : (
         <>

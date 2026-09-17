@@ -19,6 +19,12 @@ interface InfoKelas {
   kode: string;
 }
 
+export interface StudentIdentityPickerProps {
+  redirectTarget?: string | null;
+  onLoginSuccess?: () => void;
+  compact?: boolean;
+}
+
 /**
  * Login siswa: kode kelas -> pilih nama -> PIN.
  *
@@ -33,7 +39,7 @@ interface InfoKelas {
  * tombol Reset PIN. Naikkan ke PIN pra-cetak dari guru bila aplikasi dipakai
  * tanpa pengawasan.
  */
-export function StudentIdentityPicker() {
+export function StudentIdentityPicker({ redirectTarget, onLoginSuccess }: StudentIdentityPickerProps = {}) {
   const sesi = useSesiSiswa();
   const router = useRouter();
 
@@ -80,14 +86,26 @@ export function StudentIdentityPicker() {
     if (!res.ok) return setError(data.error ?? "Gagal masuk.");
     notifySessionChanged();
     router.refresh();
-    router.push("/dashboard-siswa");
+    if (onLoginSuccess) {
+      onLoginSuccess();
+    } else {
+      router.push(redirectTarget || "/dashboard-siswa");
+    }
   };
 
   if (sesi === undefined) {
     return <div className="card mb-6 animate-pulse text-sm text-slate-500">Memuat identitas…</div>;
   }
 
-  if (sesi) return <KartuIdentitas sesi={sesi} onKeluar={() => void logoutSiswa().then(() => router.refresh())} />;
+  if (sesi) {
+    return (
+      <KartuIdentitas
+        redirectTarget={redirectTarget}
+        sesi={sesi}
+        onKeluar={() => void logoutSiswa().then(() => router.refresh())}
+      />
+    );
+  }
 
   // Langkah 2: pilih nama + PIN.
   if (kelas) {
@@ -244,7 +262,16 @@ export function StudentIdentityPicker() {
   );
 }
 
-function KartuIdentitas({ sesi, onKeluar }: { sesi: SesiSiswa; onKeluar: () => void }) {
+function KartuIdentitas({
+  sesi,
+  onKeluar,
+  redirectTarget,
+}: {
+  sesi: SesiSiswa;
+  onKeluar: () => void;
+  redirectTarget?: string | null;
+}) {
+  const router = useRouter();
   return (
     <div className="card mb-6 flex flex-wrap items-center justify-between gap-4 border-l-4 border-l-blue-600 bg-blue-50/50 p-4">
       <div className="flex items-center gap-3">
@@ -267,10 +294,19 @@ function KartuIdentitas({ sesi, onKeluar }: { sesi: SesiSiswa; onKeluar: () => v
           </p>
         </div>
       </div>
-      <Button className="min-h-9 px-3 py-1.5 text-xs text-red-700 hover:bg-red-50" onClick={onKeluar} variant="ghost">
-        <LogOut className="mr-1 h-4 w-4" />
-        Keluar
-      </Button>
+      <div className="flex items-center gap-2">
+        <Button
+          className="bg-blue-600 text-white hover:bg-blue-700 text-xs px-3 py-1.5"
+          onClick={() => router.push(redirectTarget || "/dashboard-siswa")}
+          type="button"
+        >
+          Buka Dasbor Siswa →
+        </Button>
+        <Button className="min-h-9 px-3 py-1.5 text-xs text-red-700 hover:bg-red-50" onClick={onKeluar} variant="ghost">
+          <LogOut className="mr-1 h-4 w-4" />
+          Keluar
+        </Button>
+      </div>
     </div>
   );
 }

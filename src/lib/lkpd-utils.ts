@@ -51,7 +51,16 @@ export function sanitizeMathMarkdown(content: string): string {
   // 5. Hilangkan backticks di sekeliling math delimiter: `$...$` -> $...$
   text = text.replace(/`(\$[^`\n]+\$)`/g, "$1");
 
-  // 6. Pemrosesan per baris (linear time, bebas ReDoS) untuk memastikan keselarasan delimiter
+  // 6. Normalisasi karakter diagram balok hitam padat (seperti [■■■■■], [█████]) menjadi representasi rasio titik/lingkaran berjarak rapi
+  text = text.replace(/\[\s*([■█\s]+)\s*\]/g, (_m, inner) => {
+    const dots = inner.replace(/[■█]/g, "● ").replace(/\s{2,}/g, " ").trim();
+    return `[ ${dots} ]`;
+  });
+  text = text.replace(/([■█]{2,})/g, (match) => {
+    return Array.from(match).map(() => "●").join(" ");
+  });
+
+  // 7. Pemrosesan per baris (linear time, bebas ReDoS) untuk memastikan keselarasan delimiter
   const lines = text.split("\n");
   const processedLines = lines.map((line) => {
     let l = line.trimEnd();

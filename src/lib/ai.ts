@@ -438,7 +438,7 @@ export async function generateLKPD(params: GenerateLKPDParams): Promise<AIResult
     mahir: "tantangan kontekstual analitis, soal HOTS, pemecahan masalah kompleks, dan penalaran matematika mendalam",
   };
   const gayaKeterangan = params.gayaBelajar ? {
-    visual: "gunakan representasi visual, tabel data terstruktur, diagram teks, dan perbandingan grafis",
+    visual: "gunakan representasi visual proporsional, tabel data terstruktur, dan perbandingan grafis yang rapi (DILARANG menggunakan karakter balok hitam padat berdempet seperti [■■■■■] atau [█████] yang tampak seperti sensor hitam; gunakan rincian perbandingan proporsi angka, tabel pecahan bagian, atau simbol lingkaran terpisah rapi seperti '● ● ● ● ●')",
     auditory: "gunakan kalimat instruksi dialogis naratif, pertanyaan refleksi kritis, dan elaborasi konseptual",
     kinestetik: "gunakan simulasi eksperimen bertahap, manipulasi angka konkret, dan aktivitas hands-on",
   }[params.gayaBelajar] : "tanpa penyesuaian VAK khusus";
@@ -476,6 +476,10 @@ ATURAN FORMULA & SIMBOL MATEMATIKA (PEDOMAN EQUATION & OMML):
 5. HINDARI menulis kalimat deskripsi panjang di dalam pecahan KaTeX \dfrac{\text{...}}{\text{...}}. Gunakan variabel atau istilah ringkas seperti $\dfrac{\text{Bahan A}}{\text{Bahan B}}$ atau $\text{L} = \dfrac{\text{Total}}{\text{Volume}}$ agar garis pecahan tidak menabrak huruf.
 6. JANGAN PERNAH menyisakan kode LaTeX mentah (seperti \dfrac, \text, \times, \dots, \_) di luar tanda dolar! Seluruh persamaan WAJIB diapit tanda dolar $...$.
 7. Simbol variabel berindeks/subskrip WAJIB ditulis utuh di dalam tanda dolar: $v_2$, $t_a$, $t_{\min}$, DILARANG menulis terpisah seperti 'v $_ $2' atau 't $_ $a'.
+8. ATURAN STRUKTUR TABEL & REPRESENTASI VISUAL:
+- DILARANG MERENDER DIAGRAM/GRAFIK MENGGUNAKAN KARAKTER BLOK HITAM PADAT BERJEJER (seperti [■■■■■], [█████], atau balok hitam pekat tanpa spasi). Ini merusak estetika cetak dokumen dan tampak seperti sensor hitam yang rusak/glitch.
+- Gunakan tabel terstruktur dengan angka proporsi konkret, perbandingan pecahan ($\dfrac{a}{b}$), atau simbol lingkaran berjarak rapi (contoh: '● ● ● ● ●' untuk 5 bagian).
+- Judul header tabel harus ringkas, padat, dan proporsional. Hindari header yang terlalu panjang agar seluruh kolom tabel muat dalam satu baris horizontal tanpa menabrak garis tepi dan tanpa teks tumpang tindih.
 
 ${identitasInstruksi}
 
