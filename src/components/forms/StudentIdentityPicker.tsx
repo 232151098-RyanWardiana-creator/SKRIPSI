@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { useSesiSiswa, logoutSiswa, notifySessionChanged, type SesiSiswa } from "@/lib/student-session";
-import { UserCheck, LogOut, ArrowLeft, KeyRound, ShieldCheck } from "lucide-react";
+import { UserCheck, LogOut, ArrowLeft, KeyRound, ShieldCheck, Home } from "lucide-react";
 
 interface DaftarSiswa {
   id: string;
@@ -318,14 +318,15 @@ function KartuIdentitas({
       <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
         {!isDashboard && (
           <Button
-            className="bg-[#2563EB] text-white hover:bg-blue-700 text-xs px-3 py-1.5 rounded-xl shadow-xs"
+            className="min-h-8 bg-[#2563EB] text-white hover:bg-blue-700 text-xs px-3 py-1 rounded-xl shadow-xs whitespace-nowrap"
             onClick={() => router.push(redirectTarget || "/dashboard-siswa")}
             type="button"
           >
-            Buka Dasbor Siswa →
+            <Home className="mr-1 h-3.5 w-3.5" />
+            Beranda
           </Button>
         )}
-        <Button className="min-h-8 px-2.5 py-1 text-xs text-rose-700 hover:bg-rose-50 rounded-xl" onClick={onKeluar} variant="ghost">
+        <Button className="min-h-8 px-2.5 py-1 text-xs text-rose-700 hover:bg-rose-50 rounded-xl whitespace-nowrap" onClick={onKeluar} variant="ghost">
           <LogOut className="mr-1 h-3.5 w-3.5" />
           Keluar
         </Button>
