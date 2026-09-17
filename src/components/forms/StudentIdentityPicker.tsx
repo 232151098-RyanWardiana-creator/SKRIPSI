@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { useSesiSiswa, logoutSiswa, notifySessionChanged, type SesiSiswa } from "@/lib/student-session";
 import { UserCheck, LogOut, ArrowLeft, KeyRound, ShieldCheck } from "lucide-react";
@@ -290,38 +290,43 @@ function KartuIdentitas({
   redirectTarget?: string | null;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
+  const isDashboard = pathname === "/dashboard-siswa";
+
   return (
-    <div className="card mb-6 flex flex-wrap items-center justify-between gap-4 border-l-4 border-l-blue-600 bg-blue-50/50 p-4">
-      <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white">
-          <UserCheck className="h-5 w-5" />
+    <div className="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl border border-blue-200/90 bg-gradient-to-r from-blue-50/80 to-indigo-50/60 p-3.5 sm:p-4 shadow-xs">
+      <div className="flex items-center gap-3 min-w-0">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#2563EB] text-white shadow-xs">
+          <UserCheck className="h-4 w-4" />
         </div>
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold uppercase tracking-wider text-blue-700">
-              Identitas Siswa Terkunci
+        <div className="min-w-0">
+          <div className="flex items-center gap-1.5">
+            <span className="text-[10px] font-black uppercase tracking-wider text-blue-700">
+              Siswa Terverifikasi
             </span>
-            <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-800">Aktif</span>
+            <span className="rounded-full bg-emerald-100 px-1.5 py-0.2 text-[9px] font-bold text-emerald-800">Aktif</span>
           </div>
-          <p className="text-base font-bold text-slate-900">
+          <p className="truncate text-sm sm:text-base font-bold text-slate-900 leading-tight">
             {sesi.noAbsen ? `${sesi.noAbsen}. ` : ""}
             {sesi.nama}
           </p>
-          <p className="text-xs text-slate-600">
-            Kelas {sesi.kelasNama} (Kode: {sesi.kodeKelas})
+          <p className="text-[11px] text-slate-500">
+            Kelas {sesi.kelasNama} · <span className="font-mono">{sesi.kodeKelas}</span>
           </p>
         </div>
       </div>
-      <div className="flex items-center gap-2">
-        <Button
-          className="bg-blue-600 text-white hover:bg-blue-700 text-xs px-3 py-1.5"
-          onClick={() => router.push(redirectTarget || "/dashboard-siswa")}
-          type="button"
-        >
-          Buka Dasbor Siswa →
-        </Button>
-        <Button className="min-h-9 px-3 py-1.5 text-xs text-red-700 hover:bg-red-50" onClick={onKeluar} variant="ghost">
-          <LogOut className="mr-1 h-4 w-4" />
+      <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
+        {!isDashboard && (
+          <Button
+            className="bg-[#2563EB] text-white hover:bg-blue-700 text-xs px-3 py-1.5 rounded-xl shadow-xs"
+            onClick={() => router.push(redirectTarget || "/dashboard-siswa")}
+            type="button"
+          >
+            Buka Dasbor Siswa →
+          </Button>
+        )}
+        <Button className="min-h-8 px-2.5 py-1 text-xs text-rose-700 hover:bg-rose-50 rounded-xl" onClick={onKeluar} variant="ghost">
+          <LogOut className="mr-1 h-3.5 w-3.5" />
           Keluar
         </Button>
       </div>

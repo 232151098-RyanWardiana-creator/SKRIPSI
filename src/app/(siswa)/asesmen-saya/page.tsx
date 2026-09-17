@@ -41,11 +41,8 @@ export default function AsesmenSayaPage() {
             ))}
           </div>
         ) : (
-          <Card className="text-center">
-            <h2 className="text-xl font-semibold">Belum ada asesmen aktif</h2>
-            <p className="mt-2 text-sm text-[#6b7280]">
-              Tidak ada asesmen aktif untuk kelas {data.siswa.kelasNama}.
-            </p>
+          <Card className="text-center py-8 rounded-2xl border-slate-200/80 shadow-xs">
+            <h2 className="text-base font-bold text-slate-700">Belum ada asesmen aktif</h2>
           </Card>
         ))}
     </div>
