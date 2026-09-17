@@ -39,7 +39,7 @@ export interface StudentIdentityPickerProps {
  * tombol Reset PIN. Naikkan ke PIN pra-cetak dari guru bila aplikasi dipakai
  * tanpa pengawasan.
  */
-export function StudentIdentityPicker({ redirectTarget, onLoginSuccess }: StudentIdentityPickerProps = {}) {
+export function StudentIdentityPicker({ redirectTarget, onLoginSuccess, compact }: StudentIdentityPickerProps = {}) {
   const sesi = useSesiSiswa();
   const router = useRouter();
 
@@ -52,44 +52,62 @@ export function StudentIdentityPicker({ redirectTarget, onLoginSuccess }: Studen
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const cardClass = compact
+    ? "space-y-4 rounded-2xl border-2 border-slate-200/90 bg-slate-50/60 p-5 shadow-xs"
+    : "card mb-6";
+
   const cariKelas = async (event: React.FormEvent) => {
     event.preventDefault();
+    event.stopPropagation();
+    const cleanKode = kode.trim().toUpperCase();
+    if (!cleanKode) return setError("Masukkan kode kelas terlebih dahulu.");
     setLoading(true);
     setError("");
-    const res = await fetch("/api/siswa/kelas", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ kode }),
-    });
-    const data = await res.json();
-    setLoading(false);
-    if (!res.ok) return setError(data.error ?? "Kode kelas tidak ditemukan.");
-    setKelas(data.kelas);
-    setDaftar(data.siswa);
+    try {
+      const res = await fetch("/api/siswa/kelas", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ kode: cleanKode }),
+      });
+      const data = await res.json();
+      setLoading(false);
+      if (!res.ok) return setError(data.error ?? "Kode kelas tidak ditemukan.");
+      setKelas(data.kelas);
+      setDaftar(data.siswa);
+    } catch {
+      setLoading(false);
+      setError("Gagal menghubungi server. Periksa koneksi internet.");
+    }
   };
 
   const masuk = async (event: React.FormEvent) => {
     event.preventDefault();
+    event.stopPropagation();
     if (!dipilih || !kelas) return;
     if (!dipilih.sudahPunyaPin && pin !== pin2) {
       return setError("Dua PIN yang kamu masukkan berbeda.");
     }
     setLoading(true);
     setError("");
-    const res = await fetch("/api/siswa/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ kode: kelas.kode, nama: dipilih.nama, pin }),
-    });
-    const data = await res.json();
-    setLoading(false);
-    if (!res.ok) return setError(data.error ?? "Gagal masuk.");
-    notifySessionChanged();
-    router.refresh();
-    if (onLoginSuccess) {
-      onLoginSuccess();
-    } else {
-      router.push(redirectTarget || "/dashboard-siswa");
+    try {
+      const res = await fetch("/api/siswa/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ kode: kelas.kode, nama: dipilih.nama, pin }),
+      });
+      const data = await res.json();
+      setLoading(false);
+      if (!res.ok) return setError(data.error ?? "Gagal masuk.");
+      notifySessionChanged();
+      router.refresh();
+      if (onLoginSuccess) {
+        onLoginSuccess();
+      } else {
+        router.push(redirectTarget || "/dashboard-siswa");
+      }
+    } catch {
+      setLoading(false);
+      setError("Gagal memproses login. Periksa koneksi internet.");
     }
   };
 
@@ -110,7 +128,7 @@ export function StudentIdentityPicker({ redirectTarget, onLoginSuccess }: Studen
   // Langkah 2: pilih nama + PIN.
   if (kelas) {
     return (
-      <div className="card mb-6">
+      <div className={cardClass}>
         <button
           className="mb-3 flex items-center gap-1 text-xs font-semibold text-slate-600 hover:text-blue-700"
           onClick={() => {
@@ -235,7 +253,7 @@ export function StudentIdentityPicker({ redirectTarget, onLoginSuccess }: Studen
 
   // Langkah 1: kode kelas.
   return (
-    <div className="card mb-6">
+    <div className={cardClass}>
       <h2 className="text-lg font-semibold">Masuk ke Kelas</h2>
       <p className="mt-1 text-xs text-[#6b7280]">Masukkan kode kelas dari gurumu.</p>
       <form className="mt-4 grid max-w-sm gap-3 sm:grid-cols-[1fr_auto] sm:items-end" onSubmit={cariKelas}>

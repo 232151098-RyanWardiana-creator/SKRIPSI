@@ -100,7 +100,7 @@ export function AuthForm({ mode = "login" }: { mode?: "login" | "register" }) {
   };
 
   return (
-    <form className="space-y-4" onSubmit={handleSubmit}>
+    <div className="space-y-4">
       {redirectTarget && (
         <div className="flex items-start gap-2.5 rounded-2xl border border-amber-200 bg-amber-50/90 p-3 text-xs text-amber-950 shadow-xs">
           <ShieldAlert className="h-4 w-4 shrink-0 text-amber-600 mt-0.5" />
@@ -121,7 +121,14 @@ export function AuthForm({ mode = "login" }: { mode?: "login" | "register" }) {
               ? "bg-[#1E1B4B] text-white shadow-md shadow-indigo-950/20 scale-[1.01]"
               : "text-slate-600 hover:text-[#1E1B4B] hover:bg-white/60"
           }`}
-          onClick={() => setRole("guru")}
+          onClick={() => {
+            setRole("guru");
+            if (typeof window !== "undefined") {
+              const url = new URL(window.location.href);
+              url.searchParams.set("role", "guru");
+              window.history.replaceState({}, "", url.toString());
+            }
+          }}
           type="button"
         >
           Portal Guru
@@ -132,7 +139,14 @@ export function AuthForm({ mode = "login" }: { mode?: "login" | "register" }) {
               ? "bg-[#2563EB] text-white shadow-md shadow-blue-600/25 scale-[1.01]"
               : "text-slate-600 hover:text-[#2563EB] hover:bg-white/60"
           }`}
-          onClick={() => setRole("siswa")}
+          onClick={() => {
+            setRole("siswa");
+            if (typeof window !== "undefined") {
+              const url = new URL(window.location.href);
+              url.searchParams.set("role", "siswa");
+              window.history.replaceState({}, "", url.toString());
+            }
+          }}
           type="button"
         >
           Portal Siswa
@@ -141,10 +155,10 @@ export function AuthForm({ mode = "login" }: { mode?: "login" | "register" }) {
 
       {role === "siswa" ? (
         <div className="space-y-4 pt-1">
-          <StudentIdentityPicker redirectTarget={redirectTarget} />
+          <StudentIdentityPicker compact redirectTarget={redirectTarget} />
         </div>
       ) : (
-        <>
+        <form className="space-y-4" onSubmit={handleSubmit}>
           {errorMsg && (
             <div className="flex items-start gap-2.5 rounded-2xl border border-rose-200 bg-rose-50/95 p-3.5 text-xs text-rose-800">
               <AlertCircle className="h-4 w-4 shrink-0 text-rose-600 mt-0.5" />
@@ -260,8 +274,8 @@ export function AuthForm({ mode = "login" }: { mode?: "login" | "register" }) {
               {mode === "login" ? "Daftar sekarang" : "Masuk di sini"}
             </Link>
           </p>
-        </>
+        </form>
       )}
-    </form>
+    </div>
   );
 }
