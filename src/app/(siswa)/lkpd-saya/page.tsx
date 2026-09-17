@@ -17,22 +17,17 @@ export default function LkpdSayaPage() {
       <StudentIdentityPicker />
       {data && (
         <>
-          <header className="mb-7">
-            <h1 className="text-2xl font-semibold md:text-3xl">LKPD Saya</h1>
-            <p className="mt-2 text-sm text-[#414753] md:text-base">
-              Lembar kerja dari gurumu. Kerjakan langsung di sini — jawabanmu tersimpan otomatis,
-              jadi tidak hilang kalau HP mati atau internet putus sebentar.
+          <header className="mb-6">
+            <h1 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight">LKPD Saya</h1>
+            <p className="mt-1 text-xs md:text-sm text-slate-500 font-medium">
+              Lembar kerja dari gurumu. Jawaban tersimpan otomatis.
             </p>
           </header>
 
           {data.length === 0 ? (
-            <Card className="text-center">
-              <ClipboardList className="mx-auto h-10 w-10 text-[#9ca3af]" aria-hidden />
-              <h2 className="mt-4 text-lg font-semibold">Belum ada LKPD untukmu</h2>
-              <p className="mx-auto mt-2 max-w-md text-sm text-[#6b7280]">
-                Gurumu belum membagikan lembar kerja. Biasanya LKPD muncul setelah kamu
-                menyelesaikan asesmen, karena isinya disesuaikan dengan hasil belajarmu.
-              </p>
+            <Card className="text-center py-8 rounded-2xl border-slate-200/80 shadow-xs">
+              <ClipboardList className="mx-auto h-8 w-8 text-slate-400" aria-hidden />
+              <h2 className="mt-3 text-base font-bold text-slate-700">Belum ada LKPD untukmu</h2>
             </Card>
           ) : (
             <div className="grid gap-4 sm:grid-cols-2">
