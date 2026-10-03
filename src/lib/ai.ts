@@ -758,8 +758,8 @@ export async function generateSoalAsesmen(params: GenerateSoalAsesmenParams): Pr
   const messages: ChatMessage[] = [
     {
       role: "system",
-      content: `Kamu adalah pakar penyusun asesmen diagnostik matematika SMP Kurikulum Merdeka.
-TUGAS UTAMA: Susun butir soal diagnostik pilihan ganda kontekstual kehidupan nyata yang KREATIF, SEGAR, dan BERBEDA di setiap permintaan untuk topik materi "${params.materi}".
+      content: `Kamu adalah pakar penyusun asesmen pemetaan kesiapan belajar matematika SMP Kurikulum Merdeka (pendekatan TaRL).
+TUGAS UTAMA: Susun butir soal pemetaan kesiapan belajar pilihan ganda kontekstual kehidupan nyata yang KREATIF, SEGAR, dan BERBEDA di setiap permintaan untuk topik materi "${params.materi}".
 ${indicatorInstruction}
 HINDARI pengulangan soal atau angka klise yang sudah sering dipakai. Gunakan variasi skenario kehidupan nyata yang unik (misal terinspirasi dari konteks: ${randomContext}).
 Pastikan angka perhitungan rapi, realistis, dan logis untuk siswa SMP.

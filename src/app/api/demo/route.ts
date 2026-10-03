@@ -54,7 +54,7 @@ export async function POST(request: Request) {
       [
         {
           id: DEMO_IDS.asesmen,
-          judul: "Asesmen Diagnostik Rasio dan Perbandingan (Simulasi)",
+          judul: "Asesmen Kesiapan Belajar Rasio dan Perbandingan (Simulasi)",
           materi: "Rasio (Perbandingan)",
           kelas_id: DEMO_KELAS.id,
           kode_kelas: DEMO_KELAS.kode_undangan,

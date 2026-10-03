@@ -451,7 +451,7 @@ export function GeneratorWizard() {
               </label>
 
               <label className="label">
-                Asesmen Diagnostik
+                Asesmen Kesiapan Belajar
                 <select className="input" value={assessmentId} onChange={(e) => setAssessmentId(e.target.value)}>
                   <option value="">Pilih asesmen</option>
                   {availableAssessments.map((item) => <option key={item.id} value={item.id}>{item.judul}</option>)}
@@ -517,7 +517,7 @@ export function GeneratorWizard() {
                 </div>
               ) : (
                 <div className="rounded-xl bg-slate-100 p-3.5 text-xs text-slate-600 space-y-1.5">
-                  <p className="font-semibold text-slate-800">Pilih asesmen diagnostik di atas</p>
+                  <p className="font-semibold text-slate-800">Pilih asesmen kesiapan belajar di atas</p>
                   <p>Data hasil asesmen akan menjadi dasar pembagian tingkat kesulitan materi LKPD.</p>
                 </div>
               )}

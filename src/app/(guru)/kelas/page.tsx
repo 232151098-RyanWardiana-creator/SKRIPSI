@@ -559,7 +559,7 @@ export default function KelasPage() {
                     3
                   </span>
                   <span className="text-slate-700">
-                    Kerjakan <strong>Asesmen Diagnostik</strong> dan lembar <strong>LKPD Berdiferensiasi</strong>
+                    Kerjakan <strong>Asesmen Kesiapan Belajar</strong> dan lembar <strong>LKPD Berdiferensiasi</strong>
                   </span>
                 </div>
               </div>

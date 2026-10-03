@@ -64,7 +64,7 @@ interface DemoSoal {
   indikator: Indikator;
 }
 
-/** 10 butir soal asesmen diagnostik materi Rasio (2 butir per IK-01 s.d IK-05). */
+/** 10 butir soal asesmen kesiapan belajar materi Rasio (2 butir per IK-01 s.d IK-05). */
 export const DEMO_SOAL: DemoSoal[] = [
   {
     id: "s1",

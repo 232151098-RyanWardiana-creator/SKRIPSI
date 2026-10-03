@@ -309,7 +309,7 @@ export default function Home() {
             </p>
 
             <p className="mx-auto max-w-xl text-xs sm:text-base md:text-lg font-medium leading-relaxed text-slate-600 px-1 sm:px-2">
-              Ubah hasil asesmen diagnostik menjadi 3 level LKPD siap cetak secara instan.
+              Ubah hasil pemetaan kesiapan belajar siswa menjadi 3 level LKPD siap cetak secara instan.
             </p>
 
             {/* Action Buttons: Compact Grid on Mobile, Flex Row on Tablet+ */}
@@ -424,13 +424,13 @@ export default function Home() {
               { icon: Users, text: "Manajemen Kelas Siswa", bg: "bg-teal-100", color: "text-teal-600" },
               { icon: ShieldCheck, text: "Penyimpanan Otomatis", bg: "bg-emerald-100", color: "text-emerald-600" },
               { icon: Code2, text: "Rumus KaTeX Bersih", bg: "bg-cyan-100", color: "text-cyan-600" },
-              { icon: BarChart3, text: "Diagnostik Terintegrasi", bg: "bg-purple-100", color: "text-purple-600" },
+              { icon: BarChart3, text: "Kesiapan Belajar Terintegrasi", bg: "bg-purple-100", color: "text-purple-600" },
               { icon: Download, text: "Ekspor Word (.docx)", bg: "bg-blue-100", color: "text-blue-600" },
               { icon: Printer, text: "Cetak PDF A4 Rapi", bg: "bg-rose-100", color: "text-rose-600" },
               { icon: Users, text: "Manajemen Kelas Siswa", bg: "bg-teal-100", color: "text-teal-600" },
               { icon: ShieldCheck, text: "Penyimpanan Otomatis", bg: "bg-emerald-100", color: "text-emerald-600" },
               { icon: Code2, text: "Rumus KaTeX Bersih", bg: "bg-cyan-100", color: "text-cyan-600" },
-              { icon: BarChart3, text: "Diagnostik Terintegrasi", bg: "bg-purple-100", color: "text-purple-600" },
+              { icon: BarChart3, text: "Kesiapan Belajar Terintegrasi", bg: "bg-purple-100", color: "text-purple-600" },
             ].map((item, idx) => {
               const Icon = item.icon;
               return (
@@ -505,7 +505,7 @@ export default function Home() {
             <div className="grid items-center gap-8 md:grid-cols-12">
               <div className="space-y-5 md:col-span-6">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm font-extrabold text-[#1E1B4B]">Skor Diagnostik Siswa:</span>
+                  <span className="text-sm font-extrabold text-[#1E1B4B]">Skor Kesiapan Belajar Siswa:</span>
                   <span className="text-3xl font-black text-[#2563EB]">{simScore} / 100</span>
                 </div>
                 <input
@@ -587,7 +587,7 @@ export default function Home() {
               {
                 step: "1",
                 title: "Buat Asesmen",
-                desc: "Susun soal diagnostik IK-01 s.d IK-05 dengan bantuan AI.",
+                desc: "Susun butir soal IK-01 s.d IK-05 untuk memetakan kesiapan belajar.",
                 color: "text-[#2563EB]",
                 glow: "bg-blue-400/35",
                 badgeBorder: "border-blue-200/80 bg-blue-50/80",
@@ -673,7 +673,7 @@ export default function Home() {
       <footer className="border-t-2 border-[#1E1B4B]/5 bg-white px-6 pt-8 pb-24 md:pb-8 text-center text-xs font-medium text-[#1E1B4B]/60">
         <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-3 sm:flex-row">
           <p>
-            <strong>LKPD-AI</strong> • Generator LKPD Berdiferensiasi Berbantuan AI Terintegrasi Asesmen Diagnostik
+            <strong>LKPD-AI</strong> • Generator LKPD Berdiferensiasi Berbantuan AI Terintegrasi Kesiapan Belajar Siswa
           </p>
           <p className="font-bold text-[#1E1B4B]/80">
             Ryan Wardiana • Pendidikan Matematika FKIP

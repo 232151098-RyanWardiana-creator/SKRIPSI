@@ -67,7 +67,7 @@ const STORAGE_KEY = "lkpd_draft_asesmen_builder";
 interface SoalBuilderProps { onDraftChange?: (draft: AsesmenDraft) => void }
 
 export function SoalBuilder({ onDraftChange }: SoalBuilderProps) {
-  const [judul, setJudul] = useState("Diagnostik Rasio dan Perbandingan");
+  const [judul, setJudul] = useState("Asesmen Kesiapan Belajar Rasio");
   const [durasi, setDurasi] = useState(30);
   const [soal, setSoal] = useState<SoalDraft[]>([]);
   const [kuesionerAktif, setKuesionerAktif] = useState(true);
@@ -133,7 +133,7 @@ export function SoalBuilder({ onDraftChange }: SoalBuilderProps) {
 
   function resetDraft() {
     localStorage.removeItem(STORAGE_KEY);
-    setJudul("Diagnostik Rasio dan Perbandingan");
+    setJudul("Asesmen Kesiapan Belajar Rasio");
     setDurasi(30);
     setSoal([]);
     setKuesionerAktif(true);

@@ -21,10 +21,10 @@ export default function DashboardSiswa() {
             <h1 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight">Halo, {data.siswa.nama}!</h1>
           </section>
 
-          {/* Bagian 1: Asesmen Diagnostik */}
+          {/* Bagian 1: Asesmen Kesiapan Belajar */}
           <section className="space-y-3">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg md:text-xl font-bold text-slate-900">1. Asesmen Diagnostik</h2>
+              <h2 className="text-lg md:text-xl font-bold text-slate-900">1. Asesmen Kesiapan Belajar</h2>
             </div>
             {aktif.length ? (
               <div className="grid gap-3.5 sm:grid-cols-2">
@@ -67,7 +67,7 @@ export default function DashboardSiswa() {
               </div>
             ) : (
               <Card className="text-center py-6 rounded-2xl border-slate-200/80 shadow-xs">
-                <h3 className="text-sm md:text-base font-semibold text-slate-700">Tidak ada asesmen diagnostik yang perlu dikerjakan</h3>
+                <h3 className="text-sm md:text-base font-semibold text-slate-700">Tidak ada asesmen kesiapan belajar yang perlu dikerjakan</h3>
               </Card>
             )}
           </section>
