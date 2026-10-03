@@ -100,7 +100,7 @@ export function sanitizeMathMarkdown(content: string): string {
     if (!l.includes("$") && /\\(?:d?frac|text)\b/.test(l)) {
       const eqStartMatch = l.match(/^(.*?(?:\([Tt]ulis rumus:\s*|[:=]\s*|\badalah\s*))(\\.*)$/);
       if (eqStartMatch) {
-        let prefix = eqStartMatch[1];
+        const prefix = eqStartMatch[1];
         let mathPart = eqStartMatch[2];
         let suffix = "";
         if (mathPart.endsWith(")") && !mathPart.endsWith("\\)")) {

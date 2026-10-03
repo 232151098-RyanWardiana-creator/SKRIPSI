@@ -4,7 +4,7 @@ import { sanitizeMathMarkdown } from "./lkpd-utils";
 const xml = (value: string) => value.replace(/[&<>"']/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&apos;" })[char]!);
 const text = (value: string) => `<m:r><m:t xml:space="preserve">${xml(value)}</m:t></m:r>`;
 const run = (value: string, bold = false) => `<w:r>${bold ? "<w:rPr><w:b/></w:rPr>" : ""}<w:t xml:space="preserve">${xml(value)}</w:t></w:r>`;
-const operators: Record<string, string> = { times: "×", div: "÷", pm: "±", le: "≤", leq: "≤", ge: "≥", geq: "≥", neq: "≠", to: "→", rightarrow: "→", cdot: "·", sum: "∑", prod: "∏", infty: "∞", pi: "π", theta: "θ", alpha: "α", beta: "β", gamma: "γ" };
+const operators: Record<string, string> = { times: "×", div: "÷", pm: "±", le: "≤", leq: "≤", ge: "≥", geq: "≥", ne: "≠", neq: "≠", approx: "≈", to: "→", rightarrow: "→", cdot: "·", circ: "°", sum: "∑", prod: "∏", infty: "∞", pi: "π", theta: "θ", alpha: "α", beta: "β", gamma: "γ", Delta: "Δ", angle: "∠", perp: "⊥", parallel: "∥", triangle: "△" };
 
 function group(source: string, start: number): [string, number] {
   if (source[start] !== "{") return [source[start] || "", start + 1];
@@ -34,6 +34,16 @@ function mathParts(source: string): string {
     if (source.startsWith("\\sqrt", index)) {
       let cursor = index + 5;
       while (/\s/.test(source[cursor] || "")) cursor++;
+      if (source[cursor] === "[") {
+        const degreeEnd = source.indexOf("]", cursor);
+        const degree = source.slice(cursor + 1, degreeEnd);
+        cursor = degreeEnd + 1;
+        while (/\s/.test(source[cursor] || "")) cursor++;
+        const [radicand, after] = group(source, cursor);
+        output += `<m:rad><m:deg>${mathParts(degree)}</m:deg><m:e>${mathParts(radicand)}</m:e></m:rad>`;
+        index = after;
+        continue;
+      }
       const [radicand, after] = group(source, cursor);
       output += `<m:rad><m:radPr><m:degHide m:val="on"/></m:radPr><m:deg/><m:e>${mathParts(radicand)}</m:e></m:rad>`;
       index = after;
@@ -41,12 +51,22 @@ function mathParts(source: string): string {
     }
     if (source[index] === "^" || source[index] === "_") {
       const superscript = source[index] === "^";
+      if (superscript && source.startsWith("^\\circ", index)) {
+        output += text("°");
+        index += 6;
+        continue;
+      }
       const [value, after] = group(source, index + 1);
       output = `<m:${superscript ? "sSup" : "sSub"}><m:e>${output || text(" ")}</m:e><m:${superscript ? "sup" : "sub"}>${mathParts(value)}</m:${superscript ? "sup" : "sub"}></m:${superscript ? "sSup" : "sSub"}>`;
       index = after;
       continue;
     }
     if (source[index] === "\\") {
+      if (source[index + 1] && !/[A-Za-z]/.test(source[index + 1])) {
+        output += text(source[index + 1] === "%" ? "%" : source[index + 1]);
+        index += 2;
+        continue;
+      }
       const match = source.slice(index + 1).match(/^[A-Za-z]+/);
       if (match) {
         const name = match[0];
@@ -66,6 +86,12 @@ function mathParts(source: string): string {
         index += name.length + 1;
         continue;
       }
+    }
+    const chunkMatch = source.slice(index).match(/^[A-Za-z0-9+]+/);
+    if (chunkMatch) {
+      output += text(chunkMatch[0]);
+      index += chunkMatch[0].length;
+      continue;
     }
     if (!"{}".includes(source[index])) output += text(source[index]);
     index++;

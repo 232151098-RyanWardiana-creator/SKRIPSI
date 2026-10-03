@@ -1,6 +1,7 @@
 import "server-only";
 
 import type { GayaBelajar, Level } from "@/types";
+import { KESIAPAN_BELAJAR_LABELS } from "@/types";
 import { ensureFullLkpdStructure } from "./lkpd-utils";
 
 const DEFAULT_BASE_URL = "http://127.0.0.1:20128/v1";
@@ -433,9 +434,9 @@ export async function generateLKPD(params: GenerateLKPDParams): Promise<AIResult
   const randomContext = contexts[Math.floor(Math.random() * contexts.length)];
 
   const levelKeterangan: Record<Level, string> = {
-    dasar: "panduan bertahap (memecah langkah kerja menjadi isian titik-titik kosong ...... tanpa membocorkan jawaban), bahasa sederhana, dan angka bulat yang mudah dipahami",
-    menengah: "latihan penguatan konsep, scaffolding minimal, dan variasi kontekstual sedang",
-    mahir: "tantangan kontekstual analitis, soal HOTS, pemecahan masalah kompleks, dan penalaran matematika mendalam",
+    dasar: `Tier 1 — Perlu Bimbingan (Kategori Kurikuler: ${KESIAPAN_BELAJAR_LABELS.dasar.kategori}): Scaffolding tinggi & representasi konkret. Memecah langkah kerja menjadi isian titik-titik terbimbing (......) tanpa membocorkan jawaban langsung. Gunakan tabel rasio bertahap berpasangan atau blok visual lingkaran terpisah (● ● ●), bahasa sederhana, angka bulat ramah hitung, dan tekankan pemahaman konsep perkalian/pembagian untuk mencegah miskonsepsi aditif (mengira rasio bertambah secara selisih).`,
+    menengah: `Tier 2 — Berkembang / Cukup (Kategori Kurikuler: ${KESIAPAN_BELAJAR_LABELS.menengah.kategori}): Fading guidance & representasi semi-konkret. Kurangi scaffolding secara bertahap, berikan jembatan bantuan pada sebagian langkah lalu biarkan siswa melengkapi mandiri. Fokus pada masalah kontekstual dunia nyata bertingkat (resep masakan, skala denah, perbandingan kecepatan dan waktu tempuh, konversi bahan).`,
+    mahir: `Tier 3 — Mahir (Kategori Kurikuler: ${KESIAPAN_BELAJAR_LABELS.mahir.kategori}): Independent learning & tantangan HOTS (C4–C6). Tanpa scaffolding dasar awal. Sajikan masalah non-rutin terbuka (open-ended problem), perbandingan multi-variabel, analisis kritis strategi penyelesaian masalah, dan wajib menyertakan ruang justifikasi penalaran matematis mandiri.`,
   };
   const gayaKeterangan = params.gayaBelajar ? {
     visual: "gunakan representasi visual proporsional, tabel data terstruktur, dan perbandingan grafis yang rapi (DILARANG menggunakan karakter balok hitam padat berdempet seperti [■■■■■] atau [█████] yang tampak seperti sensor hitam; gunakan rincian perbandingan proporsi angka, tabel pecahan bagian, atau simbol lingkaran terpisah rapi seperti '● ● ● ● ●')",
@@ -512,8 +513,13 @@ ATURAN MUTLAK LEMBAR KERJA SISWA (BAGIAN D):
 
 ATURAN WAJIB KUNCI JAWABAN & PANDUAN GURU:
 1. Kunci jawaban HARUS menjawab SECARA PERSIS, NYATA, dan LENGKAP seluruh ${params.jumlahAktivitas} aktivitas yang dibuat pada Bagian D (Aktivitas 1 sampai Aktivitas ${params.jumlahAktivitas}).
-2. Tuliskan langkah perhitungan numerik yang detail, angka riil, dan hasil akhir tebal (**jawaban**). DILARANG KERAS menulis instruksi umum atau menyuruh guru/siswa mengamati/mencari sendiri! Berikan seluruh solusi matematis tuntas untuk mempermudah guru memeriksa hasil siswa.
-3. Selesaikan seluruh isi dokumen dari awal sampai tuntas tanpa terpotong di tengah jalan.`,
+2. ATURAN PENYELESAIAN BERTALAP MUTLAK: Setiap pembahasan wajib mengikuti 4 tahap vertikal runtut:
+   a. Tulis rumus umum dengan variabel (misal: $\\text{Kecepatan} = \\dfrac{\\text{Jarak}}{\\text{Waktu}}$ atau $\\dfrac{a_1}{b_1} = \\dfrac{a_2}{b_2}$).
+   b. Identifikasi dan deklarasikan nilai variabel yang diketahui dari soal.
+   c. Substitusikan nilai-nilai ke dalam rumus secara bertahap langkah demi langkah.
+   d. Hitung hasil numerik hingga jawaban akhir yang ditebalkan (**jawaban akhir**). DILARANG KERAS hanya menulis jawaban instan tanpa penurunan rumus bertahap!
+3. Berikan seluruh solusi matematis tuntas untuk mempermudah guru memeriksa hasil kerja siswa.
+4. Selesaikan seluruh isi dokumen dari awal sampai tuntas tanpa terpotong di tengah jalan.`,
     },
     {
       role: "user",
@@ -599,7 +605,7 @@ export function parseGeneratedQuestions(content: string, defaults: { indikator: 
     const question = String(item.pertanyaan ?? item.question ?? item.soal ?? item.prompt ?? "").trim();
     const explanation = String(item.pembahasan ?? item.penjelasan ?? item.explanation ?? item.reasoning ?? "Langkah penyelesaian sesuai konsep perbandingan.").trim();
 
-    let choices = { A: "", B: "", C: "", D: "" };
+    const choices = { A: "", B: "", C: "", D: "" };
     const stripPrefix = (text: string) => text.replace(/^[A-Da-d][.)]\s*/, "").trim();
 
     if (Array.isArray(item.options) || Array.isArray(item.pilihan)) {

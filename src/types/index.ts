@@ -1,5 +1,31 @@
 export type Role = "guru" | "siswa";
 export type Level = "dasar" | "menengah" | "mahir";
+
+export const KESIAPAN_BELAJAR_LABELS: Record<Level, {
+  kategori: string;
+  tier: string;
+  rentang: string;
+  rekomendasiLkpd: string;
+}> = {
+  dasar: {
+    kategori: "Perlu Bimbingan",
+    tier: "Tier 1",
+    rentang: "0 - 59 Poin (< 60%)",
+    rekomendasiLkpd: "LKPD Varian A (Scaffolding Tinggi & Terstruktur)"
+  },
+  menengah: {
+    kategori: "Berkembang / Cukup",
+    tier: "Tier 2",
+    rentang: "60 - 79 Poin (60% s.d. 79%)",
+    rekomendasiLkpd: "LKPD Varian B (Fading Guidance & Latihan Kontekstual)"
+  },
+  mahir: {
+    kategori: "Mahir",
+    tier: "Tier 3",
+    rentang: "80 - 100 Poin (>= 80%)",
+    rekomendasiLkpd: "LKPD Varian C (Tantangan HOTS & Eksplorasi Mandiri)"
+  }
+};
 export type Indikator = "IK-01" | "IK-02" | "IK-03" | "IK-04" | "IK-05";
 export type GayaBelajar = "visual" | "auditory" | "kinestetik" | null;
 

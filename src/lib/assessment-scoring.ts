@@ -1,4 +1,5 @@
 import type { Indikator, Level, Soal, AnswerKey, IndicatorResult } from "@/types";
+import { KESIAPAN_BELAJAR_LABELS } from "@/types";
 
 export const INDICATORS: Indikator[] = ["IK-01", "IK-02", "IK-03", "IK-04", "IK-05"];
 const PREREQUISITE: Indikator[] = ["IK-01", "IK-02"];
@@ -6,6 +7,11 @@ const MASTERY_THRESHOLD = 0.6;
 
 export function scoreToLevel(score: number): Level { return score < 60 ? "dasar" : score < 80 ? "menengah" : "mahir"; }
 export const getLevelFromScore = scoreToLevel;
+
+export function getReadinessInfo(score: number) {
+  const level = scoreToLevel(score);
+  return KESIAPAN_BELAJAR_LABELS[level];
+}
 
 export function indicatorResultsToLevel(detail: Record<Indikator, IndicatorResult>, score: number): Level {
   const mastered = INDICATORS.filter(k => detail[k].total > 0 && detail[k].dikuasai);

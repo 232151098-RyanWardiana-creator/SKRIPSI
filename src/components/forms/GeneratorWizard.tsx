@@ -50,7 +50,11 @@ interface DocumentState extends GeneratedLKPD {
 }
 
 const levels: Level[] = ["dasar", "menengah", "mahir"];
-const labels: Record<Level, string> = { dasar: "Dasar", menengah: "Menengah", mahir: "Mahir" };
+const labels: Record<Level, string> = {
+  dasar: "Perlu Bimbingan (Dasar)",
+  menengah: "Berkembang (Menengah)",
+  mahir: "Mahir (Lanjut)",
+};
 function isLevel(value: unknown): value is Level {
   return levels.includes(value as Level);
 }
