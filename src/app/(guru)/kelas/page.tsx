@@ -8,14 +8,16 @@ import { Button } from "@/components/ui/Button";
 import { ProgresAlur } from "@/components/ui/ProgresAlur";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { DemoDataPanel } from "@/components/forms/DemoDataPanel";
+import { ImportSiswaExcelModal } from "@/components/forms/ImportSiswaExcelModal";
 import { initials, generateUUID } from "@/lib/utils";
-import { Edit2, KeyRound, Plus, Printer, Trash2, UserPlus, X, Check, Copy, Users } from "lucide-react";
+import { Edit2, KeyRound, Plus, Printer, Trash2, UserPlus, X, Check, Copy, Users, FileSpreadsheet } from "lucide-react";
 
 export default function KelasPage() {
   const { classes: dataStore, updateClasses: setDataStore } = useClassStore();
   const [activeId, setActiveId] = useState<string>("");
   const [modalEditKelas, setModalEditKelas] = useState(false);
   const [modalTambahSiswa, setModalTambahSiswa] = useState(false);
+  const [modalImportExcel, setModalImportExcel] = useState(false);
   const [modalCetakKode, setModalCetakKode] = useState(false);
   const [copied, setCopied] = useState(false);
   const [pendingStudent, setPendingStudent] = useState<{ id: string; nama: string; kelasId: string; kelasNama: string } | null>(null);
@@ -149,6 +151,37 @@ export default function KelasPage() {
     setModalTambahSiswa(false);
   };
 
+  const handleImportSiswaExcel = (siswaBaru: { nama: string; nisn: string; no_absen?: number }[]) => {
+    if (!activeKelas || siswaBaru.length === 0) return;
+
+    setDataStore(prev =>
+      prev.map(item => {
+        if (item.kelas.id !== activeKelas.id) return item;
+
+        const maxAbsen = item.siswa.reduce((max, s) => Math.max(max, s.no_absen || 0), 0);
+        const importedList: SiswaMock[] = siswaBaru.map((s, idx) => ({
+          id: generateUUID(),
+          kelas_id: activeKelas.id,
+          no_absen: s.no_absen || (maxAbsen + idx + 1),
+          nama: s.nama.trim(),
+          nisn: s.nisn.trim() || `006${String(Date.now() + idx).slice(-7)}`,
+          bergabung: new Date().toISOString().split("T")[0],
+          gaya_belajar: null,
+        }));
+
+        const updatedSiswa = [...item.siswa, ...importedList].sort(
+          (a, b) => (a.no_absen || 0) - (b.no_absen || 0)
+        );
+
+        return {
+          ...item,
+          kelas: { ...item.kelas, jumlah_siswa: updatedSiswa.length },
+          siswa: updatedSiswa,
+        };
+      })
+    );
+  };
+
   const hapusSiswa = () => {
     if (!pendingStudent) return;
     const target = pendingStudent;
@@ -280,6 +313,9 @@ export default function KelasPage() {
             <div className="flex flex-wrap gap-2">
               <Button variant="ghost" onClick={() => setModalCetakKode(true)}>
                 <Printer className="h-4 w-4" />Cetak Kode Undangan
+              </Button>
+              <Button variant="secondary" onClick={() => setModalImportExcel(true)}>
+                <FileSpreadsheet className="h-4 w-4 text-emerald-600" />Upload Excel / CSV
               </Button>
               <Button onClick={bukaTambahSiswa}>
                 <Plus className="h-4 w-4" />Siswa
@@ -582,6 +618,16 @@ export default function KelasPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Modal Upload Excel/CSV */}
+      {activeKelas && (
+        <ImportSiswaExcelModal
+          isOpen={modalImportExcel}
+          onClose={() => setModalImportExcel(false)}
+          onImport={handleImportSiswaExcel}
+          kelasNama={activeKelas.nama}
+        />
       )}
     </div>
   );

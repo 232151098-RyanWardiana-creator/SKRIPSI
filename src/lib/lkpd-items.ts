@@ -1,10 +1,12 @@
+import { splitLkpdContent } from "@/lib/lkpd-utils";
+
 /**
  * Butir LKPD yang bisa diisi siswa.
  *
  * Sumber utamanya kolom `lkpd_documents.soal` (JSONB) — itulah yang dipakai
  * LKPD hasil simulasi maupun LKPD yang butirnya disusun eksplisit. LKPD lama
  * hasil generate AI hanya punya `konten` markdown, jadi butirnya diambil dari
- * baris bernomor di dalam konten itu. Kalau tetap tidak ketemu, siswa diberi
+ * bagian aktivitas/kegiatan atau baris bernomor di dalam konten itu. Kalau tetap tidak ketemu, siswa diberi
  * satu kolom jawaban bebas supaya LKPD tetap bisa dikerjakan.
  */
 export interface ItemLkpd {
@@ -24,6 +26,7 @@ const bersih = (value: string) =>
     .trim();
 
 export function itemLkpd(soal: unknown, konten: string): ItemLkpd[] {
+  // 1. Jika ada array soal JSONB eksplisit
   if (Array.isArray(soal) && soal.length) {
     const items = soal
       .map((raw, index): ItemLkpd | null => {
@@ -43,8 +46,32 @@ export function itemLkpd(soal: unknown, konten: string): ItemLkpd[] {
     if (items.length) return items;
   }
 
+  // 2. Ambil hanya konten siswa (cegah kebocoran kunci jawaban guru)
+  const studentKonten = splitLkpdContent(konten || "").studentContent || konten || "";
+
+  // 3. Ekstraksi berdasarkan Heading Aktivitas / Kegiatan / Soal (### Aktivitas 1: ...)
+  const actRegex = /###\s*(Aktivitas|Kegiatan|Latihan|Soal|Kasus|Tugas)\s*(\d+)?[:.]?\s*([^\n]+)([\s\S]*?)(?=(?:###\s*(?:Aktivitas|Kegiatan|Latihan|Soal|Kasus|Tugas)|##\s+[A-Z]|<!--|$))/gi;
+  const dariAktivitas: ItemLkpd[] = [];
+  let match: RegExpExecArray | null;
+
+  while ((match = actRegex.exec(studentKonten)) !== null) {
+    const label = `${match[1]}${match[2] ? ` ${match[2]}` : ""}: ${bersih(match[3])}`;
+    const deskripsi = bersih(match[4] || "").slice(0, 300);
+    dariAktivitas.push({
+      id: `aktivitas-${match[2] || dariAktivitas.length + 1}`,
+      nomor: dariAktivitas.length + 1,
+      pertanyaan: label,
+      petunjuk: deskripsi || undefined,
+      tipe: "uraian",
+    });
+    if (dariAktivitas.length >= 8) break;
+  }
+
+  if (dariAktivitas.length > 0) return dariAktivitas;
+
+  // 4. Fallback ke ekstraksi baris bernomor standar (1. Pertanyaan ...)
   const dariKonten: ItemLkpd[] = [];
-  for (const baris of konten.split("\n")) {
+  for (const baris of studentKonten.split("\n")) {
     const cocok = /^\s*(\d{1,2})[.)]\s+(.{10,})$/.exec(baris);
     if (!cocok) continue;
     const pertanyaan = bersih(cocok[2]);
@@ -59,6 +86,7 @@ export function itemLkpd(soal: unknown, konten: string): ItemLkpd[] {
   }
   if (dariKonten.length) return dariKonten;
 
+  // 5. Fallback terakhir: jawaban bebas
   return [
     {
       id: "jawaban-bebas",

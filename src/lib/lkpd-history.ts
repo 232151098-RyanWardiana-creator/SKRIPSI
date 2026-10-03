@@ -103,6 +103,7 @@ export async function saveHistoryEntry(entry: LkpdHistoryEntry): Promise<boolean
     level: entry.level,
     konten: entry.content,
     status: entry.status === "Tervalidasi" ? "validated" : "draft",
+    dibagikan: entry.dibagikan !== undefined ? entry.dibagikan : entry.status === "Tervalidasi",
     model: entry.model,
     is_fallback: entry.isFallback ?? false,
     divalidasi_pada: entry.validatedAt ?? null,

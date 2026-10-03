@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/Button";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { INDIKATOR_KOMPETENSI } from "@/constants/indikator";
 import type { Indikator } from "@/types";
-import { Brain, Check, Loader2, Plus, RefreshCw, Sparkles, Tag, Trash2 } from "lucide-react";
+import { Check, Loader2, Plus, RefreshCw, Sparkles, Tag, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ModalGenerateAI } from "./ModalGenerateAI";
 
@@ -225,22 +225,6 @@ export function SoalBuilder({ onDraftChange }: SoalBuilderProps) {
             Durasi (menit)
             <input className="input" type="number" min="5" max="120" value={durasi} onChange={e => setDurasi(Number(e.target.value))} />
           </label>
-          <div className="mt-5 border-t border-slate-100 pt-5">
-            <div className="flex items-center justify-between gap-4">
-              <p className="flex items-center gap-2 text-sm font-bold text-slate-800">
-                <Brain className="h-4 w-4 text-[#2563EB]" />Kuesioner Gaya Belajar
-              </p>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={kuesionerAktif}
-                onClick={() => setKuesionerAktif(v => !v)}
-                className={`relative h-7 w-12 shrink-0 rounded-full transition-colors cursor-pointer ${kuesionerAktif ? "bg-[#2563EB]" : "bg-slate-300"}`}
-              >
-                <span className={`absolute top-1 h-5 w-5 rounded-full bg-white transition-all shadow-xs ${kuesionerAktif ? "left-6" : "left-1"}`} />
-              </button>
-            </div>
-          </div>
           <div className="mt-4 flex items-center justify-between border-t pt-3 text-sm">
             <span>Total butir soal: <strong>{soal.length}</strong></span>
             <Button variant="ghost" onClick={() => setResetOpen(true)} className="text-xs text-red-600 hover:text-red-700">
