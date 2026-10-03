@@ -1,5 +1,6 @@
 import { INDICATORS } from "@/lib/assessment-scoring";
 import type { AssessmentSubmission, Siswa } from "@/types";
+import { KESIAPAN_BELAJAR_LABELS } from "@/types";
 
 function csvCell(value: string | number): string {
   const text = String(value);
@@ -9,12 +10,12 @@ function csvCell(value: string | number): string {
 }
 
 export function buildSubmissionCsv(submissions: AssessmentSubmission[], studentOf: (id: string) => Siswa | undefined): string {
-  const header = ["Nama", "Skor", "Level", ...INDICATORS.flatMap(k => [`${k} Benar`, `${k} Total`, `${k} Dikuasai`])];
+  const header = ["Nama", "Skor", "Kesiapan Belajar", ...INDICATORS.flatMap(k => [`${k} Benar`, `${k} Total`, `${k} Dikuasai`])];
   const lines = submissions.map(row => {
     const cells = [
       studentOf(row.siswa_id)?.nama ?? "Siswa tidak ditemukan",
       row.skor_total,
-      row.level,
+      KESIAPAN_BELAJAR_LABELS[row.level]?.kategori ?? row.level,
       ...INDICATORS.flatMap(k => {
         const d = row.detail_per_indikator[k];
         return [d?.benar ?? 0, d?.total ?? 0, d ? (d.dikuasai ? "Ya" : "Tidak") : "Tidak diuji"];

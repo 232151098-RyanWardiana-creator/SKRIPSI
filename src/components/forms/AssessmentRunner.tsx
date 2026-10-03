@@ -4,7 +4,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Timer } from "@/components/ui/Timer";
 import { Button } from "@/components/ui/Button";
 import { fetchAsesmenSiswa, type AsesmenSiswa, type HasilSiswa } from "@/lib/student-assessments";
-import type { AnswerKey, IndicatorResult } from "@/types";
+import type { AnswerKey, IndicatorResult, Level } from "@/types";
+import { KESIAPAN_BELAJAR_LABELS } from "@/types";
 import { ArrowLeft, ArrowRight, Clock, LayoutGrid, X, CheckCircle2 } from "lucide-react";
 
 interface HasilAkhir {
@@ -95,7 +96,7 @@ export function AssessmentRunner({
         <section className="card text-center">
           <p className="text-sm font-semibold uppercase tracking-widest text-[#0066cc]">Asesmen Selesai</p>
           <h1 className="mt-3 text-3xl font-semibold">
-            Skor {hasil.skor} · Level {hasil.level}
+            Skor {hasil.skor} · {KESIAPAN_BELAJAR_LABELS[hasil.level as Level]?.kategori ?? hasil.level}
           </h1>
           <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-5">
             {Object.entries(hasil.detail).map(([key, value]) => (
@@ -108,13 +109,7 @@ export function AssessmentRunner({
             ))}
           </div>
           <div className="mt-6">
-            {kuesionerAktif ? (
-              <Button href={`/asesmen/kerjakan/${encodeURIComponent(asesmenId)}/gaya-belajar`}>
-                Lanjut: Kenali Gaya Belajarmu
-              </Button>
-            ) : (
-              <Button href="/dashboard-siswa">Ke Dashboard</Button>
-            )}
+            <Button href="/dashboard-siswa">Ke Dashboard Siswa</Button>
           </div>
         </section>
       </div>

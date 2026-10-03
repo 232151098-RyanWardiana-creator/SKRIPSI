@@ -38,7 +38,6 @@ import rehypeKatex from "rehype-katex";
 import { LiquidButton } from "@/components/ui/liquid-glass-button";
 
 type LevelTab = "dasar" | "menengah" | "mahir";
-type GayaTab = "visual" | "auditory" | "kinestetik";
 
 export default function Home() {
   // 1. Mouse Follower State
@@ -53,9 +52,8 @@ export default function Home() {
 
   // 3. Creative Hero Interactive Showcase State
   const [activeLevel, setActiveLevel] = useState<LevelTab>("dasar");
-  const [activeGaya, setActiveGaya] = useState<GayaTab>("visual");
 
-  // Interactive Number Line step state for Level Dasar
+  // Interactive Number Line step state for Perlu Bimbingan
   const [numberLineStep, setNumberLineStep] = useState<number>(-7);
 
   // 4. Interactive Diagnostic Slider
@@ -109,24 +107,24 @@ export default function Home() {
     if (score < 60) {
       return {
         level: "dasar",
-        label: "Level Dasar",
+        label: "Perlu Bimbingan",
         badge: "bg-rose-500 text-white",
-        desc: "Perlu bimbingan konsep perbandingan dasar, rasio ekuivalen, dan representasi konkret.",
+        desc: "Perlu bimbingan konsep perbandingan dasar, rasio ekuivalen, dan representasi konkret (Tier 1).",
       };
     }
     if (score < 80) {
       return {
         level: "menengah",
-        label: "Level Menengah",
+        label: "Berkembang",
         badge: "bg-amber-500 text-white",
-        desc: "Latihan terarah menentukan nilai perbandingan senilai dan laju satuan bertingkat.",
+        desc: "Latihan terarah menentukan nilai perbandingan senilai dan laju satuan bertingkat (Tier 2).",
       };
     }
     return {
       level: "mahir",
-      label: "Level Mahir",
+      label: "Mahir",
       badge: "bg-blue-600 text-white",
-      desc: "Tantangan masalah nyata rasio kontekstual, skala peta, dan pemodelan tingkat lanjut (HOTS).",
+      desc: "Tantangan masalah nyata rasio kontekstual, skala peta, dan pemodelan tingkat lanjut HOTS (Tier 3).",
     };
   };
 
@@ -332,27 +330,27 @@ export default function Home() {
 
           {/* 3 Interactive Feature Tiers (Matriks 2 Baris di Mobile, 3 Kolom di Desktop - Tanpa Scroll) */}
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-4 pt-3 sm:pt-8 text-center">
-            {/* Level Dasar */}
+            {/* Perlu Bimbingan */}
             <div className="col-span-1 flex flex-col items-center justify-center rounded-2xl border border-rose-200/80 bg-white p-3 sm:p-5 shadow-xs transition-all hover:scale-[1.02] hover:border-rose-400">
-              <h3 className="text-xs sm:text-sm font-black text-rose-600">Level Dasar</h3>
+              <h3 className="text-xs sm:text-sm font-black text-rose-600">Perlu Bimbingan</h3>
               <p className="mt-0.5 sm:mt-1 text-[10px] sm:text-xs font-medium text-slate-600">Konsep Rasio & Bentuk Sederhana</p>
               <p className="mt-1.5 sm:mt-2.5 w-full rounded-xl border border-rose-100 bg-rose-50/70 py-1 sm:py-2 text-center font-mono text-[11px] sm:text-xs font-black text-rose-700">
                 12 : 18 = 2 : 3
               </p>
             </div>
 
-            {/* Level Menengah */}
+            {/* Berkembang */}
             <div className="col-span-1 flex flex-col items-center justify-center rounded-2xl border border-amber-200/80 bg-white p-3 sm:p-5 shadow-xs transition-all hover:scale-[1.02] hover:border-amber-400">
-              <h3 className="text-xs sm:text-sm font-black text-amber-600">Level Menengah</h3>
+              <h3 className="text-xs sm:text-sm font-black text-amber-600">Berkembang</h3>
               <p className="mt-0.5 sm:mt-1 text-[10px] sm:text-xs font-medium text-slate-600">Perbandingan Senilai & Laju</p>
               <p className="mt-1.5 sm:mt-2.5 w-full rounded-xl border border-amber-100 bg-amber-50/70 py-1 sm:py-2 text-center font-mono text-[11px] sm:text-xs font-black text-amber-800">
                 5 liter → 60 km | 8 L → 96 km
               </p>
             </div>
 
-            {/* Level Mahir (Baris 2 Penuh di Mobile, Kolom 3 di Desktop) */}
+            {/* Mahir (Baris 2 Penuh di Mobile, Kolom 3 di Desktop) */}
             <div className="col-span-2 sm:col-span-1 flex flex-col items-center justify-center rounded-2xl border border-blue-200/80 bg-white p-3 sm:p-5 shadow-xs transition-all hover:scale-[1.02] hover:border-blue-400">
-              <h3 className="text-xs sm:text-sm font-black text-blue-600">Level Mahir</h3>
+              <h3 className="text-xs sm:text-sm font-black text-blue-600">Mahir</h3>
               <p className="mt-0.5 sm:mt-1 text-[10px] sm:text-xs font-medium text-slate-600">Masalah Kontekstual & Skala HOTS</p>
               <p className="mt-1.5 sm:mt-2.5 w-full sm:w-full max-w-xs sm:max-w-none rounded-xl border border-blue-100 bg-blue-50/70 py-1 sm:py-2 text-center font-mono text-[11px] sm:text-xs font-black text-blue-800">
                 Skala 1 : 250.000 | 6 cm → 15 km
@@ -517,8 +515,8 @@ export default function Home() {
                   className="w-full h-3 bg-[#E0E7FF] rounded-lg appearance-none cursor-pointer accent-[#2563EB]"
                 />
                 <div className="flex justify-between text-[11px] font-extrabold text-[#1E1B4B]/50">
-                  <span>0 (Dasar)</span>
-                  <span>60 (Batas Menengah)</span>
+                  <span>0 (Perlu Bimbingan)</span>
+                  <span>60 (Batas Berkembang)</span>
                   <span>80 (Batas Mahir)</span>
                   <span>100</span>
                 </div>
@@ -529,13 +527,13 @@ export default function Home() {
                     onClick={() => setSimScore(48)}
                     className="rounded-xl border border-rose-200 bg-rose-50 py-2 text-rose-700 hover:bg-rose-100"
                   >
-                    48 (Dasar)
+                    48 (Perlu Bimbingan)
                   </button>
                   <button
                     onClick={() => setSimScore(72)}
                     className="rounded-xl border border-amber-200 bg-amber-50 py-2 text-amber-800 hover:bg-amber-100"
                   >
-                    72 (Menengah)
+                    72 (Berkembang)
                   </button>
                   <button
                     onClick={() => setSimScore(94)}

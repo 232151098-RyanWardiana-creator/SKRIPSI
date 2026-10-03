@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { type SiswaMock, type KelasMock } from "@/types";
+import { KESIAPAN_BELAJAR_LABELS } from "@/types";
 import { useClassStore, resetStudentPin, deleteClass } from "@/lib/class-store";
 import { Button } from "@/components/ui/Button";
 import { ProgresAlur } from "@/components/ui/ProgresAlur";
@@ -293,7 +294,7 @@ export default function KelasPage() {
                   <th className="pb-3 w-16 text-center">No. Absen</th>
                   <th className="pb-3">Nama Peserta Didik</th>
                   <th className="pb-3">NISN</th>
-                  <th className="pb-3">Gaya Belajar</th>
+                  <th className="pb-3">Kesiapan Belajar</th>
                   <th className="pb-3">PIN</th>
                   <th className="pb-3">Bergabung</th>
                   <th className="pb-3 text-right">Aksi</th>
@@ -315,9 +316,9 @@ export default function KelasPage() {
                     </td>
                     <td className="py-4 font-mono text-xs text-[#526174]">{item.nisn || "—"}</td>
                     <td className="py-4">
-                      {item.gaya_belajar ? (
-                        <span className="rounded-full bg-blue-100 px-2.5 py-1 text-xs font-medium capitalize text-blue-800">
-                          {item.gaya_belajar}
+                      {item.level ? (
+                        <span className="rounded-full bg-blue-100 px-2.5 py-1 text-xs font-medium text-blue-800">
+                          {KESIAPAN_BELAJAR_LABELS[item.level]?.kategori ?? item.level}
                         </span>
                       ) : (
                         <span className="text-xs text-[#9ca3af]">Belum asesmen</span>

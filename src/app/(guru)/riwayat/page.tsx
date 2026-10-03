@@ -16,6 +16,7 @@ import {
 } from "@/lib/lkpd-history";
 import { downloadDocx } from "@/lib/docx-client";
 import type { Level } from "@/types";
+import { KESIAPAN_BELAJAR_LABELS } from "@/types";
 import { Download, Eye, FileText, History, Printer, Share2, Trash2, X } from "lucide-react";
 
 export default function RiwayatPage() {
@@ -72,15 +73,15 @@ export default function RiwayatPage() {
       <Card className="mb-6 p-4">
         <div className="flex flex-wrap items-center gap-4 text-sm">
           <label className="flex items-center gap-2 font-medium">
-            Tingkat Kognitif:
+            Kesiapan Belajar:
             <select
               className="input h-9 py-1 text-xs"
               value={selectedLevel}
               onChange={e => setSelectedLevel(e.target.value)}
             >
-              <option value="semua">Semua Level</option>
-              <option value="dasar">Dasar</option>
-              <option value="menengah">Menengah</option>
+              <option value="semua">Semua Kesiapan</option>
+              <option value="dasar">Perlu Bimbingan</option>
+              <option value="menengah">Berkembang</option>
               <option value="mahir">Mahir</option>
             </select>
           </label>
@@ -126,8 +127,10 @@ export default function RiwayatPage() {
                       <span className="block text-xs font-normal text-[#64748b]">{item.topik}</span>
                     )}
                   </td>
-                  <td className="py-3.5 px-3.5 border-r border-slate-200">
-                    <Badge level={item.level as Level}>{item.level}</Badge>
+                  <td className="py-3 px-3.5 border-r border-slate-200">
+                    <Badge level={item.level as Level}>
+                      {KESIAPAN_BELAJAR_LABELS[item.level as Level]?.kategori ?? item.level}
+                    </Badge>
                   </td>
                   <td className="py-3.5 px-3.5 font-medium border-r border-slate-200">{item.kelas}</td>
                   <td className="py-3.5 px-3.5 text-xs text-[#526174] border-r border-slate-200">{item.tanggal}</td>
@@ -211,7 +214,7 @@ export default function RiwayatPage() {
               <div>
                 <h2 className="text-xl font-bold text-[#172033]">{activeItem.judul}</h2>
                 <p className="text-xs text-[#64748b]">
-                  Level: <strong className="capitalize">{activeItem.level}</strong> • Kelas {activeItem.kelas} • Tanggal: {activeItem.tanggal}
+                  Kesiapan Belajar: <strong>{KESIAPAN_BELAJAR_LABELS[activeItem.level as Level]?.kategori ?? activeItem.level}</strong> • Kelas {activeItem.kelas} • Tanggal: {activeItem.tanggal}
                 </p>
               </div>
               <div className="flex items-center gap-2">

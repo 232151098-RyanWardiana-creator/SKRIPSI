@@ -1,11 +1,10 @@
 import { generateLKPD, type GenerateLKPDParams } from "@/lib/ai";
-import type { GayaBelajar, Level } from "@/types";
+import type { Level } from "@/types";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
 const levels: Level[] = ["dasar", "menengah", "mahir"];
-const gayaBelajar = new Set<Exclude<GayaBelajar, null>>(["visual", "auditory", "kinestetik"]);
 
 type RequestBody = Omit<GenerateLKPDParams, "level"> & {
   level?: Level;
@@ -24,7 +23,6 @@ function validBody(value: unknown): value is RequestBody {
     && Number.isInteger(body.jumlahAktivitas) && Number(body.jumlahAktivitas) >= 1 && Number(body.jumlahAktivitas) <= 10
     && Array.isArray(body.indikatorLemah) && body.indikatorLemah.length <= 20
     && body.indikatorLemah.every((item) => typeof item === "string" && item.length <= 50)
-    && (body.gayaBelajar === null || body.gayaBelajar === undefined || gayaBelajar.has(body.gayaBelajar as Exclude<GayaBelajar, null>))
     && (body.promptTambahan === undefined || (typeof body.promptTambahan === "string" && body.promptTambahan.length <= 1000))
     && (body.level === undefined || levels.includes(body.level as Level));
 }
@@ -38,7 +36,7 @@ export async function POST(request: Request) {
   }
 
   if (!validBody(body)) {
-    return Response.json({ error: "Data generator tidak valid. Periksa materi, jumlah aktivitas, dan opsi VAK." }, { status: 400 });
+    return Response.json({ error: "Data generator tidak valid. Periksa materi dan jumlah aktivitas." }, { status: 400 });
   }
 
   const clean = {

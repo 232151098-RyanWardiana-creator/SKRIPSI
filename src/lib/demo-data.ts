@@ -194,7 +194,7 @@ export const DEMO_LKPD: DemoLkpd[] = [
   {
     id: ID.lkpd.dasar,
     level: "dasar",
-    judul: "LKPD Rasio (Perbandingan) — Kelompok Dasar",
+    judul: "LKPD Rasio (Perbandingan) — Perlu Bimbingan",
     konten:
       "Tujuan Pembelajaran\n" +
       "Peserta didik dapat menjelaskan konsep rasio dua besaran, menyederhanakan rasio sederhana, dan menentukan rasio satuan secara terbimbing (scaffolding).\n\n" +
@@ -212,7 +212,7 @@ export const DEMO_LKPD: DemoLkpd[] = [
   {
     id: ID.lkpd.menengah,
     level: "menengah",
-    judul: "LKPD Rasio (Perbandingan) — Kelompok Menengah",
+    judul: "LKPD Rasio (Perbandingan) — Berkembang",
     konten:
       "Tujuan Pembelajaran\n" +
       "Peserta didik dapat menyelesaikan masalah perbandingan senilai, perbandingan berbalik nilai, dan menentukan laju satuan dalam kehidupan sehari-hari.\n\n" +
@@ -231,7 +231,7 @@ export const DEMO_LKPD: DemoLkpd[] = [
   {
     id: ID.lkpd.mahir,
     level: "mahir",
-    judul: "LKPD Rasio (Perbandingan) — Kelompok Mahir",
+    judul: "LKPD Rasio (Perbandingan) — Mahir",
     konten:
       "Tujuan Pembelajaran\n" +
       "Peserta didik dapat menyelesaikan masalah kontekstual bertingkat (HOTS) yang melibatkan skala peta, rasio gabungan tiga besaran, dan analisis proporsi terbalik.\n\n" +

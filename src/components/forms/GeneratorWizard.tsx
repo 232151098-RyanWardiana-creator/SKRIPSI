@@ -9,7 +9,7 @@ import { LkpdDocument } from "@/components/LkpdDocument";
 import { useClassStore } from "@/lib/class-store";
 import { useAssessmentStore } from "@/lib/assessment-store";
 import { useSubmissionStore } from "@/lib/submission-store";
-import type { GayaBelajar, Level } from "@/types";
+import type { Level } from "@/types";
 import { downloadDocx } from "@/lib/docx-client";
 import { getStoredHistory, saveHistoryEntry } from "@/lib/lkpd-history";
 import { AI_PROVIDERS } from "@/constants/ai-providers";
@@ -51,9 +51,9 @@ interface DocumentState extends GeneratedLKPD {
 
 const levels: Level[] = ["dasar", "menengah", "mahir"];
 const labels: Record<Level, string> = {
-  dasar: "Perlu Bimbingan (Dasar)",
-  menengah: "Berkembang (Menengah)",
-  mahir: "Mahir (Lanjut)",
+  dasar: "Perlu Bimbingan",
+  menengah: "Berkembang",
+  mahir: "Mahir",
 };
 function isLevel(value: unknown): value is Level {
   return levels.includes(value as Level);
@@ -82,7 +82,6 @@ interface GeneratorCachedState {
   topik: string;
   jumlah: number;
   gaya: string;
-  pertimbangkanGaya: boolean;
   modePengerjaan: "individu" | "kelompok";
   jumlahAnggota: number;
   aiProvider: string;
@@ -131,7 +130,6 @@ export function GeneratorWizard() {
   const [topik, setTopik] = useState(() => getInitial()?.topik ?? "Rasio (Perbandingan)");
   const [jumlah, setJumlah] = useState(() => getInitial()?.jumlah ?? 4);
   const [gaya, setGaya] = useState(() => getInitial()?.gaya ?? "Gunakan konteks resep masakan, denah/skala peta, dan perbandingan harga satuan.");
-  const [pertimbangkanGaya, setPertimbangkanGaya] = useState(() => getInitial()?.pertimbangkanGaya ?? true);
   const [modePengerjaan, setModePengerjaan] = useState<"individu" | "kelompok">(() => getInitial()?.modePengerjaan ?? "individu");
   const [jumlahAnggota, setJumlahAnggota] = useState<number>(() => getInitial()?.jumlahAnggota ?? 4);
 
@@ -162,7 +160,6 @@ export function GeneratorWizard() {
       topik,
       jumlah,
       gaya,
-      pertimbangkanGaya,
       modePengerjaan,
       jumlahAnggota,
       aiProvider,
@@ -183,7 +180,6 @@ export function GeneratorWizard() {
     topik,
     jumlah,
     gaya,
-    pertimbangkanGaya,
     modePengerjaan,
     jumlahAnggota,
     aiProvider,
@@ -203,21 +199,6 @@ export function GeneratorWizard() {
   const assessment = availableAssessments.find(item => item.id === assessmentId);
 
   const assessmentSubmissions = submissions.filter(item => item.asesmen_id === assessmentId && item.selesai);
-  const vak = useMemo(() => {
-    const counts = { visual: 0, auditory: 0, kinestetik: 0 };
-    assessmentSubmissions.forEach(item => {
-      const style = item.gaya_belajar ?? dataKelas?.siswa.find(student => student.id === item.siswa_id)?.gaya_belajar;
-      if (style) counts[style]++;
-    });
-    const total = Object.values(counts).reduce((sum, count) => sum + count, 0);
-    const dominant = (Object.entries(counts).sort((a, b) => b[1] - a[1])[0]?.[0] || "visual") as Exclude<GayaBelajar, null>;
-    return {
-      counts,
-      total,
-      dominant,
-      percent: (key: Exclude<GayaBelajar, null>) => total ? Math.round(counts[key] / total * 100) : 0
-    };
-  }, [assessmentSubmissions, dataKelas]);
 
   const weakByLevel = useMemo(() => Object.fromEntries(levels.map(level => [
     level,
@@ -250,7 +231,6 @@ export function GeneratorWizard() {
     setActive("dasar");
     setJumlah(4);
     setGaya("Gunakan konteks resep masakan, denah/skala peta, dan perbandingan harga satuan.");
-    setPertimbangkanGaya(true);
     setModePengerjaan("individu");
     setJumlahAnggota(4);
     setError("");
@@ -265,8 +245,7 @@ export function GeneratorWizard() {
   const body = {
     materi: topik,
     jumlahAktivitas: jumlah,
-    promptTambahan: `${gaya}\nKonteks asesmen: ${assessmentJudul}. Rekap TaRL: ${levels.map(level => `${labels[level]} ${counts[level]} siswa; indikator target ${weakByLevel[level].join(", ") || "IK-01, IK-02"}`).join(" | ")}. Distribusi VAK: Visual ${vak.counts.visual}, Auditory ${vak.counts.auditory}, Kinestetik ${vak.counts.kinestetik}.`.slice(0, 1000),
-    gayaBelajar: pertimbangkanGaya && vak.total ? vak.dominant : null,
+    promptTambahan: `${gaya}\nKonteks asesmen: ${assessmentJudul}. Rekap Kesiapan Belajar (TaRL): ${levels.map(level => `${labels[level]} ${counts[level]} siswa; indikator target ${weakByLevel[level].join(", ") || "IK-01, IK-02"}`).join(" | ")}.`.slice(0, 1000),
     indikatorLemah: indikatorLemah.length ? indikatorLemah : ["IK-01", "IK-02", "IK-03"],
     modePengerjaan,
     jumlahAnggota: modePengerjaan === "kelompok" ? jumlahAnggota : undefined,
@@ -401,7 +380,6 @@ export function GeneratorWizard() {
     }
   }
 
-  const vakLabel = vak.dominant[0].toUpperCase() + vak.dominant.slice(1);
   const current = documents[active];
 
   // Split current document into student LKPD and teacher answer key
@@ -486,25 +464,14 @@ export function GeneratorWizard() {
                         </ul>
                       </div>
 
-                      {/* Gaya Belajar (VAK) - 1 Baris Per Keterangan */}
+                      {/* Fokus Penguatan Indikator Lemah */}
                       <div className="space-y-1.5 bg-white/80 rounded-lg p-2.5 border border-blue-100">
                         <span className="font-bold text-slate-800 block text-[11px] uppercase tracking-wide">
-                          Gaya Belajar Siswa:
+                          Fokus Indikator Lemah:
                         </span>
-                        <ul className="space-y-1 text-slate-700">
-                          <li className="flex items-center justify-between whitespace-nowrap">
-                            <span>- Visual</span>
-                            <span className="font-bold text-[#1E1B4B] shrink-0">{vak.counts.visual} siswa</span>
-                          </li>
-                          <li className="flex items-center justify-between whitespace-nowrap">
-                            <span>- Auditory</span>
-                            <span className="font-bold text-[#1E1B4B] shrink-0">{vak.counts.auditory} siswa</span>
-                          </li>
-                          <li className="flex items-center justify-between whitespace-nowrap">
-                            <span>- Kinestetik</span>
-                            <span className="font-bold text-[#1E1B4B] shrink-0">{vak.counts.kinestetik} siswa</span>
-                          </li>
-                        </ul>
+                        <p className="text-xs text-slate-700 font-medium leading-relaxed">
+                          {indikatorLemah.length ? indikatorLemah.join(", ") : "Semua indikator tuntas"}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -616,17 +583,6 @@ export function GeneratorWizard() {
                   }}
                 />
               </label>
-
-              <button
-                type="button"
-                className="w-full rounded-xl border border-slate-200 p-3 text-left hover:bg-slate-50 transition cursor-pointer"
-                onClick={() => setPertimbangkanGaya((v) => !v)}
-              >
-                <span className="text-xs text-slate-500 block uppercase font-bold">Penyesuaian VAK:</span>
-                <strong className="text-xs font-black text-slate-900">
-                  {pertimbangkanGaya ? `Aktif — ${vakLabel} (${vak.percent(vak.dominant)}%)` : "Tidak aktif"}
-                </strong>
-              </button>
             </div>
           )}
 
@@ -640,14 +596,14 @@ export function GeneratorWizard() {
 
                 <div className="space-y-2.5 pt-2 border-t border-slate-200/80 text-xs">
                   <div className="bg-white/80 rounded-lg p-2.5 border border-slate-200">
-                    <strong className="text-slate-800 block mb-1">Hasil Asesmen (TaRL):</strong>
+                    <strong className="text-slate-800 block mb-1">Hasil Asesmen Kesiapan Belajar (TaRL):</strong>
                     <ul className="space-y-1 text-slate-700">
                       <li className="flex items-center justify-between whitespace-nowrap">
-                        <span>- Dasar:</span>
+                        <span>- Perlu Bimbingan:</span>
                         <span className="font-bold text-[#1E1B4B] shrink-0">{counts.dasar} siswa</span>
                       </li>
                       <li className="flex items-center justify-between whitespace-nowrap">
-                        <span>- Menengah:</span>
+                        <span>- Berkembang:</span>
                         <span className="font-bold text-[#1E1B4B] shrink-0">{counts.menengah} siswa</span>
                       </li>
                       <li className="flex items-center justify-between whitespace-nowrap">
@@ -657,9 +613,9 @@ export function GeneratorWizard() {
                     </ul>
                   </div>
                   <div className="bg-white/80 rounded-lg p-2.5 border border-slate-200">
-                    <strong className="text-slate-800 block mb-1">Gaya Belajar Siswa:</strong>
-                    <p className="text-slate-700 whitespace-nowrap">
-                      {pertimbangkanGaya ? `${vakLabel} (${vak.percent(vak.dominant)}%)` : "Nonaktif"}
+                    <strong className="text-slate-800 block mb-1">Fokus Indikator Lemah:</strong>
+                    <p className="text-slate-700">
+                      {indikatorLemah.length ? indikatorLemah.join(", ") : "Semua tuntas"}
                     </p>
                   </div>
                 </div>
@@ -1032,8 +988,8 @@ export function GeneratorWizard() {
         }}
         loading={loadingLevels.length > 0}
         materi={topik}
-        targetInfo={step === 3 ? `Regenerasi Level ${labels[active]}` : "3 Level (Dasar, Menengah, Mahir)"}
-        actionText={step === 2 ? "Generate 3 Level" : "Regenerasi Level Ini"}
+        targetInfo={step === 3 ? `Regenerasi Tier ${labels[active]}` : "3 Tier TaRL (Perlu Bimbingan, Berkembang, Mahir)"}
+        actionText={step === 2 ? "Generate 3 Tier LKPD" : "Regenerasi Tier Ini"}
       />
 
       {validationLevel && (

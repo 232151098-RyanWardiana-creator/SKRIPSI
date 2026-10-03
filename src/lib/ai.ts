@@ -435,14 +435,9 @@ export async function generateLKPD(params: GenerateLKPDParams): Promise<AIResult
 
   const levelKeterangan: Record<Level, string> = {
     dasar: `Tier 1 — Perlu Bimbingan (Kategori Kurikuler: ${KESIAPAN_BELAJAR_LABELS.dasar.kategori}): Scaffolding tinggi & representasi konkret. Memecah langkah kerja menjadi isian titik-titik terbimbing (......) tanpa membocorkan jawaban langsung. Gunakan tabel rasio bertahap berpasangan atau blok visual lingkaran terpisah (● ● ●), bahasa sederhana, angka bulat ramah hitung, dan tekankan pemahaman konsep perkalian/pembagian untuk mencegah miskonsepsi aditif (mengira rasio bertambah secara selisih).`,
-    menengah: `Tier 2 — Berkembang / Cukup (Kategori Kurikuler: ${KESIAPAN_BELAJAR_LABELS.menengah.kategori}): Fading guidance & representasi semi-konkret. Kurangi scaffolding secara bertahap, berikan jembatan bantuan pada sebagian langkah lalu biarkan siswa melengkapi mandiri. Fokus pada masalah kontekstual dunia nyata bertingkat (resep masakan, skala denah, perbandingan kecepatan dan waktu tempuh, konversi bahan).`,
+    menengah: `Tier 2 — Berkembang (Kategori Kurikuler: ${KESIAPAN_BELAJAR_LABELS.menengah.kategori}): Fading guidance & representasi semi-konkret. Kurangi scaffolding secara bertahap, berikan jembatan bantuan pada sebagian langkah lalu biarkan siswa melengkapi mandiri. Fokus pada masalah kontekstual dunia nyata bertingkat (resep masakan, skala denah, perbandingan kecepatan dan waktu tempuh, konversi bahan).`,
     mahir: `Tier 3 — Mahir (Kategori Kurikuler: ${KESIAPAN_BELAJAR_LABELS.mahir.kategori}): Independent learning & tantangan HOTS (C4–C6). Tanpa scaffolding dasar awal. Sajikan masalah non-rutin terbuka (open-ended problem), perbandingan multi-variabel, analisis kritis strategi penyelesaian masalah, dan wajib menyertakan ruang justifikasi penalaran matematis mandiri.`,
   };
-  const gayaKeterangan = params.gayaBelajar ? {
-    visual: "gunakan representasi visual proporsional, tabel data terstruktur, dan perbandingan grafis yang rapi (DILARANG menggunakan karakter balok hitam padat berdempet seperti [■■■■■] atau [█████] yang tampak seperti sensor hitam; gunakan rincian perbandingan proporsi angka, tabel pecahan bagian, atau simbol lingkaran terpisah rapi seperti '● ● ● ● ●')",
-    auditory: "gunakan kalimat instruksi dialogis naratif, pertanyaan refleksi kritis, dan elaborasi konseptual",
-    kinestetik: "gunakan simulasi eksperimen bertahap, manipulasi angka konkret, dan aktivitas hands-on",
-  }[params.gayaBelajar] : "tanpa penyesuaian VAK khusus";
   const indikator = params.indikatorLemah.length ? params.indikatorLemah.join(", ") : "pengayaan seluruh indikator";
 
   const isKelompok = params.modePengerjaan === "kelompok";
@@ -509,7 +504,7 @@ Sertakan per nomor aktivitas (Aktivitas 1 sampai ${params.jumlahAktivitas}) deng
 
 ATURAN MUTLAK LEMBAR KERJA SISWA (BAGIAN D):
 1. DILARANG KERAS MENULISKAN JAWABAN ATAU HASIL PERHITUNGAN PADA BAGIAN D (KEGIATAN PEMBELAJARAN SISWA)!
-2. Untuk Level Dasar sekalipun: Scaffolding HANYA berupa panduan alur langkah kerja. Setiap langkah pada ruang jawaban siswa WAJIB KOSONG (berupa titik-titik "......" atau garis isian yang harus dikerjakan sendiri oleh siswa). JANGAN PERNAH mengisi ruang jawaban siswa dengan angka atau solusi yang sudah selesai!
+2. Untuk Tingkat Perlu Bimbingan sekalipun: Scaffolding HANYA berupa panduan alur langkah kerja. Setiap langkah pada ruang jawaban siswa WAJIB KOSONG (berupa titik-titik "......" atau garis isian yang harus dikerjakan sendiri oleh siswa). JANGAN PERNAH mengisi ruang jawaban siswa dengan angka atau solusi yang sudah selesai!
 
 ATURAN WAJIB KUNCI JAWABAN & PANDUAN GURU:
 1. Kunci jawaban HARUS menjawab SECARA PERSIS, NYATA, dan LENGKAP seluruh ${params.jumlahAktivitas} aktivitas yang dibuat pada Bagian D (Aktivitas 1 sampai Aktivitas ${params.jumlahAktivitas}).
@@ -526,8 +521,7 @@ ATURAN WAJIB KUNCI JAWABAN & PANDUAN GURU:
       content: `Buat LKPD BARU, LENGKAP, dan BERBEDA (Variasi Token #${seed}) tentang "${params.materi}" untuk tingkat ${params.level}.
 Bentuk pengerjaan: ${isKelompok ? `Kelompok (${jumlahAnggota} orang)` : "Individu"}.
 JUMLAH AKTIVITAS: TEPAT ${params.jumlahAktivitas} nomor aktivitas kontekstual berbeda (Aktivitas 1 s.d Aktivitas ${params.jumlahAktivitas}).
-Karakteristik level: ${levelKeterangan[params.level]}.
-Penyesuaian VAK: ${gayaKeterangan}.
+Karakteristik kesiapan belajar: ${levelKeterangan[params.level]}.
 Indikator target: ${indikator}.
 Pastikan pada Bagian D (Kegiatan Pembelajaran), ruang jawaban siswa murni berupa titik-titik kosong tanpa angka jawaban yang terisi!
 Sertakan tanda pembatas <!-- PEMISAH_KUNCI_GURU --> tepat sebelum bagian Kunci Jawaban Guru. Tulis kunci jawaban nyata dan lengkap untuk SELURUH ${params.jumlahAktivitas} aktivitas. Keluarkan langsung teks Markdown tanpa sapaan pembuka/penutup.`,

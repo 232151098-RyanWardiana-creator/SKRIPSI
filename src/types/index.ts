@@ -14,7 +14,7 @@ export const KESIAPAN_BELAJAR_LABELS: Record<Level, {
     rekomendasiLkpd: "LKPD Varian A (Scaffolding Tinggi & Terstruktur)"
   },
   menengah: {
-    kategori: "Berkembang / Cukup",
+    kategori: "Berkembang",
     tier: "Tier 2",
     rentang: "60 - 79 Poin (60% s.d. 79%)",
     rekomendasiLkpd: "LKPD Varian B (Fading Guidance & Latihan Kontekstual)"
@@ -28,16 +28,6 @@ export const KESIAPAN_BELAJAR_LABELS: Record<Level, {
 };
 export type Indikator = "IK-01" | "IK-02" | "IK-03" | "IK-04" | "IK-05";
 export type GayaBelajar = "visual" | "auditory" | "kinestetik" | null;
-
-export interface PertanyaanGayaBelajar {
-  id: string;
-  pertanyaan: string;
-  pilihan: {
-    a: { teks: string; tipe: "visual" | "auditory" | "kinestetik" };
-    b: { teks: string; tipe: "visual" | "auditory" | "kinestetik" };
-    c: { teks: string; tipe: "visual" | "auditory" | "kinestetik" };
-  };
-}
 
 export interface User { id: string; email: string; nama: string; role: Role; sekolah?: string }
 export interface Kelas { id: string; nama: string; tahun_ajaran: string; kode_undangan: string; guru_id: string; jumlah_siswa: number; wali_kelas?: string }
