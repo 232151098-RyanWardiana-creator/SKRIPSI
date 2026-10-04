@@ -1,16 +1,33 @@
 "use client";
 
+import { useState } from "react";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { StudentIdentityPicker } from "@/components/forms/StudentIdentityPicker";
 import { useDataSiswa } from "@/lib/student-assessments";
 import { useLkpdSiswa } from "@/lib/student-lkpd";
-import { BookOpenCheck, CheckCircle2, Clock } from "lucide-react";
+import { notifySessionChanged } from "@/lib/student-session";
+import { BookOpenCheck, CheckCircle2, Clock, Users, ShieldCheck } from "lucide-react";
 
 export default function DashboardSiswa() {
   const data = useDataSiswa();
   const { data: lkpdList } = useLkpdSiswa();
+  const [mengalihkan, setMengalihkan] = useState(false);
   const aktif = data?.asesmen.filter((item) => item.status === "aktif") ?? [];
+
+  const alihkanJuruTulis = async () => {
+    setMengalihkan(true);
+    try {
+      const res = await fetch("/api/siswa/kelompok/juru-tulis", { method: "POST" });
+      if (res.ok) {
+        notifySessionChanged();
+      }
+    } catch (err) {
+      console.error("Gagal mengalihkan juru tulis:", err);
+    } finally {
+      setMengalihkan(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -20,6 +37,64 @@ export default function DashboardSiswa() {
           <section className="rounded-2xl bg-gradient-to-r from-blue-50/90 via-indigo-50/70 to-slate-50 border border-blue-100/80 p-5 md:p-6 shadow-xs">
             <h1 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight">Halo, {data.siswa.nama}!</h1>
           </section>
+
+          {/* Kartu Informasi Kelompok & Peran Device */}
+          {data.siswa.kelompok && (
+            <section className="rounded-2xl border border-blue-200/90 bg-white p-5 shadow-xs">
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <div className="flex items-center gap-3.5">
+                  <div className="grid h-12 w-12 place-items-center rounded-2xl bg-blue-600 text-white shadow-xs">
+                    <Users className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                      Kelompok Belajar TaRL
+                    </span>
+                    <h2 className="text-lg md:text-xl font-black text-slate-900 leading-tight">
+                      {data.siswa.kelompok}
+                    </h2>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      Kelas: {data.siswa.kelasNama}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2.5">
+                  {data.siswa.isJuruTulis ? (
+                    <span className="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 px-3.5 py-1.5 text-xs font-black text-white shadow-xs">
+                      ⭐ Juru Tulis (Device Pengerjaan)
+                    </span>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <span className="inline-flex items-center gap-1.5 rounded-xl bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-700 border border-slate-200">
+                        👥 Anggota Kelompok (Mode Baca)
+                      </span>
+                      <Button
+                        variant="secondary"
+                        onClick={alihkanJuruTulis}
+                        disabled={mengalihkan}
+                        className="text-xs font-bold border-blue-200 text-blue-700 hover:bg-blue-50"
+                      >
+                        {mengalihkan ? "Mengalihkan..." : "Jadikan Saya Juru Tulis"}
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="mt-3.5 pt-3.5 border-t border-slate-100 text-xs text-slate-600">
+                {data.siswa.isJuruTulis ? (
+                  <p className="text-blue-900 font-medium">
+                    📌 <strong>Tugasmu:</strong> Kamu ditunjuk sebagai juru tulis kelompok. Gunakan HP/laptop ini untuk mengetikkan hasil diskusi dan jawaban LKPD teman-temanmu.
+                  </p>
+                ) : (
+                  <p className="text-slate-600">
+                    💡 <strong>Petunjuk:</strong> Teman juru tulismu yang memegang HP/laptop untuk mengetikkan jawaban resmi kelompok. Kamu dapat membuka LKPD untuk berdiskusi bersama. Jika HP juru tulis kehabisan baterai, klik tombol <em>Jadikan Saya Juru Tulis</em> untuk mengambil alih pengerjaan.
+                  </p>
+                )}
+              </div>
+            </section>
+          )}
 
           {/* Bagian 1: Asesmen Kesiapan Belajar */}
           <section className="space-y-3">

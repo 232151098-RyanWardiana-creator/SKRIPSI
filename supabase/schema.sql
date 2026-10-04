@@ -70,6 +70,8 @@ CREATE TABLE IF NOT EXISTS students (
 
 ALTER TABLE students ADD COLUMN IF NOT EXISTS pin_hash TEXT;
 ALTER TABLE students ADD COLUMN IF NOT EXISTS pin_diperbarui_pada TIMESTAMPTZ;
+ALTER TABLE students ADD COLUMN IF NOT EXISTS kelompok TEXT;
+ALTER TABLE students ADD COLUMN IF NOT EXISTS is_juru_tulis BOOLEAN DEFAULT false;
 
 -- Kolom turunan agar layar guru bisa tahu siapa yang sudah punya PIN tanpa
 -- pernah mengirim hash PIN ke browser.

@@ -133,16 +133,55 @@ export async function simpanNilai(
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  // 1. Dapatkan detail pengisian yang dinilai
+  const { data: targetSub } = await supabase
+    .from("lkpd_submissions")
+    .select("id, lkpd_id, kelas_id, siswa_id, jawaban")
+    .eq("id", pengisianId)
+    .maybeSingle();
+
+  const nowIso = new Date().toISOString();
+  const updateData = {
+    nilai,
+    catatan_guru: catatan.trim() || null,
+    status: "dinilai",
+    dinilai_pada: nowIso,
+    dinilai_oleh: user?.id ?? null,
+  };
+
   const { error } = await supabase
     .from("lkpd_submissions")
-    .update({
-      nilai,
-      catatan_guru: catatan.trim() || null,
-      status: "dinilai",
-      dinilai_pada: new Date().toISOString(),
-      dinilai_oleh: user?.id ?? null,
-    })
+    .update(updateData)
     .eq("id", pengisianId);
   if (error) return console.error("Gagal menyimpan nilai:", error), false;
+
+  // 2. Jika pengisian terkait kelompok, sinkronkan nilai ke seluruh anggota sekelompok
+  if (targetSub) {
+    try {
+      const jawabanObj = (targetSub.jawaban ?? {}) as Record<string, string>;
+      const namaKelompok = jawabanObj["identitas_kelompok"];
+
+      if (namaKelompok && targetSub.kelas_id) {
+        const { data: siswaKelompok } = await supabase
+          .from("students")
+          .select("id")
+          .eq("kelas_id", targetSub.kelas_id)
+          .eq("kelompok", namaKelompok);
+
+        if (siswaKelompok && siswaKelompok.length > 0) {
+          const anggotaIds = siswaKelompok.map((s) => s.id);
+          await supabase
+            .from("lkpd_submissions")
+            .update(updateData)
+            .eq("lkpd_id", targetSub.lkpd_id)
+            .in("siswa_id", anggotaIds);
+        }
+      }
+    } catch (syncErr) {
+      console.warn("Gagal sinkron nilai kelompok:", syncErr);
+    }
+  }
+
   return true;
 }

@@ -35,7 +35,7 @@ export async function refreshClasses(): Promise<ClassStoreEntry[]> {
   if (!isSupabaseConfigured) return cache;
   const [{ data: classes, error }, { data: students }] = await Promise.all([
     supabase.from("classes").select("id,nama,tahun_ajaran,kode_undangan,guru_id,wali_kelas,jumlah_siswa"),
-    supabase.from("students").select("id,kelas_id,nama,no_absen,nisn,level,gaya_belajar,bergabung,punya_pin"),
+    supabase.from("students").select("id,kelas_id,nama,no_absen,nisn,level,gaya_belajar,bergabung,punya_pin,kelompok,is_juru_tulis"),
   ]);
   if (error || !classes) {
     if (error) console.warn("Supabase refreshClasses error:", error);
@@ -92,6 +92,8 @@ export async function saveClasses(classes: ClassStoreEntry[]): Promise<boolean> 
       level: (item as SiswaMock & { level?: Level }).level ?? null,
       gaya_belajar: item.gaya_belajar,
       bergabung: item.bergabung,
+      kelompok: item.kelompok ?? null,
+      is_juru_tulis: Boolean(item.is_juru_tulis),
     }))
   );
 
@@ -104,7 +106,12 @@ export async function saveClasses(classes: ClassStoreEntry[]): Promise<boolean> 
   }
   if (studentRows.length) {
     const { error } = await supabase.from("students").upsert(studentRows);
-    if (error) return console.error("Gagal menyimpan siswa:", error), false;
+    if (error) {
+      // Fallback jika kolom kelompok/is_juru_tulis belum dieksekusi di skema supabase
+      const fallbackRows = studentRows.map(({ kelompok, is_juru_tulis, ...rest }) => rest);
+      const { error: errFallback } = await supabase.from("students").upsert(fallbackRows);
+      if (errFallback) return console.error("Gagal menyimpan siswa:", errFallback), false;
+    }
   }
 
   // Hapus baris yang sudah tidak ada di daftar.

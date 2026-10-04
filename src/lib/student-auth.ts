@@ -36,6 +36,8 @@ export interface StudentSession {
   gayaBelajar: string | null;
   kelasNama: string;
   kodeKelas: string;
+  kelompok?: string | null;
+  isJuruTulis?: boolean;
 }
 
 /**
@@ -47,11 +49,21 @@ export async function getStudentSession(): Promise<StudentSession | null> {
   const token = (await cookies()).get(SESSION_COOKIE)?.value;
   if (!token) return null;
 
-  const { data } = await supabaseAdmin
+  let queryRes = await supabaseAdmin
     .from("student_sessions")
-    .select("siswa_id,kelas_id,kedaluwarsa_pada,students(nama,no_absen,level,gaya_belajar),classes(nama,kode_undangan)")
+    .select("siswa_id,kelas_id,kedaluwarsa_pada,students(nama,no_absen,level,gaya_belajar,kelompok,is_juru_tulis),classes(nama,kode_undangan)")
     .eq("token", token)
     .maybeSingle();
+
+  if (queryRes.error) {
+    queryRes = await supabaseAdmin
+      .from("student_sessions")
+      .select("siswa_id,kelas_id,kedaluwarsa_pada,students(nama,no_absen,level,gaya_belajar),classes(nama,kode_undangan)")
+      .eq("token", token)
+      .maybeSingle();
+  }
+
+  const data = queryRes.data;
 
   if (!data) return null;
   if (new Date(data.kedaluwarsa_pada).getTime() < Date.now()) {
@@ -60,7 +72,13 @@ export async function getStudentSession(): Promise<StudentSession | null> {
   }
 
   const student = data.students as unknown as {
-    nama: string; no_absen: number | null; level: string | null; gaya_belajar: string | null;
+    nama: string;
+    no_absen: number | null;
+    level: string | null;
+    gayaBelajar?: string | null;
+    gaya_belajar?: string | null;
+    kelompok?: string | null;
+    is_juru_tulis?: boolean;
   } | null;
   const kelas = data.classes as unknown as { nama: string; kode_undangan: string } | null;
   if (!student) return null;
@@ -71,9 +89,11 @@ export async function getStudentSession(): Promise<StudentSession | null> {
     nama: student.nama,
     noAbsen: student.no_absen,
     level: student.level,
-    gayaBelajar: student.gaya_belajar,
+    gayaBelajar: student.gaya_belajar ?? null,
     kelasNama: kelas?.nama ?? "",
     kodeKelas: kelas?.kode_undangan ?? "",
+    kelompok: student.kelompok ?? null,
+    isJuruTulis: Boolean(student.is_juru_tulis),
   };
 }
 

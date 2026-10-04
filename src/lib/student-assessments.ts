@@ -48,6 +48,8 @@ export interface DataSiswa {
     gayaBelajar: string | null;
     kelasNama: string;
     kodeKelas: string;
+    kelompok?: string | null;
+    isJuruTulis?: boolean;
   };
   asesmen: AsesmenSiswa[];
   hasilSaya: HasilSiswa[];

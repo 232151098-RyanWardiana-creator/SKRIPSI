@@ -29,6 +29,7 @@ import { EquationField } from "@/components/ui/EquationField";
 import { hitungTerisi } from "@/lib/lkpd-items";
 import { simpanPengisianLkpd, type LkpdSiswa } from "@/lib/student-lkpd";
 import { splitLkpdContent, sanitizeMathMarkdown } from "@/lib/lkpd-utils";
+import { useSesiSiswa, notifySessionChanged } from "@/lib/student-session";
 import { KESIAPAN_BELAJAR_LABELS } from "@/types";
 
 type StatusSimpan = "bersih" | "menyimpan" | "tersimpan" | "gagal";
@@ -40,12 +41,42 @@ function safeUrl(url: string): string {
 }
 
 export function LkpdWorksheet({ lkpd, onKirim }: { lkpd: LkpdSiswa; onKirim: () => void }) {
+  const sesi = useSesiSiswa();
   const terkunci = lkpd.pengisian?.status === "terkirim" || lkpd.pengisian?.status === "dinilai";
   const [jawaban, setJawaban] = useState<Record<string, string>>(lkpd.pengisian?.jawaban ?? {});
   const [statusSimpan, setStatusSimpan] = useState<StatusSimpan>("bersih");
   const [pesanGagal, setPesanGagal] = useState<string | null>(null);
   const [konfirmasiKirim, setKonfirmasiKirim] = useState(false);
   const [mengirim, setMengirim] = useState(false);
+  const [mengalihkanJuruTulis, setMengalihkanJuruTulis] = useState(false);
+
+  const punyaKelompok = Boolean(sesi?.kelompok);
+  const isJuruTulis = punyaKelompok ? Boolean(sesi?.isJuruTulis) : true;
+  const inputDisabled = terkunci || (!isJuruTulis && punyaKelompok);
+
+  // Inisialisasi otomatis nama kelompok dari sesi jika belum terisi
+  useEffect(() => {
+    if (sesi?.kelompok && !jawaban["identitas_kelompok"]) {
+      setJawaban((prev) => ({
+        ...prev,
+        identitas_kelompok: sesi.kelompok || "",
+      }));
+    }
+  }, [sesi?.kelompok]);
+
+  const alihkanJuruTulis = async () => {
+    setMengalihkanJuruTulis(true);
+    try {
+      const res = await fetch("/api/siswa/kelompok/juru-tulis", { method: "POST" });
+      if (res.ok) {
+        notifySessionChanged();
+      }
+    } catch (err) {
+      console.error("Gagal mengalihkan juru tulis:", err);
+    } finally {
+      setMengalihkanJuruTulis(false);
+    }
+  };
 
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const progres = useMemo(() => hitungTerisi(lkpd.butir, jawaban), [lkpd.butir, jawaban]);
@@ -146,6 +177,58 @@ export function LkpdWorksheet({ lkpd, onKirim }: { lkpd: LkpdSiswa; onKirim: () 
             value={progres.persen}
             label={`${progres.terisi} dari ${progres.total} aktivitas sudah kamu selesaikan (${progres.persen}%)`}
           />
+        </div>
+      )}
+
+      {/* Banner Mode Juru Tulis / Diskusi Kelompok */}
+      {punyaKelompok && (
+        <div
+          className={`mb-6 rounded-xl border p-4 shadow-xs transition-all flex flex-wrap items-center justify-between gap-3 ${
+            isJuruTulis
+              ? "border-blue-200 bg-blue-50/70"
+              : "border-amber-200 bg-amber-50/80"
+          }`}
+        >
+          <div className="flex items-center gap-3">
+            <span
+              className={`grid h-9 w-9 shrink-0 place-items-center rounded-xl text-base font-black ${
+                isJuruTulis ? "bg-blue-600 text-white" : "bg-amber-500 text-white"
+              }`}
+            >
+              {isJuruTulis ? "⭐" : "👥"}
+            </span>
+            <div>
+              <p
+                className={`text-xs font-bold ${
+                  isJuruTulis ? "text-blue-950" : "text-amber-950"
+                }`}
+              >
+                {isJuruTulis
+                  ? `Peran: Juru Tulis (${sesi?.kelompok})`
+                  : `Mode Diskusi Kelompok (${sesi?.kelompok})`}
+              </p>
+              <p
+                className={`text-[11px] ${
+                  isJuruTulis ? "text-blue-800" : "text-amber-800"
+                }`}
+              >
+                {isJuruTulis
+                  ? "Perangkat ini memiliki akses penuh untuk mengetikkan jawaban matematika dan mengumpulkan tugas kelompok."
+                  : "Perangkat ini dalam mode peninjauan untuk membaca soal dan berdiskusi. Jawaban resmi diketik oleh Juru Tulis kelompok."}
+              </p>
+            </div>
+          </div>
+
+          {!isJuruTulis && !terkunci && (
+            <Button
+              variant="secondary"
+              onClick={alihkanJuruTulis}
+              disabled={mengalihkanJuruTulis}
+              className="text-xs font-bold border-amber-300 hover:bg-amber-100 text-amber-900"
+            >
+              {mengalihkanJuruTulis ? "Mengalihkan..." : "Ambil Alih sebagai Juru Tulis"}
+            </Button>
+          )}
         </div>
       )}
 
@@ -387,7 +470,7 @@ export function LkpdWorksheet({ lkpd, onKirim }: { lkpd: LkpdSiswa; onKirim: () 
                                 value={subVal}
                                 onChange={(val) => ubah(sub.id, val)}
                                 placeholder={`Tuliskan rumus atau jawaban untuk pertanyaan ${sub.kode}...`}
-                                disabled={terkunci}
+                                disabled={inputDisabled}
                               />
                             </div>
                           );
@@ -398,7 +481,7 @@ export function LkpdWorksheet({ lkpd, onKirim }: { lkpd: LkpdSiswa; onKirim: () 
                         value={textVal}
                         onChange={(val) => ubah(butir.id, val)}
                         placeholder="Klik di sini untuk menulis langkah penyelesaian matematika..."
-                        disabled={terkunci}
+                        disabled={inputDisabled}
                       />
                     )}
                   </div>
@@ -430,21 +513,29 @@ export function LkpdWorksheet({ lkpd, onKirim }: { lkpd: LkpdSiswa; onKirim: () 
             <p className="text-[11px] text-slate-500">
               {terkunci
                 ? "Lembar kerja telah dikumpulkan."
+                : !isJuruTulis && punyaKelompok
+                ? "Kamu sedang membuka lembar kerja dalam mode peninjauan kelompok."
                 : "Semua isian tersimpan otomatis di perangkatmu."}
             </p>
           </div>
 
           {!terkunci && (
             <div className="flex items-center gap-2">
-              <Button
-                variant="primary"
-                disabled={progres.terisi === 0 || mengirim}
-                onClick={() => setKonfirmasiKirim(true)}
-                className="gap-2 px-5 py-2.5 text-sm font-bold shadow-md cursor-pointer"
-              >
-                <Send className="h-4 w-4" aria-hidden />
-                <span>{mengirim ? "Mengirim..." : "Kumpulkan ke Guru"}</span>
-              </Button>
+              {!isJuruTulis && punyaKelompok ? (
+                <span className="text-xs font-semibold text-amber-800 bg-amber-100/90 px-3 py-2 rounded-xl border border-amber-200">
+                  🔒 Pengumpulan hanya dapat dilakukan melalui HP/Laptop Juru Tulis
+                </span>
+              ) : (
+                <Button
+                  variant="primary"
+                  disabled={progres.terisi === 0 || mengirim}
+                  onClick={() => setKonfirmasiKirim(true)}
+                  className="gap-2 px-5 py-2.5 text-sm font-bold shadow-md cursor-pointer"
+                >
+                  <Send className="h-4 w-4" aria-hidden />
+                  <span>{mengirim ? "Mengirim..." : "Kumpulkan ke Guru"}</span>
+                </Button>
+              )}
             </div>
           )}
         </footer>

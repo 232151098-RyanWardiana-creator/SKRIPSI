@@ -35,10 +35,42 @@ export async function GET() {
 
   const punyaSaya = new Map((pengisian ?? []).map((row) => [row.lkpd_id, row]));
 
+  // Jika siswa memiliki kelompok dan belum ada submission individual miliknya,
+  // cari submission dari teman sekelompok di kelas ini
+  const submissionsKelompok = new Map<string, any>();
+  if (sesi.kelompok) {
+    try {
+      const { data: temanSiswa } = await supabaseAdmin
+        .from("students")
+        .select("id")
+        .eq("kelas_id", sesi.kelasId)
+        .eq("kelompok", sesi.kelompok);
+
+      if (temanSiswa && temanSiswa.length > 0) {
+        const temanIds = temanSiswa.map((t) => t.id);
+        const { data: subTeman } = await supabaseAdmin
+          .from("lkpd_submissions")
+          .select("id,lkpd_id,jawaban,status,nilai,catatan_guru,dikirim_pada,dinilai_pada,diperbarui_pada")
+          .in("siswa_id", temanIds)
+          .order("diperbarui_pada", { ascending: false });
+
+        if (subTeman) {
+          for (const st of subTeman) {
+            if (!submissionsKelompok.has(st.lkpd_id)) {
+              submissionsKelompok.set(st.lkpd_id, st);
+            }
+          }
+        }
+      }
+    } catch (err) {
+      console.warn("Gagal membaca submission kelompok:", err);
+    }
+  }
+
   return NextResponse.json({
     siswa: sesi,
     lkpd: cocok.map((row) => {
-      const milikSaya = punyaSaya.get(row.id);
+      const milikSaya = punyaSaya.get(row.id) ?? submissionsKelompok.get(row.id);
       return {
         id: row.id,
         judul: row.judul,

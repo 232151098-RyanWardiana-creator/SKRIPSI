@@ -78,5 +78,35 @@ export async function PUT(
     return NextResponse.json({ error: "Gagal menyimpan jawaban." }, { status: 500 });
   }
 
+  // Jika siswa memiliki kelompok dan statusnya dikirim/draft, sinkronkan ke anggota sekelompok
+  if (sesi.kelompok) {
+    try {
+      const { data: temanList } = await supabaseAdmin
+        .from("students")
+        .select("id, nama")
+        .eq("kelas_id", sesi.kelasId)
+        .eq("kelompok", sesi.kelompok)
+        .neq("id", sesi.siswaId);
+
+      if (temanList && temanList.length > 0) {
+        const temanRows = temanList.map((t) => ({
+          lkpd_id: lkpdId,
+          siswa_id: t.id,
+          kelas_id: sesi.kelasId,
+          nama_siswa: t.nama,
+          jawaban,
+          status: kirim ? "terkirim" : "draft",
+          dikirim_pada: kirim ? sekarang : null,
+          diperbarui_pada: sekarang,
+        }));
+        await supabaseAdmin.from("lkpd_submissions").upsert(temanRows, {
+          onConflict: "lkpd_id,siswa_id",
+        });
+      }
+    } catch (syncErr) {
+      console.warn("Gagal sinkron pengisian ke anggota kelompok:", syncErr);
+    }
+  }
+
   return NextResponse.json({ ok: true, status: kirim ? "terkirim" : "draft" });
 }

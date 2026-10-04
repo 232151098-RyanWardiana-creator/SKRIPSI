@@ -15,6 +15,8 @@ export interface SesiSiswa {
   gayaBelajar: string | null;
   kelasNama: string;
   kodeKelas: string;
+  kelompok?: string | null;
+  isJuruTulis?: boolean;
 }
 
 export const STUDENT_SESSION_EVENT = "lkpd_student_session_updated";

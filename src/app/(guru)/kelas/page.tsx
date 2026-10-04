@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/Button";
 import { ProgresAlur } from "@/components/ui/ProgresAlur";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { DemoDataPanel } from "@/components/forms/DemoDataPanel";
+import { BagiKelompokTaRLModal } from "@/components/forms/BagiKelompokTaRLModal";
 import { ImportSiswaExcelModal } from "@/components/forms/ImportSiswaExcelModal";
 import { initials, generateUUID } from "@/lib/utils";
 import { Edit2, KeyRound, Plus, Printer, Trash2, UserPlus, X, Check, Copy, Users, FileSpreadsheet } from "lucide-react";
@@ -18,6 +19,7 @@ export default function KelasPage() {
   const [modalEditKelas, setModalEditKelas] = useState(false);
   const [modalTambahSiswa, setModalTambahSiswa] = useState(false);
   const [modalImportExcel, setModalImportExcel] = useState(false);
+  const [modalBagiKelompok, setModalBagiKelompok] = useState(false);
   const [modalCetakKode, setModalCetakKode] = useState(false);
   const [copied, setCopied] = useState(false);
   const [pendingStudent, setPendingStudent] = useState<{ id: string; nama: string; kelasId: string; kelasNama: string } | null>(null);
@@ -199,6 +201,34 @@ export default function KelasPage() {
     setPendingStudent(null);
   };
 
+  const handleTerapkanKelompok = (siswaUpdated: SiswaMock[]) => {
+    setDataStore((prev) =>
+      prev.map((item) =>
+        item.kelas.id === activeKelas.id ? { ...item, siswa: siswaUpdated } : item
+      )
+    );
+  };
+
+  const jadikanJuruTulis = (siswaId: string) => {
+    setDataStore((prev) =>
+      prev.map((item) => {
+        if (item.kelas.id !== activeKelas.id) return item;
+        const targetSiswa = item.siswa.find((s) => s.id === siswaId);
+        if (!targetSiswa || !targetSiswa.kelompok) return item;
+
+        return {
+          ...item,
+          siswa: item.siswa.map((s) => {
+            if (s.kelompok === targetSiswa.kelompok) {
+              return { ...s, is_juru_tulis: s.id === siswaId };
+            }
+            return s;
+          }),
+        };
+      })
+    );
+  };
+
   const konfirmasiHapusKelas = async () => {
     if (!pendingDeleteClass) return;
     const targetId = pendingDeleteClass.id;
@@ -314,6 +344,9 @@ export default function KelasPage() {
               <Button variant="ghost" onClick={() => setModalCetakKode(true)}>
                 <Printer className="h-4 w-4" />Cetak Kode Undangan
               </Button>
+              <Button variant="secondary" onClick={() => setModalBagiKelompok(true)}>
+                <Users className="h-4 w-4 text-blue-600" />Bagi Kelompok TaRL
+              </Button>
               <Button variant="secondary" onClick={() => setModalImportExcel(true)}>
                 <FileSpreadsheet className="h-4 w-4 text-emerald-600" />Upload Excel / CSV
               </Button>
@@ -331,6 +364,7 @@ export default function KelasPage() {
                   <th className="pb-3">Nama Peserta Didik</th>
                   <th className="pb-3">NISN</th>
                   <th className="pb-3">Kesiapan Belajar</th>
+                  <th className="pb-3">Kelompok & Peran</th>
                   <th className="pb-3">PIN</th>
                   <th className="pb-3">Bergabung</th>
                   <th className="pb-3 text-right">Aksi</th>
@@ -358,6 +392,30 @@ export default function KelasPage() {
                         </span>
                       ) : (
                         <span className="text-xs text-[#9ca3af]">Belum asesmen</span>
+                      )}
+                    </td>
+                    <td className="py-4">
+                      {item.kelompok ? (
+                        <div className="flex flex-col items-start gap-1">
+                          <span className="rounded-md bg-slate-100 px-2 py-0.5 text-xs font-bold text-slate-800 border border-slate-200">
+                            {item.kelompok}
+                          </span>
+                          {item.is_juru_tulis ? (
+                            <span className="inline-flex items-center gap-1 rounded bg-blue-600 px-1.5 py-0.5 text-[9px] font-black text-white">
+                              ⭐ Juru Tulis
+                            </span>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => jadikanJuruTulis(item.id)}
+                              className="text-[10px] text-slate-400 hover:text-blue-600 hover:underline"
+                            >
+                              Jadikan Juru Tulis
+                            </button>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="text-xs text-[#9ca3af] italic">Belum ada</span>
                       )}
                     </td>
                     <td className="py-4">
@@ -627,6 +685,17 @@ export default function KelasPage() {
           onClose={() => setModalImportExcel(false)}
           onImport={handleImportSiswaExcel}
           kelasNama={activeKelas.nama}
+        />
+      )}
+
+      {/* Modal Bagi Kelompok TaRL Otomatis */}
+      {activeKelas && (
+        <BagiKelompokTaRLModal
+          isOpen={modalBagiKelompok}
+          onClose={() => setModalBagiKelompok(false)}
+          siswaList={siswaList}
+          namaKelas={activeKelas.nama}
+          onTerapkan={handleTerapkanKelompok}
         />
       )}
     </div>

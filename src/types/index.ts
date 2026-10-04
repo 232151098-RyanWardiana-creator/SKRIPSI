@@ -43,5 +43,13 @@ export interface Siswa { id: string; nama: string; no_absen?: number; nisn?: str
 
 /** Kelas + siswa sebagaimana dipakai layar guru. Nama historis dari fase mock. */
 export interface KelasMock extends Kelas { wali_kelas: string }
-export interface SiswaMock extends Siswa { kelas_id: string; no_absen: number; gaya_belajar: GayaBelajar; level?: Level; punya_pin?: boolean }
+export interface SiswaMock extends Siswa {
+  kelas_id: string;
+  no_absen: number;
+  gaya_belajar: GayaBelajar;
+  level?: Level;
+  punya_pin?: boolean;
+  kelompok?: string | null;
+  is_juru_tulis?: boolean;
+}
 
