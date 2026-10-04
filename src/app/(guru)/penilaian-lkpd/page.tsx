@@ -222,6 +222,22 @@ function FormPenilaian({
         <p className="mt-1 text-sm text-[#414753]">
           {lkpd.judul} · {lkpd.kelasNama}
         </p>
+        {(siswa.jawaban["identitas_kelompok"] || siswa.jawaban["identitas_anggota"]) && (
+          <div className="mt-3 flex flex-wrap gap-4 text-xs font-semibold text-slate-700 bg-white/80 p-3 rounded-xl border border-slate-200">
+            {siswa.jawaban["identitas_kelompok"] && (
+              <div>
+                <span className="text-slate-400 block text-[10px] uppercase font-bold">Kelompok:</span>
+                <span className="text-blue-900 font-bold">{siswa.jawaban["identitas_kelompok"]}</span>
+              </div>
+            )}
+            {siswa.jawaban["identitas_anggota"] && (
+              <div>
+                <span className="text-slate-400 block text-[10px] uppercase font-bold">Anggota Kelompok:</span>
+                <span className="text-slate-800">{siswa.jawaban["identitas_anggota"]}</span>
+              </div>
+            )}
+          </div>
+        )}
       </header>
 
       <p className="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-3.5 text-xs leading-relaxed text-amber-900">
@@ -244,25 +260,62 @@ function FormPenilaian({
                   </span>
                   {butir.pertanyaan}
                 </p>
-                <div className="mt-3 rounded-xl bg-[#f8f9fc] p-4 text-sm leading-relaxed text-[#374151] border border-slate-200">
-                  {isi ? (
-                    <div className="lkpd-markdown">
-                      <ReactMarkdown
-                        skipHtml
-                        remarkPlugins={[remarkGfm, remarkMath]}
-                        rehypePlugins={[[rehypeKatex, { throwOnError: false }]]}
-                      >
-                        {sanitizeMathMarkdown(
-                          isi.includes("\\") || isi.includes("^") || isi.includes("_")
-                            ? `$$${isi.replace(/^\$\$|\$\$$/g, "")}$$`
-                            : isi
-                        )}
-                      </ReactMarkdown>
-                    </div>
-                  ) : (
-                    <span className="italic text-[#9ca3af]">Tidak dijawab</span>
-                  )}
-                </div>
+                {butir.subItems && butir.subItems.length > 0 ? (
+                  <div className="mt-3 space-y-3">
+                    {butir.subItems.map((sub) => {
+                      const subIsi = (siswa.jawaban[sub.id] ?? (butir.subItems.length === 1 ? siswa.jawaban[butir.id] : "") ?? "").trim();
+                      return (
+                        <div key={sub.id} className="rounded-lg bg-white border border-slate-200 p-3 shadow-2xs">
+                          <p className="text-xs font-bold text-slate-800 mb-1.5 flex items-start gap-2">
+                            <span className="grid h-5 w-5 shrink-0 place-items-center rounded bg-blue-100 text-blue-800 text-[11px] font-black">
+                              {sub.kode}
+                            </span>
+                            <span className="leading-snug">{sub.pertanyaan}</span>
+                          </p>
+                          <div className="rounded-md bg-[#f8f9fc] p-2.5 text-xs text-slate-800 border border-slate-100">
+                            {subIsi ? (
+                              <div className="lkpd-markdown">
+                                <ReactMarkdown
+                                  skipHtml
+                                  remarkPlugins={[remarkGfm, remarkMath]}
+                                  rehypePlugins={[[rehypeKatex, { throwOnError: false }]]}
+                                >
+                                  {sanitizeMathMarkdown(
+                                    subIsi.includes("\\") || subIsi.includes("^") || subIsi.includes("_")
+                                      ? `$$${subIsi.replace(/^\$\$|\$\$$/g, "")}$$`
+                                      : subIsi
+                                  )}
+                                </ReactMarkdown>
+                              </div>
+                            ) : (
+                              <span className="italic text-slate-400">Tidak dijawab</span>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="mt-3 rounded-xl bg-[#f8f9fc] p-4 text-sm leading-relaxed text-[#374151] border border-slate-200">
+                    {isi ? (
+                      <div className="lkpd-markdown">
+                        <ReactMarkdown
+                          skipHtml
+                          remarkPlugins={[remarkGfm, remarkMath]}
+                          rehypePlugins={[[rehypeKatex, { throwOnError: false }]]}
+                        >
+                          {sanitizeMathMarkdown(
+                            isi.includes("\\") || isi.includes("^") || isi.includes("_")
+                              ? `$$${isi.replace(/^\$\$|\$\$$/g, "")}$$`
+                              : isi
+                          )}
+                        </ReactMarkdown>
+                      </div>
+                    ) : (
+                      <span className="italic text-[#9ca3af]">Tidak dijawab</span>
+                    )}
+                  </div>
+                )}
               </Card>
             </li>
           );

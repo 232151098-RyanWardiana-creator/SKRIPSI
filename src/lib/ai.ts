@@ -177,10 +177,10 @@ function mockContent(
       (act) => `### ${act.title}
 ${act.problem}
 
-> **Ruang Jawaban:**
-> - Bagian perbandingan / nilai per satuan = $\\dots\\dots\\dots\\dots$
-> - Langkah perhitungan = $\\dots\\dots\\dots\\dots$
-> - Hasil akhir = $\\dots\\dots\\dots\\dots$
+Pertanyaan Pengerjaan:
+a. Tuliskan perbandingan atau rasio dari besaran yang diketahui pada masalah di atas!
+b. Hitunglah nilai besaran yang ditanyakan dengan menggunakan penurunan rumus bertahap!
+c. Tuliskan kesimpulan akhir dari hasil perhitunganmu!
 `
     )
     .join("\n");
@@ -481,8 +481,17 @@ ${identitasInstruksi}
 
 PENTING — JUMLAH AKTIVITAS HARUS TEPAT ${params.jumlahAktivitas} NOMOR:
 Pada ## D. Kegiatan Pembelajaran, WAJIB buat TEPAT ${params.jumlahAktivitas} nomor aktivitas kontekstual berbeda (Aktivitas 1, Aktivitas 2, ... hingga Aktivitas ${params.jumlahAktivitas}).
-Setiap nomor mencantumkan target indikator dalam tanda kurung misal "(target: IK-01)", diikuti ruang pengerjaan bertahap isian titik-titik.
+Setiap nomor mencantumkan target indikator dalam tanda kurung misal "(target: IK-01)".
 DILARANG KERAS membuat hanya 2 aktivitas jika diminta ${params.jumlahAktivitas} aktivitas!
+
+ATURAN STRUKTUR SETIAP AKTIVITAS PADA BAGIAN D:
+Setiap aktivitas wajib memiliki 2 bagian terpisah yang jelas:
+1. Stimulus / Masalah Kontekstual (cerita masalah nyata dan tabel pengamatan bergaris rapi).
+2. Pertanyaan Pengerjaan Terstruktur (WAJIB menggunakan label huruf a, b, c):
+   Pertanyaan Pengerjaan:
+   a. [Pertanyaan 1: identifikasi rasio / variabel yang diketahui]
+   b. [Pertanyaan 2: langkah perhitungan matematis bertahap]
+   c. [Pertanyaan 3: kesimpulan kontekstual dari hasil perhitungan]
 
 STRUKTUR DOKUMEN WAJIB MENGGUNAKAN PEMISAH RESMI BERIKUT:
 # LEMBAR KERJA PESERTA DIDIK (LKPD)

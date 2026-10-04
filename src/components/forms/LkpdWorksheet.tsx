@@ -180,19 +180,43 @@ export function LkpdWorksheet({ lkpd, onKirim }: { lkpd: LkpdSiswa; onKirim: () 
             </div>
           </div>
 
-          {/* Kotak Identitas Siswa */}
-          <div className="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-3 rounded-xl border border-slate-200 bg-white p-3.5 text-xs text-slate-700 shadow-2xs">
+          {/* Kotak Identitas Siswa & Kelompok */}
+          <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 rounded-xl border border-slate-200 bg-white p-4 text-xs text-slate-700 shadow-2xs">
             <div>
               <span className="block text-[10px] font-bold uppercase text-slate-400">Judul Kegiatan:</span>
-              <span className="font-semibold text-slate-900">{lkpd.judul}</span>
+              <span className="font-semibold text-slate-900 block truncate">{lkpd.judul}</span>
             </div>
             <div>
-              <span className="block text-[10px] font-bold uppercase text-slate-400">Target Belajar:</span>
-              <span className="font-semibold text-slate-800">Diferensiasi Kesiapan Belajar</span>
+              <span className="block text-[10px] font-bold uppercase text-slate-400">Nama Kelompok:</span>
+              {terkunci ? (
+                <span className="font-semibold text-slate-800">{jawaban["identitas_kelompok"] || "-"}</span>
+              ) : (
+                <input
+                  type="text"
+                  value={jawaban["identitas_kelompok"] ?? ""}
+                  onChange={(e) => ubah("identitas_kelompok", e.target.value)}
+                  placeholder="Contoh: Kelompok 1 (Al-Khawarizmi)"
+                  className="mt-1 w-full rounded border border-slate-300 px-2 py-1 text-xs font-medium focus:border-blue-500 focus:outline-hidden"
+                />
+              )}
+            </div>
+            <div>
+              <span className="block text-[10px] font-bold uppercase text-slate-400">Anggota Kelompok / Siswa:</span>
+              {terkunci ? (
+                <span className="font-semibold text-slate-800">{jawaban["identitas_anggota"] || "-"}</span>
+              ) : (
+                <input
+                  type="text"
+                  value={jawaban["identitas_anggota"] ?? ""}
+                  onChange={(e) => ubah("identitas_anggota", e.target.value)}
+                  placeholder="Contoh: Aisyah, Budi, Citra, Dadan"
+                  className="mt-1 w-full rounded border border-slate-300 px-2 py-1 text-xs font-medium focus:border-blue-500 focus:outline-hidden"
+                />
+              )}
             </div>
             <div>
               <span className="block text-[10px] font-bold uppercase text-slate-400">Status Tugas:</span>
-              <span className={`font-bold ${terkunci ? "text-emerald-700" : "text-amber-700"}`}>
+              <span className={`font-bold mt-1 inline-block ${terkunci ? "text-emerald-700" : "text-amber-700"}`}>
                 {lkpd.pengisian?.status === "dinilai"
                   ? `Sudah Dinilai (${lkpd.pengisian.nilai}/100)`
                   : lkpd.pengisian?.status === "terkirim"
@@ -306,26 +330,77 @@ export function LkpdWorksheet({ lkpd, onKirim }: { lkpd: LkpdSiswa; onKirim: () 
                   )}
 
                   {/* ========================================================
-                      KOLOM PENGERJAAN SISWA (EQUATION FIELD MATHLIVE)
-                      Langsung di bawah soal, persis seperti mengisi LKS dengan pulpen
+                      KOLOM PENGERJAAN SUB-PERTANYAAN (EQUATION FIELD MATHLIVE)
+                      Setiap sub-pertanyaan (a, b, c) memiliki kotak equation tersendiri
                       ======================================================== */}
-                  <div className="p-4 sm:p-5 bg-white">
-                    <div className="mb-2 flex items-center justify-between">
+                  <div className="p-4 sm:p-5 bg-white space-y-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-slate-100 pb-2.5">
                       <label className="flex items-center gap-1.5 text-xs font-bold text-blue-900">
                         <PenLine className="h-3.5 w-3.5 text-blue-600" />
-                        <span>Kolom Penyelesaian & Jawabanmu:</span>
+                        <span>Lembar Pengerjaan Sub-Pertanyaan:</span>
                       </label>
                       <span className="text-[11px] text-slate-500">
-                        Gunakan tombol rumus (pecahan, kuadrat, akar) di bawah ini
+                        {butir.subItems && butir.subItems.length > 0
+                          ? `Tuliskan rumus atau jawaban pada masing-masing butir (${butir.subItems.length} sub-soal)`
+                          : "Gunakan tombol rumus (pecahan, kuadrat, akar) di bawah ini"}
                       </span>
                     </div>
 
-                    <EquationField
-                      value={textVal}
-                      onChange={(val) => ubah(butir.id, val)}
-                      placeholder="Klik di sini untuk menulis langkah penyelesaian matematika..."
-                      disabled={terkunci}
-                    />
+                    {butir.subItems && butir.subItems.length > 0 ? (
+                      <div className="space-y-4">
+                        {butir.subItems.map((sub, sIdx) => {
+                          const subVal =
+                            jawaban[sub.id] ??
+                            (sIdx === 0 && butir.subItems.length === 1 ? (jawaban[butir.id] ?? "") : "");
+                          const subTerisi = subVal.trim().length > 0;
+
+                          return (
+                            <div
+                              key={sub.id}
+                              className={`rounded-xl border p-3.5 sm:p-4 transition-all ${
+                                subTerisi
+                                  ? "border-emerald-300/80 bg-emerald-50/15"
+                                  : "border-slate-200 bg-slate-50/40 hover:border-blue-300"
+                              }`}
+                            >
+                              <div className="mb-2.5 flex items-start justify-between gap-3">
+                                <div className="flex items-start gap-2.5">
+                                  <span className="grid h-6 w-6 shrink-0 place-items-center rounded-md bg-blue-700 text-xs font-black text-white shadow-2xs">
+                                    {sub.kode}
+                                  </span>
+                                  <p className="text-xs sm:text-sm font-bold text-slate-900 leading-snug">
+                                    {sub.pertanyaan}
+                                  </p>
+                                </div>
+                                {subTerisi ? (
+                                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800 shrink-0">
+                                    <CheckCircle2 className="h-3 w-3" /> Terisi
+                                  </span>
+                                ) : (
+                                  <span className="inline-flex items-center gap-1 rounded-full bg-slate-200 px-2 py-0.5 text-[10px] font-medium text-slate-600 shrink-0">
+                                    Belum Diisi
+                                  </span>
+                                )}
+                              </div>
+
+                              <EquationField
+                                value={subVal}
+                                onChange={(val) => ubah(sub.id, val)}
+                                placeholder={`Tuliskan rumus atau jawaban untuk pertanyaan ${sub.kode}...`}
+                                disabled={terkunci}
+                              />
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <EquationField
+                        value={textVal}
+                        onChange={(val) => ubah(butir.id, val)}
+                        placeholder="Klik di sini untuk menulis langkah penyelesaian matematika..."
+                        disabled={terkunci}
+                      />
+                    )}
                   </div>
                 </article>
               );
