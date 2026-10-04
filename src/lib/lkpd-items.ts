@@ -2,23 +2,16 @@ import { splitLkpdContent } from "@/lib/lkpd-utils";
 
 /**
  * Butir LKPD yang bisa diisi siswa.
- *
- * Sumber utamanya kolom `lkpd_documents.soal` (JSONB) — itulah yang dipakai
- * LKPD hasil simulasi maupun LKPD yang butirnya disusun eksplisit. LKPD lama
- * hasil generate AI hanya punya `konten` markdown, jadi butirnya diambil dari
- * bagian aktivitas/kegiatan atau baris bernomor di dalam konten itu. Kalau tetap tidak ketemu, siswa diberi
- * satu kolom jawaban bebas supaya LKPD tetap bisa dikerjakan.
  */
 export interface ItemLkpd {
   id: string;
   nomor: number;
   pertanyaan: string;
   petunjuk?: string;
-  /** "uraian" = kotak jawaban besar, "isian" = satu baris. */
   tipe: "isian" | "uraian";
 }
 
-const bersih = (value: string) =>
+const bersihkanJudul = (value: string) =>
   value
     .replace(/\*\*/g, "")
     .replace(/[*_`#>]/g, "")
@@ -32,13 +25,13 @@ export function itemLkpd(soal: unknown, konten: string): ItemLkpd[] {
       .map((raw, index): ItemLkpd | null => {
         if (typeof raw !== "object" || raw === null) return null;
         const row = raw as Record<string, unknown>;
-        const pertanyaan = typeof row.pertanyaan === "string" ? bersih(row.pertanyaan) : "";
+        const pertanyaan = typeof row.pertanyaan === "string" ? bersihkanJudul(row.pertanyaan) : "";
         if (!pertanyaan) return null;
         return {
           id: typeof row.id === "string" && row.id ? row.id : `butir-${index + 1}`,
           nomor: typeof row.nomor === "number" ? row.nomor : index + 1,
           pertanyaan,
-          petunjuk: typeof row.petunjuk === "string" ? bersih(row.petunjuk) : undefined,
+          petunjuk: typeof row.petunjuk === "string" ? row.petunjuk.trim() : undefined,
           tipe: row.tipe === "isian" ? "isian" : "uraian",
         };
       })
@@ -55,11 +48,13 @@ export function itemLkpd(soal: unknown, konten: string): ItemLkpd[] {
   let match: RegExpExecArray | null;
 
   while ((match = actRegex.exec(studentKonten)) !== null) {
-    const label = `${match[1]}${match[2] ? ` ${match[2]}` : ""}: ${bersih(match[3])}`;
-    const deskripsi = bersih(match[4] || "").slice(0, 300);
+    const nomor = match[2] ? parseInt(match[2], 10) : dariAktivitas.length + 1;
+    const label = `${match[1]}${match[2] ? ` ${match[2]}` : ""}: ${bersihkanJudul(match[3])}`;
+    // Pertahankan markdown utuh (termasuk tabel dan rumus KaTeX)
+    const deskripsi = (match[4] || "").trim();
     dariAktivitas.push({
       id: `aktivitas-${match[2] || dariAktivitas.length + 1}`,
-      nomor: dariAktivitas.length + 1,
+      nomor: isNaN(nomor) ? dariAktivitas.length + 1 : nomor,
       pertanyaan: label,
       petunjuk: deskripsi || undefined,
       tipe: "uraian",
@@ -74,7 +69,7 @@ export function itemLkpd(soal: unknown, konten: string): ItemLkpd[] {
   for (const baris of studentKonten.split("\n")) {
     const cocok = /^\s*(\d{1,2})[.)]\s+(.{10,})$/.exec(baris);
     if (!cocok) continue;
-    const pertanyaan = bersih(cocok[2]);
+    const pertanyaan = bersihkanJudul(cocok[2]);
     if (pertanyaan.length < 10) continue;
     dariKonten.push({
       id: `konten-${cocok[1]}-${dariKonten.length + 1}`,
@@ -91,8 +86,8 @@ export function itemLkpd(soal: unknown, konten: string): ItemLkpd[] {
     {
       id: "jawaban-bebas",
       nomor: 1,
-      pertanyaan: "Tulis seluruh jawaban dan langkah pengerjaanmu di sini.",
-      petunjuk: "Kerjakan sesuai urutan kegiatan pada LKPD di atas.",
+      pertanyaan: "Lembar Pengerjaan & Jawaban Peserta Didik",
+      petunjuk: "Selesaikan aktivitas dan jawab pertanyaan pada lembar kerja ini.",
       tipe: "uraian",
     },
   ];

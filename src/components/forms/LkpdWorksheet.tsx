@@ -10,12 +10,13 @@ import {
   AlertCircle,
   ArrowLeft,
   BookOpen,
-  Calculator,
   CheckCircle2,
   Cloud,
-  FileEdit,
+  FileText,
+  GraduationCap,
+  HelpCircle,
   Loader2,
-  Pencil,
+  PenLine,
   Send,
   Sparkles,
 } from "lucide-react";
@@ -24,10 +25,11 @@ import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
-import { MathKeyboard } from "@/components/ui/MathKeyboard";
+import { EquationField } from "@/components/ui/EquationField";
 import { hitungTerisi } from "@/lib/lkpd-items";
 import { simpanPengisianLkpd, type LkpdSiswa } from "@/lib/student-lkpd";
 import { splitLkpdContent, sanitizeMathMarkdown } from "@/lib/lkpd-utils";
+import { KESIAPAN_BELAJAR_LABELS } from "@/types";
 
 type StatusSimpan = "bersih" | "menyimpan" | "tersimpan" | "gagal";
 
@@ -45,13 +47,7 @@ export function LkpdWorksheet({ lkpd, onKirim }: { lkpd: LkpdSiswa; onKirim: () 
   const [konfirmasiKirim, setKonfirmasiKirim] = useState(false);
   const [mengirim, setMengirim] = useState(false);
 
-  // Keyboard matematika state
-  const [keyboardOpen, setKeyboardOpen] = useState(false);
-  const [activeFieldId, setActiveFieldId] = useState<string>(lkpd.butir[0]?.id || "");
-  const inputRefs = useRef<Record<string, HTMLInputElement | HTMLTextAreaElement | null>>({});
-
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
   const progres = useMemo(() => hitungTerisi(lkpd.butir, jawaban), [lkpd.butir, jawaban]);
 
   // Pisahkan konten siswa murni dari kunci jawaban guru
@@ -60,11 +56,20 @@ export function LkpdWorksheet({ lkpd, onKirim }: { lkpd: LkpdSiswa; onKirim: () 
     return splitLkpdContent(lkpd.konten).studentContent || lkpd.konten;
   }, [lkpd.konten]);
 
-  // Label target soal aktif untuk keyboard
-  const activeQuestionLabel = useMemo(() => {
-    const item = lkpd.butir.find((b) => b.id === activeFieldId);
-    return item ? `Soal ${item.nomor}` : "";
-  }, [activeFieldId, lkpd.butir]);
+  // Ambil pengantar LKPD (bagian sebelum Aktivitas 1 jika ada)
+  const kontenPengantar = useMemo(() => {
+    if (!studentKonten) return "";
+    const splitIndex = studentKonten.search(/###\s*(Aktivitas|Kegiatan|Latihan|Soal|Kasus|Tugas)\s*1/i);
+    if (splitIndex !== -1) {
+      return studentKonten.slice(0, splitIndex).trim();
+    }
+    // Jika tidak ada heading aktivitas bernomor, cek seksi kegiatan
+    const kegiatanIndex = studentKonten.search(/##\s*[D-F]\.?\s*Kegiatan/i);
+    if (kegiatanIndex !== -1) {
+      return studentKonten.slice(0, kegiatanIndex).trim();
+    }
+    return "";
+  }, [studentKonten]);
 
   // Simpan otomatis 1,5 detik setelah siswa berhenti mengetik
   useEffect(() => {
@@ -85,58 +90,6 @@ export function LkpdWorksheet({ lkpd, onKirim }: { lkpd: LkpdSiswa; onKirim: () 
     setStatusSimpan("menyimpan");
   };
 
-  const handleInsertMath = (text: string) => {
-    if (!activeFieldId || terkunci) return;
-    const el = inputRefs.current[activeFieldId];
-    const currentVal = jawaban[activeFieldId] ?? "";
-
-    if (el) {
-      const start = el.selectionStart ?? currentVal.length;
-      const end = el.selectionEnd ?? currentVal.length;
-      const nextVal = currentVal.slice(0, start) + text + currentVal.slice(end);
-      ubah(activeFieldId, nextVal);
-      setTimeout(() => {
-        el.focus();
-        el.setSelectionRange(start + text.length, start + text.length);
-      }, 0);
-    } else {
-      ubah(activeFieldId, currentVal + text);
-    }
-  };
-
-  const handleBackspaceMath = () => {
-    if (!activeFieldId || terkunci) return;
-    const el = inputRefs.current[activeFieldId];
-    const currentVal = jawaban[activeFieldId] ?? "";
-
-    if (el) {
-      const start = el.selectionStart ?? currentVal.length;
-      const end = el.selectionEnd ?? currentVal.length;
-      if (start === end && start > 0) {
-        const nextVal = currentVal.slice(0, start - 1) + currentVal.slice(end);
-        ubah(activeFieldId, nextVal);
-        setTimeout(() => {
-          el.focus();
-          el.setSelectionRange(start - 1, start - 1);
-        }, 0);
-      } else if (start !== end) {
-        const nextVal = currentVal.slice(0, start) + currentVal.slice(end);
-        ubah(activeFieldId, nextVal);
-        setTimeout(() => {
-          el.focus();
-          el.setSelectionRange(start, start);
-        }, 0);
-      }
-    } else if (currentVal.length > 0) {
-      ubah(activeFieldId, currentVal.slice(0, -1));
-    }
-  };
-
-  const handleClearMath = () => {
-    if (!activeFieldId || terkunci) return;
-    ubah(activeFieldId, "");
-  };
-
   const kirim = async () => {
     setMengirim(true);
     const hasil = await simpanPengisianLkpd(lkpd.id, jawaban, true);
@@ -147,286 +100,289 @@ export function LkpdWorksheet({ lkpd, onKirim }: { lkpd: LkpdSiswa; onKirim: () 
     setPesanGagal(hasil.error ?? null);
   };
 
+  const labelLevel =
+    KESIAPAN_BELAJAR_LABELS[lkpd.level as keyof typeof KESIAPAN_BELAJAR_LABELS]?.kategori ||
+    lkpd.level;
+
   return (
     <div className="mx-auto max-w-4xl pb-32">
-      <Link
-        className="mb-5 inline-flex items-center gap-2 text-sm font-semibold text-[#0066cc] hover:underline"
-        href="/lkpd-saya"
-      >
-        <ArrowLeft className="h-4 w-4" aria-hidden />
-        Kembali ke daftar LKPD
-      </Link>
+      {/* Bar Navigasi Atas */}
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <Link
+          className="inline-flex items-center gap-2 text-sm font-semibold text-blue-700 hover:underline"
+          href="/lkpd-saya"
+        >
+          <ArrowLeft className="h-4 w-4" aria-hidden />
+          Kembali ke daftar LKPD
+        </Link>
 
-      {/* Header LKPD */}
-      <header className="mb-6 rounded-2xl border border-slate-200/80 bg-white p-6 shadow-xs">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <span className="text-xs font-bold text-blue-600 uppercase tracking-wider">Lembar Kerja Peserta Didik</span>
-            <h1 className="text-2xl font-black text-slate-900 mt-1">{lkpd.judul}</h1>
-            <p className="mt-1 text-sm font-medium text-slate-600">{lkpd.materi}</p>
-          </div>
-          <Badge level={lkpd.level}>{lkpd.level}</Badge>
-        </div>
-
-        {lkpd.pengisian?.status === "dinilai" ? (
-          <div className="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50/80 p-4">
-            <p className="flex items-center gap-2 font-bold text-emerald-800">
-              <CheckCircle2 className="h-5 w-5" aria-hidden />
-              Sudah dinilai gurumu
-              {lkpd.pengisian.nilai !== null && <span>· Nilai {lkpd.pengisian.nilai} dari 100</span>}
-            </p>
-            {lkpd.pengisian.catatanGuru && (
-              <p className="mt-2 text-sm leading-relaxed text-emerald-900">
-                <strong>Catatan guru:</strong> {lkpd.pengisian.catatanGuru}
-              </p>
-            )}
-          </div>
-        ) : lkpd.pengisian?.status === "terkirim" ? (
-          <p className="mt-5 rounded-2xl border border-blue-200 bg-blue-50/80 p-4 text-sm font-bold text-blue-800">
-            Sudah kamu kumpulkan. Tunggu gurumu menilai — jawaban tidak bisa diubah lagi.
-          </p>
-        ) : (
-          <div className="mt-5">
-            <ProgressBar
-              value={progres.persen}
-              label={`${progres.terisi} dari ${progres.total} soal sudah kamu isi`}
-            />
-          </div>
-        )}
-      </header>
-
-      {/* Tampilan Dokumen LKPD (Render Markdown Akademis Resmi) */}
-      {studentKonten && (
-        <Card className="mb-8 border-slate-200/80 bg-white shadow-xs p-6 md:p-8">
-          <div className="flex items-center gap-2 border-b border-slate-200 pb-3 mb-6">
-            <BookOpen className="h-5 w-5 text-blue-600" />
-            <h2 className="text-base font-bold text-slate-800">Isi Lembar Kerja & Aktivitas Siswa</h2>
-          </div>
-          <div className="lkpd-markdown">
-            <ReactMarkdown
-              skipHtml
-              urlTransform={safeUrl}
-              remarkPlugins={[remarkGfm, remarkMath]}
-              rehypePlugins={[[rehypeKatex, { throwOnError: false }]]}
-            >
-              {sanitizeMathMarkdown(studentKonten)}
-            </ReactMarkdown>
-          </div>
-        </Card>
-      )}
-
-      {/* Lembar Jawaban Siswa */}
-      <section className="mb-6">
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <Pencil className="h-5 w-5 text-blue-600" />
-            <h2 className="text-xl font-bold text-slate-900">Lembar Jawaban Siswa</h2>
-          </div>
-
-          {!terkunci && (
-            <button
-              type="button"
-              onClick={() => setKeyboardOpen((v) => !v)}
-              className={`flex items-center gap-2 rounded-xl px-3 py-1.5 text-xs font-bold transition-all shadow-xs cursor-pointer ${
-                keyboardOpen
-                  ? "bg-blue-600 text-white"
-                  : "bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200"
-              }`}
-            >
-              <Calculator className="h-4 w-4" />
-              <span>{keyboardOpen ? "Tutup Keyboard Matematika" : "Buka Keyboard Matematika"}</span>
-            </button>
+        {/* Indikator Status Simpan */}
+        <div className="flex items-center gap-2 text-xs">
+          {statusSimpan === "menyimpan" && (
+            <span className="flex items-center gap-1.5 font-medium text-amber-600 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200">
+              <Loader2 className="h-3 w-3 animate-spin" aria-hidden />
+              Menyimpan...
+            </span>
+          )}
+          {statusSimpan === "tersimpan" && (
+            <span className="flex items-center gap-1.5 font-medium text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+              <Cloud className="h-3 w-3" aria-hidden />
+              Tersimpan otomatis
+            </span>
+          )}
+          {statusSimpan === "gagal" && (
+            <span className="flex items-center gap-1.5 font-medium text-red-600 bg-red-50 px-2.5 py-1 rounded-full border border-red-200">
+              <AlertCircle className="h-3 w-3" aria-hidden />
+              {pesanGagal ?? "Gagal menyimpan"}
+            </span>
           )}
         </div>
+      </div>
 
-        <ol className="space-y-5">
-          {lkpd.butir.map((butir) => {
-            const inputId = `butir-${butir.id}`;
-            const isActive = activeFieldId === butir.id;
-            const textVal = jawaban[butir.id] ?? "";
+      {/* Progress Bar Pengerjaan */}
+      {!terkunci && (
+        <div className="mb-6 rounded-xl bg-white p-3.5 border border-slate-200/80 shadow-2xs">
+          <ProgressBar
+            value={progres.persen}
+            label={`${progres.terisi} dari ${progres.total} aktivitas sudah kamu selesaikan (${progres.persen}%)`}
+          />
+        </div>
+      )}
 
-            return (
-              <li key={butir.id}>
-                <Card
-                  className={`transition-all ${
-                    isActive ? "ring-2 ring-blue-500/40 border-blue-400 shadow-md" : "border-slate-200"
-                  }`}
+      {/* ========================================================
+          LEMBAR KERJA PESERTA DIDIK DIGITAL (KERTAS KERJA UTUH)
+          Konsep: Seperti lembar kerja cetak yang langsung diisi pulpen oleh siswa
+          ======================================================== */}
+      <main className="rounded-2xl border-2 border-slate-200/90 bg-white shadow-xl overflow-hidden">
+        {/* KOP FORMAL LKPD */}
+        <header className="border-b-2 border-slate-800/80 bg-slate-50/60 p-6 sm:p-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-300 pb-5">
+            <div className="flex items-center gap-3">
+              <div className="grid h-12 w-12 place-items-center rounded-xl bg-blue-700 text-white font-black shadow-xs">
+                <GraduationCap className="h-6 w-6" />
+              </div>
+              <div>
+                <span className="text-[11px] font-bold tracking-widest text-slate-500 uppercase">
+                  Kurikulum Merdeka · Fase D (Kelas VII)
+                </span>
+                <h1 className="text-xl sm:text-2xl font-black text-slate-900 leading-tight">
+                  LEMBAR KERJA PESERTA DIDIK (LKPD)
+                </h1>
+                <p className="text-xs font-semibold text-blue-700">Mata Pelajaran Matematika</p>
+              </div>
+            </div>
+
+            <div className="sm:text-right">
+              <span className="inline-block rounded-lg bg-blue-100 px-3 py-1 text-xs font-bold text-blue-800 border border-blue-200">
+                {labelLevel}
+              </span>
+              <p className="mt-1 text-[11px] font-medium text-slate-500">Materi: {lkpd.materi}</p>
+            </div>
+          </div>
+
+          {/* Kotak Identitas Siswa */}
+          <div className="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-3 rounded-xl border border-slate-200 bg-white p-3.5 text-xs text-slate-700 shadow-2xs">
+            <div>
+              <span className="block text-[10px] font-bold uppercase text-slate-400">Judul Kegiatan:</span>
+              <span className="font-semibold text-slate-900">{lkpd.judul}</span>
+            </div>
+            <div>
+              <span className="block text-[10px] font-bold uppercase text-slate-400">Target Belajar:</span>
+              <span className="font-semibold text-slate-800">Diferensiasi Kesiapan Belajar</span>
+            </div>
+            <div>
+              <span className="block text-[10px] font-bold uppercase text-slate-400">Status Tugas:</span>
+              <span className={`font-bold ${terkunci ? "text-emerald-700" : "text-amber-700"}`}>
+                {lkpd.pengisian?.status === "dinilai"
+                  ? `Sudah Dinilai (${lkpd.pengisian.nilai}/100)`
+                  : lkpd.pengisian?.status === "terkirim"
+                  ? "Sudah Dikumpulkan"
+                  : "Sedang Dikerjakan"}
+              </span>
+            </div>
+          </div>
+
+          {/* Notifikasi Nilai & Catatan Guru */}
+          {lkpd.pengisian?.status === "dinilai" && (
+            <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50/90 p-4">
+              <p className="flex items-center gap-2 font-bold text-emerald-900">
+                <CheckCircle2 className="h-5 w-5 text-emerald-600" aria-hidden />
+                Sudah dinilai oleh gurumu
+                {lkpd.pengisian.nilai !== null && <span>· Nilai: {lkpd.pengisian.nilai} / 100</span>}
+              </p>
+              {lkpd.pengisian.catatanGuru && (
+                <p className="mt-2 text-xs leading-relaxed text-emerald-950 bg-white/70 p-3 rounded-lg border border-emerald-200">
+                  <strong>Catatan Evaluasi Guru:</strong> {lkpd.pengisian.catatanGuru}
+                </p>
+              )}
+            </div>
+          )}
+
+          {lkpd.pengisian?.status === "terkirim" && (
+            <p className="mt-4 rounded-xl border border-blue-200 bg-blue-50/90 p-3.5 text-xs font-bold text-blue-900">
+              Lembar kerja ini sudah kamu kumpulkan ke guru. Kamu dapat meninjau langkah penyelesaianmu di bawah ini.
+            </p>
+          )}
+        </header>
+
+        {/* BADAN LEMBAR KERJA */}
+        <div className="p-6 sm:p-8 space-y-8">
+          {/* 1. Pengantar / Tujuan & Petunjuk (jika ada pada konten LKPD) */}
+          {kontenPengantar && (
+            <section className="rounded-xl border border-slate-200/80 bg-slate-50/40 p-5">
+              <div className="flex items-center gap-2 border-b border-slate-200 pb-2.5 mb-3">
+                <BookOpen className="h-4 w-4 text-blue-600" />
+                <h2 className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                  A. Petunjuk & Informasi Pembelajaran
+                </h2>
+              </div>
+              <div className="lkpd-markdown text-sm">
+                <ReactMarkdown
+                  skipHtml
+                  urlTransform={safeUrl}
+                  remarkPlugins={[remarkGfm, remarkMath]}
+                  rehypePlugins={[[rehypeKatex, { throwOnError: false }]]}
                 >
-                  <label className="block cursor-pointer" htmlFor={inputId} onClick={() => setActiveFieldId(butir.id)}>
-                    <div className="flex items-start gap-3">
-                      <span
-                        aria-hidden
-                        className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-blue-600 text-sm font-bold text-white shadow-xs"
-                      >
-                        {butir.nomor}
+                  {sanitizeMathMarkdown(kontenPengantar)}
+                </ReactMarkdown>
+              </div>
+            </section>
+          )}
+
+          {/* 2. BUTIR AKTIVITAS & KOLOM PENGERJAAN IN-PLACE (Kertas Ditimpa Isian Siswa) */}
+          <section className="space-y-8">
+            <div className="flex items-center justify-between border-b-2 border-slate-800 pb-2">
+              <h2 className="text-sm font-black uppercase tracking-wider text-slate-900 flex items-center gap-2">
+                <FileText className="h-4 w-4 text-blue-700" />
+                B. Aktivitas Pembelajaran & Lembar Pengerjaan
+              </h2>
+              <span className="text-[11px] font-semibold text-slate-500">
+                Total {lkpd.butir.length} Aktivitas
+              </span>
+            </div>
+
+            {lkpd.butir.map((butir, index) => {
+              const textVal = jawaban[butir.id] ?? "";
+              const sudahTerisi = textVal.trim().length > 0;
+
+              return (
+                <article
+                  key={butir.id}
+                  className="rounded-xl border border-slate-300 bg-white overflow-hidden shadow-2xs"
+                >
+                  {/* Header Bar Aktivitas */}
+                  <div className="flex items-center justify-between bg-slate-100/90 border-b border-slate-200 px-4 py-2.5">
+                    <div className="flex items-center gap-2.5">
+                      <span className="grid h-6 w-6 place-items-center rounded-md bg-blue-700 text-xs font-black text-white">
+                        {index + 1}
                       </span>
-                      <div className="flex-1">
-                        <span className="text-base font-bold text-slate-900 leading-snug">
-                          {butir.pertanyaan}
-                        </span>
-                        {butir.petunjuk && (
-                          <div className="mt-1.5 text-xs leading-relaxed text-slate-600 bg-slate-50 border border-slate-200/80 rounded-lg p-2.5">
-                            {butir.petunjuk}
-                          </div>
-                        )}
-                      </div>
+                      <h3 className="text-sm font-bold text-slate-900">{butir.pertanyaan}</h3>
                     </div>
-                  </label>
-
-                  {/* Toolbar Simbol Cepat Matematika */}
-                  {!terkunci && (
-                    <div className="mt-3 flex flex-wrap items-center gap-1 border-t border-slate-100 pt-2.5">
-                      <span className="text-[11px] font-bold text-slate-400 mr-1 flex items-center gap-1">
-                        <Sparkles className="h-3 w-3 text-amber-500" /> Rumus:
+                    {sudahTerisi ? (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-bold text-emerald-800">
+                        <CheckCircle2 className="h-3 w-3" /> Terisi
                       </span>
-                      {[
-                        { label: "a/b", val: " / " },
-                        { label: "²", val: "²" },
-                        { label: "√", val: "√" },
-                        { label: ":", val: " : " },
-                        { label: "×", val: " × " },
-                        { label: "÷", val: " ÷ " },
-                        { label: "≤", val: " ≤ " },
-                        { label: "≥", val: " ≥ " },
-                        { label: "=", val: " = " },
-                        { label: "π", val: "π" },
-                        { label: "x", val: "x" },
-                        { label: "y", val: "y" },
-                      ].map((sym) => (
-                        <button
-                          key={sym.label}
-                          type="button"
-                          onMouseDown={(e) => {
-                            e.preventDefault();
-                            setActiveFieldId(butir.id);
-                            handleInsertMath(sym.val);
-                          }}
-                          className="h-7 min-w-7 px-1.5 rounded-md bg-slate-100 hover:bg-blue-100 hover:text-blue-700 text-slate-700 border border-slate-200 text-xs font-semibold active:scale-95 transition cursor-pointer"
-                        >
-                          {sym.label}
-                        </button>
-                      ))}
-
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setActiveFieldId(butir.id);
-                          setKeyboardOpen(true);
-                        }}
-                        className="ml-auto text-[11px] font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1 cursor-pointer"
-                      >
-                        <Calculator className="h-3 w-3" /> Keyboard Lengkap
-                      </button>
-                    </div>
-                  )}
-
-                  {/* Input Bidang Jawaban */}
-                  <div className="mt-2">
-                    {butir.tipe === "isian" ? (
-                      <input
-                        ref={(el) => {
-                          inputRefs.current[butir.id] = el;
-                        }}
-                        className="input w-full text-sm font-sans"
-                        disabled={terkunci}
-                        id={inputId}
-                        onFocus={() => setActiveFieldId(butir.id)}
-                        onChange={(e) => ubah(butir.id, e.target.value)}
-                        placeholder="Ketik jawabanmu di sini..."
-                        value={textVal}
-                      />
                     ) : (
-                      <textarea
-                        ref={(el) => {
-                          inputRefs.current[butir.id] = el;
-                        }}
-                        className="input w-full text-sm font-sans leading-relaxed"
-                        disabled={terkunci}
-                        id={inputId}
-                        onFocus={() => setActiveFieldId(butir.id)}
-                        onChange={(e) => ubah(butir.id, e.target.value)}
-                        placeholder="Tuliskan langkah pengerjaan bertahap dan jawaban akhirmu di sini..."
-                        rows={4}
-                        value={textVal}
-                      />
+                      <span className="inline-flex items-center gap-1 rounded-full bg-slate-200 px-2 py-0.5 text-[11px] font-medium text-slate-600">
+                        Belum Diisi
+                      </span>
                     )}
                   </div>
 
-                  {/* Live Math Hint / Preview jika ada simbol matematika */}
-                  {textVal.trim() && (textVal.includes(":") || textVal.includes("√") || textVal.includes("²") || textVal.includes("=") || textVal.includes("×")) && (
-                    <div className="mt-2 flex items-center gap-2 rounded-lg bg-blue-50/60 px-3 py-1.5 text-xs text-blue-900 border border-blue-200/60">
-                      <span className="font-bold text-blue-700">Format Matematis:</span>
-                      <span className="font-mono">{textVal}</span>
+                  {/* Konten Stimulus Soal / Cerita / Tabel Data (Dirender KaTeX & GFM Cantik) */}
+                  {butir.petunjuk && (
+                    <div className="p-4 sm:p-5 bg-slate-50/30 border-b border-slate-200">
+                      <div className="lkpd-markdown text-sm">
+                        <ReactMarkdown
+                          skipHtml
+                          urlTransform={safeUrl}
+                          remarkPlugins={[remarkGfm, remarkMath]}
+                          rehypePlugins={[[rehypeKatex, { throwOnError: false }]]}
+                        >
+                          {sanitizeMathMarkdown(butir.petunjuk)}
+                        </ReactMarkdown>
+                      </div>
                     </div>
                   )}
-                </Card>
-              </li>
-            );
-          })}
-        </ol>
-      </section>
 
-      {/* Bottom Sticky Action Bar */}
-      {!terkunci && (
-        <div className="sticky bottom-0 mt-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white/95 p-4 backdrop-blur shadow-lg">
-          <p aria-live="polite" className="text-xs text-slate-500">
-            {statusSimpan === "menyimpan" && (
-              <span className="flex items-center gap-1.5 font-medium text-amber-600">
-                <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden />
-                Menyimpan jawaban...
-              </span>
-            )}
-            {statusSimpan === "tersimpan" && (
-              <span className="flex items-center gap-1.5 font-medium text-emerald-700">
-                <Cloud className="h-3.5 w-3.5" aria-hidden />
-                Tersimpan otomatis
-              </span>
-            )}
-            {statusSimpan === "gagal" && (
-              <span className="flex items-center gap-1.5 font-medium text-red-600">
-                <AlertCircle className="h-3.5 w-3.5" aria-hidden />
-                {pesanGagal ?? "Gagal menyimpan"}
-              </span>
-            )}
-            {statusSimpan === "bersih" && "Jawabanmu tersimpan otomatis saat kamu mengetik."}
-          </p>
+                  {/* ========================================================
+                      KOLOM PENGERJAAN SISWA (EQUATION FIELD MATHLIVE)
+                      Langsung di bawah soal, persis seperti mengisi LKS dengan pulpen
+                      ======================================================== */}
+                  <div className="p-4 sm:p-5 bg-white">
+                    <div className="mb-2 flex items-center justify-between">
+                      <label className="flex items-center gap-1.5 text-xs font-bold text-blue-900">
+                        <PenLine className="h-3.5 w-3.5 text-blue-600" />
+                        <span>Kolom Penyelesaian & Jawabanmu:</span>
+                      </label>
+                      <span className="text-[11px] text-slate-500">
+                        Gunakan tombol rumus (pecahan, kuadrat, akar) di bawah ini
+                      </span>
+                    </div>
 
-          <div className="flex items-center gap-2">
-            <Button
-              variant="secondary"
-              type="button"
-              onClick={() => setKeyboardOpen((v) => !v)}
-              className="text-xs"
-            >
-              <Calculator className="h-4 w-4 text-blue-600" />
-              <span>{keyboardOpen ? "Tutup Keyboard" : "Keyboard Math"}</span>
-            </Button>
+                    <EquationField
+                      value={textVal}
+                      onChange={(val) => ubah(butir.id, val)}
+                      placeholder="Klik di sini untuk menulis langkah penyelesaian matematika..."
+                      disabled={terkunci}
+                    />
+                  </div>
+                </article>
+              );
+            })}
+          </section>
 
-            <Button disabled={progres.terisi === 0} onClick={() => setKonfirmasiKirim(true)}>
-              <Send className="h-4 w-4" aria-hidden />
-              Kumpulkan ke Guru
-            </Button>
-          </div>
+          {/* 3. Penutup & Refleksi Lembar Kerja */}
+          <section className="rounded-xl border border-blue-200/80 bg-blue-50/40 p-4 text-xs text-blue-950">
+            <h4 className="font-bold flex items-center gap-1.5 text-blue-900 mb-1">
+              <Sparkles className="h-4 w-4 text-amber-500" />
+              Petunjuk Pengumpulan Tugas:
+            </h4>
+            <p className="leading-relaxed">
+              Pastikan seluruh langkah penyelesaian dan jawaban matematika pada tiap aktivitas di atas telah
+              terisi dengan benar. Setelah kamu menekan tombol <strong>Kumpulkan ke Guru</strong>, lembar kerjamu
+              akan dikunci dan diteruskan ke guru untuk evaluasi dan penilaian.
+            </p>
+          </section>
         </div>
-      )}
 
-      {/* Floating / Docked Math Virtual Keyboard */}
-      <MathKeyboard
-        isOpen={keyboardOpen && !terkunci}
-        onClose={() => setKeyboardOpen(false)}
-        onInsert={handleInsertMath}
-        onBackspace={handleBackspaceMath}
-        onClear={handleClearMath}
-        targetLabel={activeQuestionLabel}
-      />
+        {/* FOOTER AKSI LEMBAR KERJA */}
+        <footer className="border-t-2 border-slate-200 bg-slate-50/80 p-5 sm:p-6 flex flex-wrap items-center justify-between gap-4">
+          <div className="text-xs text-slate-600">
+            <p className="font-semibold text-slate-800">
+              Status Pengerjaan: {progres.terisi} dari {progres.total} aktivitas selesai ({progres.persen}%)
+            </p>
+            <p className="text-[11px] text-slate-500">
+              {terkunci
+                ? "Lembar kerja telah dikumpulkan."
+                : "Semua isian tersimpan otomatis di perangkatmu."}
+            </p>
+          </div>
 
+          {!terkunci && (
+            <div className="flex items-center gap-2">
+              <Button
+                variant="primary"
+                disabled={progres.terisi === 0 || mengirim}
+                onClick={() => setKonfirmasiKirim(true)}
+                className="gap-2 px-5 py-2.5 text-sm font-bold shadow-md cursor-pointer"
+              >
+                <Send className="h-4 w-4" aria-hidden />
+                <span>{mengirim ? "Mengirim..." : "Kumpulkan ke Guru"}</span>
+              </Button>
+            </div>
+          )}
+        </footer>
+      </main>
+
+      {/* Modal Konfirmasi Pengumpulan */}
       <ConfirmModal
         isOpen={konfirmasiKirim}
-        title="Kumpulkan LKPD sekarang?"
+        title="Kumpulkan Lembar Kerja Peserta Didik?"
         description={
           progres.terisi < progres.total
-            ? `Masih ada ${progres.total - progres.terisi} soal yang belum diisi. Setelah dikumpulkan, jawaban akan dinilai oleh guru dan tidak dapat diubah lagi.`
-            : "Semua butir soal sudah terisi dengan baik. Setelah dikumpulkan, lembar kerja akan langsung diserahkan kepada guru."
+            ? `Masih ada ${progres.total - progres.terisi} aktivitas yang belum terisi. Yakin ingin mengumpulkan sekarang? Jawaban tidak dapat diubah lagi setelah dikirim.`
+            : "Semua aktivitas pembelajaran telah selesai kamu kerjakan. Setelah dikumpulkan, lembar kerja akan langsung diserahkan kepada guru untuk dinilai."
         }
         confirmText={mengirim ? "Mengirim..." : "Ya, Kumpulkan Sekarang"}
         onConfirm={kirim}

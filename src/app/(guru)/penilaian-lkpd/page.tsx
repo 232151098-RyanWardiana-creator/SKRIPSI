@@ -6,6 +6,11 @@ import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { StatCard } from "@/components/ui/StatCard";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
+import { sanitizeMathMarkdown } from "@/lib/lkpd-utils";
 import { hitungTerisi } from "@/lib/lkpd-items";
 import {
   simpanNilai,
@@ -239,8 +244,24 @@ function FormPenilaian({
                   </span>
                   {butir.pertanyaan}
                 </p>
-                <div className="mt-3 whitespace-pre-wrap rounded-xl bg-[#f8f9fc] p-4 text-sm leading-relaxed text-[#374151]">
-                  {isi || <span className="italic text-[#9ca3af]">Tidak dijawab</span>}
+                <div className="mt-3 rounded-xl bg-[#f8f9fc] p-4 text-sm leading-relaxed text-[#374151] border border-slate-200">
+                  {isi ? (
+                    <div className="lkpd-markdown">
+                      <ReactMarkdown
+                        skipHtml
+                        remarkPlugins={[remarkGfm, remarkMath]}
+                        rehypePlugins={[[rehypeKatex, { throwOnError: false }]]}
+                      >
+                        {sanitizeMathMarkdown(
+                          isi.includes("\\") || isi.includes("^") || isi.includes("_")
+                            ? `$$${isi.replace(/^\$\$|\$\$$/g, "")}$$`
+                            : isi
+                        )}
+                      </ReactMarkdown>
+                    </div>
+                  ) : (
+                    <span className="italic text-[#9ca3af]">Tidak dijawab</span>
+                  )}
                 </div>
               </Card>
             </li>
