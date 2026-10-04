@@ -43,17 +43,57 @@ interface DemoSiswa {
   pilihan: AnswerKey[];
 }
 
-/** 8 siswa dengan pola jawaban berbeda agar levelnya menyebar. */
+/** 30 siswa simulasi kelas VII-A (10 Perlu Bimbingan, 10 Berkembang, 10 Mahir) */
 export const DEMO_SISWA: DemoSiswa[] = [
-  { id: "d1000000-0000-4000-8000-000000000001", nama: "Aisyah Nurhaliza", no_absen: 1, nisn: "0091234501", gaya_belajar: "visual",     pilihan: ["b","c","a","b","d","c","a","b","c","a"] },
-  { id: "d1000000-0000-4000-8000-000000000002", nama: "Bagas Prasetyo",   no_absen: 2, nisn: "0091234502", gaya_belajar: "kinestetik", pilihan: ["b","c","a","b","d","c","a","c","b","d"] },
-  { id: "d1000000-0000-4000-8000-000000000003", nama: "Citra Ayu Lestari",no_absen: 3, nisn: "0091234503", gaya_belajar: "auditory",   pilihan: ["b","c","a","d","d","c","b","b","c","a"] },
-  { id: "d1000000-0000-4000-8000-000000000004", nama: "Dimas Ardiansyah", no_absen: 4, nisn: "0091234504", gaya_belajar: "visual",     pilihan: ["b","a","a","b","c","c","a","b","d","a"] },
-  { id: "d1000000-0000-4000-8000-000000000005", nama: "Elsa Ramadhani",   no_absen: 5, nisn: "0091234505", gaya_belajar: "auditory",   pilihan: ["a","c","c","b","d","a","a","b","c","b"] },
-  { id: "d1000000-0000-4000-8000-000000000006", nama: "Fajar Nugraha",    no_absen: 6, nisn: "0091234506", gaya_belajar: "kinestetik", pilihan: ["b","d","a","b","a","c","d","b","c","c"] },
-  { id: "d1000000-0000-4000-8000-000000000007", nama: "Gita Puspita",     no_absen: 7, nisn: "0091234507", gaya_belajar: "visual",     pilihan: ["c","c","b","b","d","b","a","d","c","a"] },
-  { id: "d1000000-0000-4000-8000-000000000008", nama: "Hafiz Maulana",    no_absen: 8, nisn: "0091234508", gaya_belajar: "kinestetik", pilihan: ["a","b","a","c","d","c","a","b","a","d"] },
+  { id: "d1000000-0000-4000-8000-000000000001", nama: "Aditia Pratama",   no_absen: 1,  nisn: "0091234501", gaya_belajar: "visual",     pilihan: ["b", "c", "a", "b", "d", "c", "a", "b", "c", "a"] },
+  { id: "d1000000-0000-4000-8000-000000000002", nama: "Aisyah Nurhaliza", no_absen: 2,  nisn: "0091234502", gaya_belajar: "visual",     pilihan: ["b", "c", "a", "b", "d", "c", "a", "b", "c", "a"] },
+  { id: "d1000000-0000-4000-8000-000000000003", nama: "Bagas Prasetyo",   no_absen: 3,  nisn: "0091234503", gaya_belajar: "kinestetik", pilihan: ["b", "c", "a", "b", "d", "c", "b", "b", "c", "a"] },
+  { id: "d1000000-0000-4000-8000-000000000004", nama: "Citra Ayu Lestari",no_absen: 4,  nisn: "0091234504", gaya_belajar: "auditory",   pilihan: ["b", "c", "a", "b", "d", "c", "a", "b", "b", "a"] },
+  { id: "d1000000-0000-4000-8000-000000000005", nama: "Daffa Ibnu Sina",  no_absen: 5,  nisn: "0091234505", gaya_belajar: "visual",     pilihan: ["d", "c", "a", "b", "d", "c", "a", "b", "c", "a"] },
+  { id: "d1000000-0000-4000-8000-000000000006", nama: "Dimas Ardiansyah", no_absen: 6,  nisn: "0091234506", gaya_belajar: "visual",     pilihan: ["b", "c", "b", "b", "d", "c", "a", "b", "c", "a"] },
+  { id: "d1000000-0000-4000-8000-000000000007", nama: "Elsa Ramadhani",   no_absen: 7,  nisn: "0091234507", gaya_belajar: "auditory",   pilihan: ["b", "c", "a", "b", "b", "c", "a", "d", "c", "a"] },
+  { id: "d1000000-0000-4000-8000-000000000008", nama: "Fajar Nugraha",    no_absen: 8,  nisn: "0091234508", gaya_belajar: "kinestetik", pilihan: ["b", "c", "a", "b", "d", "c", "d", "b", "c", "b"] },
+  { id: "d1000000-0000-4000-8000-000000000009", nama: "Farhan Maulana",   no_absen: 9,  nisn: "0091234509", gaya_belajar: "visual",     pilihan: ["b", "b", "a", "b", "d", "c", "a", "b", "a", "a"] },
+  { id: "d1000000-0000-4000-8000-000000000010", nama: "Gita Puspita",     no_absen: 10, nisn: "0091234510", gaya_belajar: "auditory",   pilihan: ["c", "c", "a", "d", "d", "c", "a", "b", "c", "a"] },
+  { id: "d1000000-0000-4000-8000-000000000011", nama: "Hafiz Maulana",    no_absen: 11, nisn: "0091234511", gaya_belajar: "kinestetik", pilihan: ["b", "c", "d", "b", "d", "a", "a", "b", "b", "a"] },
+  { id: "d1000000-0000-4000-8000-000000000012", nama: "Hana Safitri",     no_absen: 12, nisn: "0091234512", gaya_belajar: "visual",     pilihan: ["d", "c", "a", "b", "a", "c", "a", "c", "c", "a"] },
+  { id: "d1000000-0000-4000-8000-000000000013", nama: "Ihsan Kurniawan",  no_absen: 13, nisn: "0091234513", gaya_belajar: "auditory",   pilihan: ["b", "c", "b", "b", "d", "c", "c", "b", "c", "d"] },
+  { id: "d1000000-0000-4000-8000-000000000014", nama: "Indah Permata",    no_absen: 14, nisn: "0091234514", gaya_belajar: "visual",     pilihan: ["b", "a", "a", "b", "b", "c", "a", "b", "d", "a"] },
+  { id: "d1000000-0000-4000-8000-000000000015", nama: "Jihan Salsabila",  no_absen: 15, nisn: "0091234515", gaya_belajar: "kinestetik", pilihan: ["a", "c", "a", "c", "d", "c", "d", "b", "c", "a"] },
+  { id: "d1000000-0000-4000-8000-000000000016", nama: "Kevin Sanjaya",    no_absen: 16, nisn: "0091234516", gaya_belajar: "visual",     pilihan: ["b", "b", "c", "b", "d", "d", "a", "b", "a", "a"] },
+  { id: "d1000000-0000-4000-8000-000000000017", nama: "Laila Rahmawati",  no_absen: 17, nisn: "0091234517", gaya_belajar: "auditory",   pilihan: ["c", "c", "a", "d", "c", "c", "a", "a", "c", "a"] },
+  { id: "d1000000-0000-4000-8000-000000000018", nama: "Muhammad Rizky",  no_absen: 18, nisn: "0091234518", gaya_belajar: "kinestetik", pilihan: ["b", "c", "d", "b", "d", "a", "b", "b", "c", "c"] },
+  { id: "d1000000-0000-4000-8000-000000000019", nama: "Nabila Putri",     no_absen: 19, nisn: "0091234519", gaya_belajar: "visual",     pilihan: ["b", "d", "a", "b", "a", "c", "a", "c", "b", "a"] },
+  { id: "d1000000-0000-4000-8000-000000000020", nama: "Najla Khoirunnisa",no_absen: 20, nisn: "0091234520", gaya_belajar: "auditory",   pilihan: ["d", "c", "a", "a", "d", "c", "c", "b", "c", "d"] },
+  { id: "d1000000-0000-4000-8000-000000000021", nama: "Oktaviana Dewi",   no_absen: 21, nisn: "0091234521", gaya_belajar: "visual",     pilihan: ["b", "a", "b", "b", "b", "b", "a", "b", "d", "a"] },
+  { id: "d1000000-0000-4000-8000-000000000022", nama: "Panji Gemilang",   no_absen: 22, nisn: "0091234522", gaya_belajar: "kinestetik", pilihan: ["a", "c", "a", "c", "b", "c", "d", "d", "c", "a"] },
+  { id: "d1000000-0000-4000-8000-000000000023", nama: "Qonita Az-Zahra",  no_absen: 23, nisn: "0091234523", gaya_belajar: "auditory",   pilihan: ["b", "c", "c", "b", "d", "d", "d", "b", "a", "b"] },
+  { id: "d1000000-0000-4000-8000-000000000024", nama: "Raditya Danendra", no_absen: 24, nisn: "0091234524", gaya_belajar: "visual",     pilihan: ["c", "b", "a", "b", "c", "c", "a", "a", "a", "a"] },
+  { id: "d1000000-0000-4000-8000-000000000025", nama: "Rania Maharani",   no_absen: 25, nisn: "0091234525", gaya_belajar: "kinestetik", pilihan: ["c", "c", "d", "d", "d", "a", "b", "b", "c", "c"] },
+  { id: "d1000000-0000-4000-8000-000000000026", nama: "Salman Al-Farisi", no_absen: 26, nisn: "0091234526", gaya_belajar: "auditory",   pilihan: ["b", "d", "d", "b", "a", "a", "a", "c", "b", "a"] },
+  { id: "d1000000-0000-4000-8000-000000000027", nama: "Siti Nurhaliza",   no_absen: 27, nisn: "0091234527", gaya_belajar: "visual",     pilihan: ["d", "c", "a", "a", "a", "c", "c", "c", "c", "d"] },
+  { id: "d1000000-0000-4000-8000-000000000028", nama: "Tiara Andini",     no_absen: 28, nisn: "0091234528", gaya_belajar: "auditory",   pilihan: ["b", "a", "b", "b", "b", "b", "c", "b", "d", "d"] },
+  { id: "d1000000-0000-4000-8000-000000000029", nama: "Wahyu Hidayat",    no_absen: 29, nisn: "0091234529", gaya_belajar: "kinestetik", pilihan: ["a", "a", "a", "c", "b", "c", "d", "d", "d", "a"] },
+  { id: "d1000000-0000-4000-8000-000000000030", nama: "Zaidan Al-Ghifari",no_absen: 30, nisn: "0091234530", gaya_belajar: "visual",     pilihan: ["a", "b", "c", "c", "d", "d", "d", "b", "a", "b"] },
 ];
+
+/** Helper untuk menghasilkan 30 siswa simulasi siap pakai dengan level kesiapan belajar TaRL seimbang */
+export function buatSiswaSimulasi30(kelasId: string): import("@/types").SiswaMock[] {
+  return DEMO_SISWA.map((s) => {
+    const hasil = nilaiDemoSiswa(s.pilihan);
+    return {
+      id: s.id,
+      kelas_id: kelasId,
+      nama: s.nama,
+      no_absen: s.no_absen,
+      nisn: s.nisn,
+      gaya_belajar: s.gaya_belajar,
+      level: hasil.level,
+      skor: hasil.skor_total,
+      bergabung: "2026-08-01T00:00:00.000Z",
+    };
+  });
+}
 
 interface DemoSoal {
   id: string;

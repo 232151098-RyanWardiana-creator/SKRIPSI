@@ -71,7 +71,11 @@ export async function refreshClasses(): Promise<ClassStoreEntry[]> {
  * benar-benar tersimpan (bukan hanya hilang di layar).
  */
 export async function saveClasses(classes: ClassStoreEntry[]): Promise<boolean> {
-  if (!isSupabaseConfigured) return false;
+  // Update in-memory cache dan notifikasi listeners secara instan
+  cache = classes;
+  emit();
+
+  if (!isSupabaseConfigured) return true;
 
   const classRows = classes.map(({ kelas, siswa }) => ({
     id: ensureUUID(kelas.id),

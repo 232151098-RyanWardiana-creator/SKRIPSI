@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import { Users, Shuffle, CheckCircle2, ShieldCheck, X, RefreshCw } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Users, Shuffle, CheckCircle2, ShieldCheck, X, RefreshCw, Sparkles, FileSpreadsheet } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import type { SiswaMock, Level } from "@/types";
-import { bagiKelompokTaRL } from "@/lib/tarl-grouping";
+import type { SiswaMock } from "@/types";
+import { kelompokkanTaRL, type HasilGrupTaRL } from "@/lib/tarl-grouping";
 
 interface BagiKelompokModalProps {
   isOpen: boolean;
@@ -12,13 +12,8 @@ interface BagiKelompokModalProps {
   siswaList: SiswaMock[];
   namaKelas: string;
   onTerapkan: (siswaUpdated: SiswaMock[]) => void;
-}
-
-interface KelompokPreview {
-  nama: string;
-  level: Level | "belum_asesmen";
-  anggota: SiswaMock[];
-  juruTulisId: string;
+  onMuatSimulasi?: () => void;
+  onBukaUploadExcel?: () => void;
 }
 
 export function BagiKelompokTaRLModal({
@@ -27,60 +22,31 @@ export function BagiKelompokTaRLModal({
   siswaList,
   namaKelas,
   onTerapkan,
+  onMuatSimulasi,
+  onBukaUploadExcel,
 }: BagiKelompokModalProps) {
   const [kapasitas, setKapasitas] = useState<number>(5);
-  const [preview, setPreview] = useState<KelompokPreview[]>([]);
-
-  if (!isOpen) return null;
+  const [preview, setPreview] = useState<HasilGrupTaRL[]>([]);
 
   // Algoritma pembagian kelompok homogen TaRL
   const buatKelompok = (kap: number) => {
-    // Kelompokkan siswa berdasarkan level kesiapan belajar
-    const perLevel: Record<string, SiswaMock[]> = {
-      dasar: [],
-      menengah: [],
-      mahir: [],
-      belum: [],
-    };
-
-    siswaList.forEach((s) => {
-      if (s.level === "dasar") perLevel.dasar.push({ ...s });
-      else if (s.level === "menengah") perLevel.menengah.push({ ...s });
-      else if (s.level === "mahir") perLevel.mahir.push({ ...s });
-      else perLevel.belum.push({ ...s });
-    });
-
-    const hasilKelompok: KelompokPreview[] = [];
-
-    const prosesTier = (
-      list: SiswaMock[],
-      namaPrefix: string,
-      levelKey: Level | "belum_asesmen"
-    ) => {
-      if (list.length === 0) return;
-      // Shuffle acak
-      const acak = [...list].sort(() => Math.random() - 0.5);
-      const totalKelompok = Math.ceil(acak.length / kap);
-
-      for (let i = 0; i < totalKelompok; i++) {
-        const chunk = acak.slice(i * kap, (i + 1) * kap);
-        const juruTulis = chunk[0]; // Siswa pertama sebagai juru tulis default
-        hasilKelompok.push({
-          nama: `${namaPrefix} ${i + 1}`,
-          level: levelKey,
-          anggota: chunk,
-          juruTulisId: juruTulis.id,
-        });
-      }
-    };
-
-    prosesTier(perLevel.dasar, "Kelompok Bimbingan", "dasar");
-    prosesTier(perLevel.menengah, "Kelompok Berkembang", "menengah");
-    prosesTier(perLevel.mahir, "Kelompok Mahir", "mahir");
-    prosesTier(perLevel.belum, "Kelompok Campuran", "belum_asesmen");
-
-    setPreview(hasilKelompok);
+    if (siswaList.length === 0) {
+      setPreview([]);
+      return;
+    }
+    const hasil = kelompokkanTaRL(siswaList, kap);
+    setPreview(hasil);
   };
+
+  useEffect(() => {
+    if (isOpen && siswaList.length > 0) {
+      buatKelompok(kapasitas);
+    } else if (isOpen && siswaList.length === 0) {
+      setPreview([]);
+    }
+  }, [isOpen, siswaList.length, kapasitas]);
+
+  if (!isOpen) return null;
 
   const handleBagiSekarang = () => {
     buatKelompok(kapasitas);
@@ -161,45 +127,92 @@ export function BagiKelompokTaRLModal({
 
         {/* Konten Modal */}
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
-          {/* Konfigurasi Ukuran Kelompok */}
-          <div className="rounded-xl border border-blue-200 bg-blue-50/50 p-4">
-            <div className="flex flex-wrap items-center justify-between gap-4">
-              <div>
-                <label className="block text-xs font-bold text-blue-900 uppercase">
-                  Jumlah Anggota per Kelompok:
-                </label>
-                <p className="text-xs text-blue-700 mt-0.5">
-                  Total {siswaList.length} siswa akan dibagi otomatis secara proporsional.
+          {/* Banner jika belum ada siswa di kelas */}
+          {siswaList.length === 0 ? (
+            <div className="rounded-2xl border-2 border-dashed border-amber-300 bg-amber-50/80 p-6 text-center space-y-4">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-100 text-amber-700 shadow-2xs">
+                <Users className="h-7 w-7" />
+              </div>
+              <div className="space-y-1">
+                <h4 className="font-bold text-amber-950 text-base">
+                  Kelas Ini Belum Memiliki Peserta Didik
+                </h4>
+                <p className="text-xs text-amber-800 max-w-md mx-auto leading-relaxed">
+                  Fitur pembagian kelompok TaRL memerlukan data kesiapan belajar siswa. Anda dapat mengisi <strong>30 siswa simulasi</strong> (10 Perlu Bimbingan, 10 Berkembang, 10 Mahir) secara instan, atau mencoba fitur upload Excel / CSV.
                 </p>
               </div>
-              <div className="flex items-center gap-2">
-                {[3, 4, 5, 6].map((num) => (
-                  <button
-                    key={num}
-                    type="button"
-                    onClick={() => {
-                      setKapasitas(num);
-                      buatKelompok(num);
-                    }}
-                    className={`h-9 w-9 rounded-lg text-xs font-bold transition-all ${
-                      kapasitas === num
-                        ? "bg-blue-600 text-white shadow-xs"
-                        : "bg-white text-slate-700 border border-slate-300 hover:bg-slate-100"
-                    }`}
+              <div className="flex flex-wrap items-center justify-center gap-2.5 pt-2">
+                {onMuatSimulasi && (
+                  <Button
+                    onClick={onMuatSimulasi}
+                    className="text-xs font-bold gap-2 shadow-sm bg-blue-600 hover:bg-blue-700 text-white"
                   >
-                    {num}
-                  </button>
-                ))}
+                    <Sparkles className="h-4 w-4" />
+                    Isi 30 Siswa Simulasi ke Kelas Ini
+                  </Button>
+                )}
+                <a
+                  href="/Template_30_Siswa_Kelas_VII.xlsx"
+                  download
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-slate-50 transition"
+                >
+                  <FileSpreadsheet className="h-4 w-4 text-emerald-600" />
+                  Unduh Excel Contoh (30 Siswa)
+                </a>
+                {onBukaUploadExcel && (
+                  <Button
+                    variant="secondary"
+                    onClick={onBukaUploadExcel}
+                    className="text-xs font-semibold gap-1.5"
+                  >
+                    Upload Excel / CSV
+                  </Button>
+                )}
               </div>
             </div>
+          ) : (
+            <>
+              {/* Konfigurasi Ukuran Kelompok */}
+              <div className="rounded-xl border border-blue-200 bg-blue-50/50 p-4">
+                <div className="flex flex-wrap items-center justify-between gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-blue-900 uppercase">
+                      Jumlah Anggota per Kelompok:
+                    </label>
+                    <p className="text-xs text-blue-700 mt-0.5">
+                      Total {siswaList.length} siswa akan dibagi otomatis secara proporsional.
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {[3, 4, 5, 6].map((num) => (
+                      <button
+                        key={num}
+                        type="button"
+                        onClick={() => {
+                          setKapasitas(num);
+                          buatKelompok(num);
+                        }}
+                        className={`h-9 w-9 rounded-lg text-xs font-bold transition-all ${
+                          kapasitas === num
+                            ? "bg-blue-600 text-white shadow-xs"
+                            : "bg-white text-slate-700 border border-slate-300 hover:bg-slate-100"
+                        }`}
+                      >
+                        {num}
+                      </button>
+                    ))}
+                  </div>
+                </div>
 
-            <div className="mt-4 flex flex-wrap gap-2">
-              <Button onClick={handleBagiSekarang} className="text-xs">
-                <Shuffle className="h-3.5 w-3.5 mr-1" />
-                {preview.length === 0 ? "Mulai Acak Kelompok" : "Acak Ulang Siswa"}
-              </Button>
-            </div>
-          </div>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <Button onClick={handleBagiSekarang} className="text-xs">
+                    <Shuffle className="h-3.5 w-3.5 mr-1" />
+                    {preview.length === 0 ? "Mulai Acak Kelompok" : "Acak Ulang Siswa"}
+                  </Button>
+                </div>
+              </div>
+            </>
+          )}
 
           {/* Preview Hasil Pembagian Kelompok */}
           {preview.length > 0 && (

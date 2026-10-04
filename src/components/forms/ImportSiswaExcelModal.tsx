@@ -33,17 +33,12 @@ export function ImportSiswaExcelModal({
   if (!isOpen) return null;
 
   const handleDownloadTemplate = () => {
-    const templateData = [
-      { "No Absen": 1, "Nama Siswa": "Adinda Maharani", "NIS / NISN": "0091234501" },
-      { "No Absen": 2, "Nama Siswa": "Bagas Kurniawan", "NIS / NISN": "0091234502" },
-      { "No Absen": 3, "Nama Siswa": "Chandra Wijaya", "NIS / NISN": "0091234503" },
-      { "No Absen": 4, "Nama Siswa": "Dewi Sartika", "NIS / NISN": "0091234504" },
-    ];
-
-    const worksheet = XLSX.utils.json_to_sheet(templateData);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Data Siswa");
-    XLSX.writeFile(workbook, `Template_Siswa_${kelasNama.replace(/\s+/g, "_")}.xlsx`);
+    const link = document.createElement("a");
+    link.href = "/Template_30_Siswa_Kelas_VII.xlsx";
+    link.download = `Template_30_Siswa_${kelasNama.replace(/\s+/g, "_")}.xlsx`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {

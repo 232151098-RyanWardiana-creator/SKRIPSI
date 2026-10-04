@@ -8,6 +8,7 @@ import {
   Sparkles,
   HelpCircle,
   Calculator,
+  Lock,
 } from "lucide-react";
 
 interface EquationFieldProps {
@@ -61,18 +62,19 @@ export function EquationField({
       mf.style.padding = "10px 14px";
       mf.style.fontSize = "1.2rem";
       mf.style.borderRadius = "12px";
-      mf.style.backgroundColor = readOnly ? "#f8fafc" : "#ffffff";
-      mf.style.border = "1.5px solid #cbd5e1";
+      mf.style.backgroundColor = isLocked ? "#f8fafc" : "#ffffff";
+      mf.style.border = isLocked ? "1.5px dashed #cbd5e1" : "1.5px solid #cbd5e1";
+      mf.style.cursor = isLocked ? "not-allowed" : "text";
       mf.style.display = "block";
       mf.style.outline = "none";
       mf.style.transition = "all 0.15s ease-in-out";
       mf.style.fontFamily = "inherit";
 
-      // Configure virtual keyboard policy: manual to let our custom toolbar drive or auto
+      // Configure virtual keyboard policy: auto agar keyboard muncul di HP/tablet
       mf.mathVirtualKeyboardPolicy = "auto";
 
       mf.addEventListener("focus", () => {
-        if (!readOnly) {
+        if (!isLocked) {
           mf.style.borderColor = "#2563eb";
           mf.style.boxShadow = "0 0 0 3px rgba(37, 99, 235, 0.12)";
         }
@@ -101,7 +103,17 @@ export function EquationField({
         hostRef.current.innerHTML = "";
       }
     };
-  }, [readOnly]);
+  }, [isLocked, minHeight, placeholder]);
+
+  // Update dynamic lock status without rebuilding DOM
+  useEffect(() => {
+    if (mathfieldRef.current) {
+      mathfieldRef.current.readOnly = !!isLocked;
+      mathfieldRef.current.style.backgroundColor = isLocked ? "#f8fafc" : "#ffffff";
+      mathfieldRef.current.style.border = isLocked ? "1.5px dashed #cbd5e1" : "1.5px solid #cbd5e1";
+      mathfieldRef.current.style.cursor = isLocked ? "not-allowed" : "text";
+    }
+  }, [isLocked]);
 
   // Keep value in sync if changed from outside
   useEffect(() => {
@@ -131,7 +143,14 @@ export function EquationField({
   return (
     <div className={`space-y-2 ${className}`}>
       {/* Toolbar Equation Cepat ala Word */}
-      {!isLocked && (
+      {isLocked ? (
+        <div className="flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50/70 px-3.5 py-2 text-xs text-amber-900 shadow-2xs">
+          <Lock className="h-4 w-4 shrink-0 text-amber-600" />
+          <span>
+            Kotak pengerjaan dikunci (mode peninjauan). Hanya perangkat <strong>Juru Tulis</strong> yang dapat mengetik rumus dan jawaban.
+          </span>
+        </div>
+      ) : (
         <div className="flex flex-wrap items-center justify-between gap-1.5 rounded-xl border border-slate-200 bg-slate-50/90 p-2 text-xs shadow-2xs backdrop-blur-xs">
           {/* Kelompok Rumus Utama */}
           <div className="flex flex-wrap items-center gap-1">

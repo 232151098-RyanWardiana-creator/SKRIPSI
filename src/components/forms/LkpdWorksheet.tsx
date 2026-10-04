@@ -49,10 +49,12 @@ export function LkpdWorksheet({ lkpd, onKirim }: { lkpd: LkpdSiswa; onKirim: () 
   const [konfirmasiKirim, setKonfirmasiKirim] = useState(false);
   const [mengirim, setMengirim] = useState(false);
   const [mengalihkanJuruTulis, setMengalihkanJuruTulis] = useState(false);
+  const [modeUjiCoba, setModeUjiCoba] = useState(false);
 
   const punyaKelompok = Boolean(sesi?.kelompok);
   const isJuruTulis = punyaKelompok ? Boolean(sesi?.isJuruTulis) : true;
-  const inputDisabled = terkunci || (!isJuruTulis && punyaKelompok);
+  const bisaMengisi = !terkunci && (isJuruTulis || !punyaKelompok || modeUjiCoba);
+  const inputDisabled = !bisaMengisi;
 
   // Inisialisasi otomatis nama kelompok dari sesi jika belum terisi
   useEffect(() => {
@@ -66,6 +68,7 @@ export function LkpdWorksheet({ lkpd, onKirim }: { lkpd: LkpdSiswa; onKirim: () 
 
   const alihkanJuruTulis = async () => {
     setMengalihkanJuruTulis(true);
+    setModeUjiCoba(true); // Langsung buka kunci secara lokal agar responsif
     try {
       const res = await fetch("/api/siswa/kelompok/juru-tulis", { method: "POST" });
       if (res.ok) {
@@ -220,17 +223,65 @@ export function LkpdWorksheet({ lkpd, onKirim }: { lkpd: LkpdSiswa; onKirim: () 
           </div>
 
           {!isJuruTulis && !terkunci && (
-            <Button
-              variant="secondary"
-              onClick={alihkanJuruTulis}
-              disabled={mengalihkanJuruTulis}
-              className="text-xs font-bold border-amber-300 hover:bg-amber-100 text-amber-900"
-            >
-              {mengalihkanJuruTulis ? "Mengalihkan..." : "Ambil Alih sebagai Juru Tulis"}
-            </Button>
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                variant="secondary"
+                onClick={alihkanJuruTulis}
+                disabled={mengalihkanJuruTulis}
+                className="text-xs font-bold border-amber-300 hover:bg-amber-100 text-amber-900"
+              >
+                {mengalihkanJuruTulis ? "Mengalihkan..." : "Jadikan Perangkat Ini Juru Tulis"}
+              </Button>
+              {!modeUjiCoba && (
+                <Button
+                  variant="ghost"
+                  onClick={() => setModeUjiCoba(true)}
+                  className="text-xs font-semibold text-amber-900 border border-amber-300 hover:bg-amber-100"
+                >
+                  Buka Akses Ketik (Coba Mengisi)
+                </Button>
+              )}
+            </div>
           )}
         </div>
       )}
+
+      {/* Petunjuk Pengisian Lembar LKPD & Sub-Soal a/b */}
+      <section className="mb-6 rounded-2xl border border-blue-200 bg-gradient-to-r from-blue-50/90 via-sky-50/70 to-indigo-50/80 p-4 text-xs shadow-2xs">
+        <div className="flex items-start gap-3">
+          <div className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-blue-600 text-white font-bold text-sm shadow-xs">
+            💡
+          </div>
+          <div className="space-y-2 text-slate-800 flex-1">
+            <h4 className="font-bold text-blue-950 text-sm">
+              Petunjuk Pengisian Lembar Jawaban Matematika:
+            </h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+              <div className="rounded-xl border border-blue-200/80 bg-white/90 p-3 shadow-2xs">
+                <p className="font-bold text-blue-900 text-xs flex items-center gap-1.5">
+                  <span className="grid h-5 w-5 place-items-center rounded-md bg-blue-600 text-white text-[11px] font-black">a</span>
+                  Penurunan Rumus & Langkah Pengerjaan
+                </p>
+                <p className="text-[11px] text-slate-600 mt-1.5 leading-relaxed">
+                  Tuliskan cara pengerjaan atau rumus bertahap. Klik kotak putih, lalu ketik angka/rumus atau gunakan tombol bantuan di atas kotak (seperti tombol <strong>½</strong> untuk pecahan, <strong>x²</strong> untuk pangkat, dll).
+                </p>
+              </div>
+              <div className="rounded-xl border border-emerald-200/80 bg-white/90 p-3 shadow-2xs">
+                <p className="font-bold text-emerald-900 text-xs flex items-center gap-1.5">
+                  <span className="grid h-5 w-5 place-items-center rounded-md bg-emerald-600 text-white text-[11px] font-black">b</span>
+                  Jawaban Akhir & Satuan
+                </p>
+                <p className="text-[11px] text-slate-600 mt-1.5 leading-relaxed">
+                  Tuliskan kesimpulan hasil akhir beserta satuannya (contoh: <code>15 cm</code>, <code>3 : 4</code>, atau <code>Rp 12.000</code>) agar guru dapat menilai ketepatan jawaban kelompokmu.
+                </p>
+              </div>
+            </div>
+            <p className="text-[11px] text-blue-900/80 italic pt-0.5">
+              *Tips: Cukup klik kotak bertitik-titik pada rumus untuk mengisi angka. Jawaban otomatis tersimpan saat kamu mengetik.
+            </p>
+          </div>
+        </div>
+      </section>
 
       {/* ========================================================
           LEMBAR KERJA PESERTA DIDIK DIGITAL (KERTAS KERJA UTUH)

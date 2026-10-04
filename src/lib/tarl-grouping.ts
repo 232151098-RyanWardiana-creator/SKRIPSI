@@ -84,3 +84,42 @@ export function bagiKelompokTaRL(
 
   return hasilSiswa;
 }
+
+/**
+ * Helper pembagi kelompok yang mengembalikan format grup berstruktur (KelompokPreview)
+ * untuk antarmuka modal guru.
+ */
+export function kelompokkanTaRL(
+  siswaList: SiswaMock[],
+  ukuranKelompok: number = 5
+): HasilGrupTaRL[] {
+  const siswaUpdated = bagiKelompokTaRL(siswaList, ukuranKelompok);
+  const groupsMap = new Map<string, HasilGrupTaRL>();
+
+  siswaUpdated.forEach((s) => {
+    if (!s.kelompok) return;
+    if (!groupsMap.has(s.kelompok)) {
+      groupsMap.set(s.kelompok, {
+        nama: s.kelompok,
+        level: s.level || "belum_asesmen",
+        labelLevel:
+          s.level === "dasar"
+            ? "Perlu Bimbingan"
+            : s.level === "menengah"
+            ? "Berkembang"
+            : s.level === "mahir"
+            ? "Mahir"
+            : "Belum Asesmen",
+        anggota: [],
+        juruTulisId: "",
+      });
+    }
+    const grp = groupsMap.get(s.kelompok)!;
+    grp.anggota.push(s);
+    if (s.is_juru_tulis) {
+      grp.juruTulisId = s.id;
+    }
+  });
+
+  return Array.from(groupsMap.values());
+}

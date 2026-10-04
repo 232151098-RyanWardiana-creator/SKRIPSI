@@ -10,8 +10,9 @@ import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { DemoDataPanel } from "@/components/forms/DemoDataPanel";
 import { BagiKelompokTaRLModal } from "@/components/forms/BagiKelompokTaRLModal";
 import { ImportSiswaExcelModal } from "@/components/forms/ImportSiswaExcelModal";
+import { buatSiswaSimulasi30 } from "@/lib/demo-data";
 import { initials, generateUUID } from "@/lib/utils";
-import { Edit2, KeyRound, Plus, Printer, Trash2, UserPlus, X, Check, Copy, Users, FileSpreadsheet } from "lucide-react";
+import { Edit2, KeyRound, Plus, Printer, Trash2, UserPlus, X, Check, Copy, Users, FileSpreadsheet, Sparkles } from "lucide-react";
 
 export default function KelasPage() {
   const { classes: dataStore, updateClasses: setDataStore } = useClassStore();
@@ -205,6 +206,22 @@ export default function KelasPage() {
     setDataStore((prev) =>
       prev.map((item) =>
         item.kelas.id === activeKelas.id ? { ...item, siswa: siswaUpdated } : item
+      )
+    );
+  };
+
+  const handleMuat30Simulasi = () => {
+    if (!activeKelas) return;
+    const siswa30 = buatSiswaSimulasi30(activeKelas.id);
+    setDataStore((prev) =>
+      prev.map((item) =>
+        item.kelas.id === activeKelas.id
+          ? {
+              ...item,
+              siswa: siswa30,
+              kelas: { ...item.kelas, jumlah_siswa: siswa30.length },
+            }
+          : item
       )
     );
   };
@@ -449,8 +466,30 @@ export default function KelasPage() {
               </tbody>
             </table>
             {siswaList.length === 0 && (
-              <div className="py-12 text-center text-slate-500 font-medium">
-                <p>Belum ada peserta didik yang terdaftar di kelas {activeKelas.nama}.</p>
+              <div className="py-12 text-center text-slate-500 space-y-3">
+                <p className="font-semibold text-slate-700">
+                  Belum ada peserta didik yang terdaftar di kelas {activeKelas.nama}.
+                </p>
+                <p className="text-xs text-slate-500 max-w-md mx-auto">
+                  Untuk memulai simulasi kelompok TaRL atau asesmen, Anda dapat mengisi 30 siswa simulasi secara otomatis atau mengunggah data siswa via Excel.
+                </p>
+                <div className="flex flex-wrap items-center justify-center gap-2.5 pt-2">
+                  <Button
+                    onClick={handleMuat30Simulasi}
+                    className="text-xs font-bold gap-1.5 shadow-sm bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    <Sparkles className="h-4 w-4" />
+                    Isi 30 Siswa Simulasi (TaRL 3 Level)
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    onClick={() => setModalImportExcel(true)}
+                    className="text-xs font-semibold gap-1.5"
+                  >
+                    <FileSpreadsheet className="h-4 w-4 text-emerald-600" />
+                    Upload File Excel / CSV
+                  </Button>
+                </div>
               </div>
             )}
           </div>
@@ -696,6 +735,11 @@ export default function KelasPage() {
           siswaList={siswaList}
           namaKelas={activeKelas.nama}
           onTerapkan={handleTerapkanKelompok}
+          onMuatSimulasi={handleMuat30Simulasi}
+          onBukaUploadExcel={() => {
+            setModalBagiKelompok(false);
+            setModalImportExcel(true);
+          }}
         />
       )}
     </div>
