@@ -8,9 +8,9 @@ dan **gaya belajar VAK (Visual–Auditory–Kinestetik)**.
 
 - **Asesmen diagnostik** — guru membuat soal per indikator (IK-01 s.d. IK-05), siswa
   mengerjakan dengan timer, sistem menskor otomatis.
-- **Pemetaan TaRL berbasis indikator** — level Dasar/Menengah/Mahir ditentukan dari
-  penguasaan indikator prasyarat (IK-01, IK-02) dan jumlah indikator yang dikuasai
-  (ambang 60%), bukan hanya persentase skor total.
+- **Pemetaan TaRL berbasis skor** — level ditentukan dari skor total 10 butir soal penelitian
+  (< 60 Perlu Bimbingan, 60–79 Berkembang, ≥ 80 Mahir). Hasil per indikator tidak mengubah
+  level, tetapi dikirim ke AI sebagai indikator lemah tiap kelompok.
 - **Generator LKPD 3 level** — AI (via 9Router) menyusun LKPD per level dengan
   penyesuaian VAK dan target indikator lemah, plus fallback offline.
 - **Ekspor Word `.docx`** — persamaan matematika dikonversi ke **OMML** sehingga

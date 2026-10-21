@@ -1,4 +1,5 @@
 import type { AnswerKey, Indikator, IndicatorResult, Level } from "@/types";
+import { SOAL_PENELITIAN } from "@/constants/soal-penelitian";
 
 /**
  * DATA SIMULASI TERINTEGRASI untuk materi Rasio & Perbandingan (SMP Kelas VII).
@@ -104,94 +105,15 @@ interface DemoSoal {
   indikator: Indikator;
 }
 
-/** 10 butir soal asesmen kesiapan belajar materi Rasio (2 butir per IK-01 s.d IK-05). */
-export const DEMO_SOAL: DemoSoal[] = [
-  {
-    id: "s1",
-    nomor: 1,
-    indikator: "IK-01",
-    jawaban_benar: "b",
-    pertanyaan: "Di dalam kelas VII-A terdapat 15 siswa laki-laki dan 20 siswa perempuan. Rasio banyak siswa laki-laki terhadap siswa perempuan adalah ...",
-    pilihan: { a: "4 : 3", b: "3 : 4", c: "3 : 7", d: "15 : 35" },
-  },
-  {
-    id: "s2",
-    nomor: 2,
-    indikator: "IK-01",
-    jawaban_benar: "c",
-    pertanyaan: "Sebuah resep minuman memerlukan 2 gelas sirup untuk 5 gelas air. Rasio banyak air terhadap sirup adalah ...",
-    pilihan: { a: "2 : 5", b: "2 : 7", c: "5 : 2", d: "7 : 5" },
-  },
-  {
-    id: "s3",
-    nomor: 3,
-    indikator: "IK-02",
-    jawaban_benar: "a",
-    pertanyaan: "Bentuk paling sederhana dari rasio 24 : 36 adalah ...",
-    pilihan: { a: "2 : 3", b: "3 : 4", c: "4 : 6", d: "6 : 9" },
-  },
-  {
-    id: "s4",
-    nomor: 4,
-    indikator: "IK-02",
-    jawaban_benar: "b",
-    pertanyaan: "Rasio berikut yang senilai (ekuivalen) dengan 3 : 5 adalah ...",
-    pilihan: { a: "6 : 8", b: "9 : 15", c: "12 : 25", d: "15 : 20" },
-  },
-  {
-    id: "s5",
-    nomor: 5,
-    indikator: "IK-03",
-    jawaban_benar: "d",
-    pertanyaan: "Harga 4 kg apel adalah Rp60.000. Rasio satuan harga per kilogram apel tersebut adalah ...",
-    pilihan: { a: "Rp12.000 / kg", b: "Rp14.000 / kg", c: "Rp20.000 / kg", d: "Rp15.000 / kg" },
-  },
-  {
-    id: "s6",
-    nomor: 6,
-    indikator: "IK-03",
-    jawaban_benar: "c",
-    pertanyaan: "Mobil A menempuh 180 km dalam 3 jam, sedangkan Mobil B menempuh 200 km dalam 4 jam. Laju satuan yang tepat adalah ...",
-    pilihan: {
-      a: "Mobil A = 50 km/jam, Mobil B = 60 km/jam",
-      b: "Mobil A = 70 km/jam, Mobil B = 50 km/jam",
-      c: "Mobil A = 60 km/jam, Mobil B = 50 km/jam",
-      d: "Kedua mobil memiliki laju satuan yang sama",
-    },
-  },
-  {
-    id: "s7",
-    nomor: 7,
-    indikator: "IK-04",
-    jawaban_benar: "a",
-    pertanyaan: "Sebanyak 3 liter bensin cukup untuk menempuh jarak 45 km. Dengan perbandingan senilai, jarak tempuh jika menggunakan 7 liter bensin adalah ...",
-    pilihan: { a: "105 km", b: "95 km", c: "135 km", d: "120 km" },
-  },
-  {
-    id: "s8",
-    nomor: 8,
-    indikator: "IK-04",
-    jawaban_benar: "b",
-    pertanyaan: "Suatu renovasi ruang kelas dapat diselesaikan 6 pekerja dalam waktu 12 hari. Jika dikerjakan oleh 9 pekerja, waktu yang diperlukan adalah ...",
-    pilihan: { a: "6 hari", b: "8 hari", c: "10 hari", d: "18 hari" },
-  },
-  {
-    id: "s9",
-    nomor: 9,
-    indikator: "IK-05",
-    jawaban_benar: "c",
-    pertanyaan: "Jarak kota Tasikmalaya ke Bandung pada peta berskala 1 : 500.000 adalah 16 cm. Jarak sebenarnya antara kedua kota tersebut adalah ...",
-    pilihan: { a: "8 km", b: "800 km", c: "80 km", d: "50 km" },
-  },
-  {
-    id: "s10",
-    nomor: 10,
-    indikator: "IK-05",
-    jawaban_benar: "a",
-    pertanyaan: "Uang saku Rian dan Dimas berbanding 3 : 5. Jika jumlah uang saku mereka berdua adalah Rp80.000, selisih uang saku mereka adalah ...",
-    pilihan: { a: "Rp20.000", b: "Rp30.000", c: "Rp50.000", d: "Rp10.000" },
-  },
-];
+/** 10 butir soal asesmen kesiapan belajar materi Rasio (2 butir per IK-01 s.d IK-05), sama dengan soal penelitian. */
+export const DEMO_SOAL: DemoSoal[] = SOAL_PENELITIAN.map(({ id, nomor, indikator, jawaban_benar, pertanyaan, pilihan }) => ({
+  id,
+  nomor,
+  indikator,
+  jawaban_benar,
+  pertanyaan,
+  pilihan: { ...pilihan },
+}));
 
 export function levelDariSkor(skor: number): Level {
   if (skor >= 80) return "mahir";

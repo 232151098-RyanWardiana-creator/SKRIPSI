@@ -1,51 +1,36 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { indicatorResultsToLevel } from "./assessment-scoring.js";
-import type { Indikator, IndicatorResult, Level } from "../types/index.js";
+import { scoreAssessment, scoreToLevel } from "./assessment-scoring.js";
+import { DEMO_SOAL } from "./demo-data.js";
+import type { AnswerKey, Soal } from "../types/index.js";
 
-function makeDetail(overrides: Partial<Record<Indikator, IndicatorResult>>): Record<Indikator, IndicatorResult> {
-  const empty = { benar: 0, total: 0, dikuasai: false };
-  return {
-    "IK-01": empty,
-    "IK-02": empty,
-    "IK-03": empty,
-    "IK-04": empty,
-    "IK-05": empty,
-    ...overrides,
-  };
-}
-const m = { benar: 2, total: 3, dikuasai: true };
-const f = { benar: 1, total: 3, dikuasai: false };
+const soal: Soal[] = DEMO_SOAL.map(item => ({ ...item, asesmen_id: "uji" }));
 
-function level(detail: Record<Indikator, IndicatorResult>, score: number): Level {
-  return indicatorResultsToLevel(detail, score);
+function jawabBenar(jumlah: number, salahDulu: string[] = []): Record<string, AnswerKey> {
+  const urut = [...soal].sort((a, b) => Number(salahDulu.includes(b.indikator)) - Number(salahDulu.includes(a.indikator)));
+  return Object.fromEntries(urut.map((item, index) => {
+    const salah = (["a", "b", "c", "d"] as AnswerKey[]).find(key => key !== item.jawaban_benar)!;
+    return [item.id, index >= soal.length - jumlah ? item.jawaban_benar : salah];
+  }));
 }
 
-test("mahir: semua prerequisite dikuasai, >=4 dikuasai, skor >=80", () => {
-  assert.equal(level(makeDetail({ "IK-01": m, "IK-02": m, "IK-03": m, "IK-04": m }), 90), "mahir");
+test("batas skor: < 60 Perlu Bimbingan, 60–79 Berkembang, >= 80 Mahir", () => {
+  assert.equal(scoreToLevel(59), "dasar");
+  assert.equal(scoreToLevel(60), "menengah");
+  assert.equal(scoreToLevel(79), "menengah");
+  assert.equal(scoreToLevel(80), "mahir");
 });
 
-test("menengah: prereq ok tapi <4 indikator dikuasai", () => {
-  assert.equal(level(makeDetail({ "IK-01": m, "IK-02": m, "IK-03": m }), 85), "menengah");
+test("10 butir: 5 benar dasar, 6–7 benar menengah, 8 benar mahir", () => {
+  assert.equal(scoreAssessment(soal, jawabBenar(5)).level, "dasar");
+  assert.equal(scoreAssessment(soal, jawabBenar(6)).level, "menengah");
+  assert.equal(scoreAssessment(soal, jawabBenar(7)).level, "menengah");
+  assert.equal(scoreAssessment(soal, jawabBenar(8)).level, "mahir");
 });
 
-test("menengah: prereq ok, >=4 dikuasai, tapi skor <80", () => {
-  assert.equal(level(makeDetail({ "IK-01": m, "IK-02": m, "IK-03": m, "IK-04": m }), 79), "menengah");
-});
-
-test("dasar: salah satu prerequisite gagal", () => {
-  assert.equal(level(makeDetail({ "IK-01": f, "IK-02": m, "IK-03": m, "IK-04": m }), 90), "dasar");
-});
-
-test("dasar: total indikator dikuasai <=2", () => {
-  assert.equal(level(makeDetail({ "IK-01": m, "IK-02": m }), 90), "dasar");
-});
-
-test("prerequisite tidak diuji tidak dianggap gagal", () => {
-  assert.equal(level(makeDetail({ "IK-02": m, "IK-03": m, "IK-04": m, "IK-05": m }), 90), "mahir");
-});
-
-test("indikator tanpa soal tidak menghukum", () => {
-  assert.equal(level(makeDetail({ "IK-01": m, "IK-02": m }), 50), "dasar");
-  assert.equal(level(makeDetail({ "IK-01": m, "IK-02": m, "IK-03": m, "IK-04": m }), 90), "mahir");
+test("salah di indikator prasyarat tidak menurunkan level; tetap tercatat sebagai indikator lemah", () => {
+  const hasil = scoreAssessment(soal, jawabBenar(8, ["IK-01"]));
+  assert.equal(hasil.score, 80);
+  assert.equal(hasil.level, "mahir");
+  assert.equal(hasil.detail_per_indikator["IK-01"].dikuasai, false);
 });

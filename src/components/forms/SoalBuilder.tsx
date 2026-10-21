@@ -8,59 +8,25 @@ import type { Indikator } from "@/types";
 import { Check, Loader2, Plus, RefreshCw, Sparkles, Tag, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ModalGenerateAI } from "./ModalGenerateAI";
+import { SOAL_PENELITIAN } from "@/constants/soal-penelitian";
 
 type Difficulty = "mudah" | "sedang" | "sulit";
 export type SoalDraft = { id: number; pertanyaan: string; indikator: Indikator; pilihan: string[]; benar: number; pembahasan: string; diagram?: string; tingkat: Difficulty };
 export interface AsesmenDraft { judul: string; materi: string; durasi: number; soal: SoalDraft[]; kuesionerAktif: boolean }
 type AIQuestion = { pertanyaan:string; indikator_id:Indikator; pilihan:{A:string;B:string;C:string;D:string}; jawaban_benar:"A"|"B"|"C"|"D"; pembahasan:string; diagram?:string; tingkat_kesulitan:Difficulty };
 
-export const DEFAULT_SOAL: SoalDraft[] = [
-  {
-    id: 1,
-    pertanyaan: "Di kelas VII-A terdapat 15 siswa laki-laki dan 20 siswa perempuan. Rasio banyak siswa laki-laki terhadap perempuan adalah ...",
-    indikator: "IK-01",
-    pilihan: ["4 : 3", "3 : 4", "3 : 7", "15 : 35"],
-    benar: 1,
-    pembahasan: "Bandingkan 15 : 20. Bagi kedua bilangan dengan FPB (5) sehingga diperoleh 3 : 4.",
-    tingkat: "mudah",
-  },
-  {
-    id: 2,
-    pertanyaan: "Bentuk paling sederhana dari rasio 24 : 36 adalah ...",
-    indikator: "IK-02",
-    pilihan: ["2 : 3", "3 : 4", "4 : 6", "6 : 9"],
-    benar: 0,
-    pembahasan: "FPB dari 24 dan 36 adalah 12. Bagi 24:12 = 2 dan 36:12 = 3, diperoleh 2 : 3.",
-    tingkat: "mudah",
-  },
-  {
-    id: 3,
-    pertanyaan: "Harga 4 kg apel adalah Rp60.000. Rasio satuan harga per kilogram apel tersebut adalah ...",
-    indikator: "IK-03",
-    pilihan: ["Rp12.000/kg", "Rp14.000/kg", "Rp15.000/kg", "Rp20.000/kg"],
-    benar: 2,
-    pembahasan: "Rasio satuan = Rp60.000 : 4 kg = Rp15.000 per kg.",
-    tingkat: "sedang",
-  },
-  {
-    id: 4,
-    pertanyaan: "Sebuah motor membutuhkan 3 liter bensin untuk 75 km. Dengan perbandingan senilai, jarak tempuh dengan 6 liter bensin adalah ...",
-    indikator: "IK-04",
-    pilihan: ["120 km", "150 km", "175 km", "200 km"],
-    benar: 1,
-    pembahasan: "Laju = 75 / 3 = 25 km/liter. Jarak untuk 6 liter = 6 × 25 = 150 km.",
-    tingkat: "sedang",
-  },
-  {
-    id: 5,
-    pertanyaan: "Pada peta berskala 1 : 250.000, jarak dua kecamatan adalah 6 cm. Jarak sebenarnya adalah ...",
-    indikator: "IK-05",
-    pilihan: ["15 km", "25 km", "150 km", "250 km"],
-    benar: 0,
-    pembahasan: "Jarak sebenarnya = 6 cm × 250.000 = 1.500.000 cm = 15 km.",
-    tingkat: "sulit",
-  },
-];
+/** Soal default = 10 butir tes diagnostik penelitian (tetap; lihat constants/soal-penelitian.ts). */
+export const DEFAULT_SOAL: SoalDraft[] = SOAL_PENELITIAN.map(item => ({
+  id: item.nomor,
+  pertanyaan: item.pertanyaan,
+  indikator: item.indikator,
+  pilihan: [item.pilihan.a, item.pilihan.b, item.pilihan.c, item.pilihan.d],
+  benar: "abcd".indexOf(item.jawaban_benar),
+  pembahasan: item.pembahasan,
+  tingkat: item.tingkat,
+}));
+
+const salinSoalDefault = () => DEFAULT_SOAL.map(item => ({ ...item, pilihan: [...item.pilihan] }));
 
 const STORAGE_KEY = "lkpd_draft_asesmen_builder";
 
@@ -96,6 +62,8 @@ export function SoalBuilder({ onDraftChange }: SoalBuilderProps) {
         if (typeof data.materi === "string") setMateri(data.materi);
         if (typeof data.indikator === "string") setIndikator(data.indikator as Indikator | "SEMUA");
         if (typeof data.tingkat === "string") setTingkat(data.tingkat as Difficulty);
+      } else {
+        setSoal(salinSoalDefault());
       }
     } catch {
       // ignore
@@ -135,7 +103,7 @@ export function SoalBuilder({ onDraftChange }: SoalBuilderProps) {
     localStorage.removeItem(STORAGE_KEY);
     setJudul("Asesmen Kesiapan Belajar Rasio");
     setDurasi(30);
-    setSoal([]);
+    setSoal(salinSoalDefault());
     setKuesionerAktif(true);
     setMateri("Rasio (Perbandingan)");
     setIndikator("SEMUA");
@@ -143,7 +111,7 @@ export function SoalBuilder({ onDraftChange }: SoalBuilderProps) {
     setResetOpen(false);
   }
 
-  const useDefaultQuestions = () => setSoal(DEFAULT_SOAL.map(item => ({ ...item, pilihan: [...item.pilihan] })));
+  const useDefaultQuestions = () => setSoal(salinSoalDefault());
 
   async function generateWithConfig(aiConfig: {
     provider: string;
@@ -300,7 +268,7 @@ export function SoalBuilder({ onDraftChange }: SoalBuilderProps) {
                 <Button variant="secondary" disabled={loading || !materi.trim()} onClick={() => setModalAIOpen(true)}>
                   {loading && <Loader2 className="h-4 w-4 animate-spin" />}Generate AI
                 </Button>
-                <Button variant="ghost" onClick={useDefaultQuestions}>5 Contoh Rasio</Button>
+                <Button variant="ghost" onClick={useDefaultQuestions}>Muat 10 Soal Penelitian</Button>
               </div>
             </div>
           )}
@@ -414,7 +382,7 @@ export function SoalBuilder({ onDraftChange }: SoalBuilderProps) {
       <ConfirmModal
         isOpen={resetOpen}
         title="Reset draf asesmen?"
-        description="Semua perubahan pada draf soal akan dihapus dan Anda akan memulai dari daftar soal kosong."
+        description="Semua perubahan pada draf soal akan dihapus dan daftar soal kembali ke 10 soal penelitian bawaan."
         confirmText="Reset Draf"
         variant="danger"
         onConfirm={resetDraft}
