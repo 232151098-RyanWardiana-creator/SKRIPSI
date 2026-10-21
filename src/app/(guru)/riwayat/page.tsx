@@ -148,7 +148,8 @@ export default function RiwayatPage() {
                   <td className="py-3.5 px-3.5 border-r border-slate-200">
                     <button
                       aria-pressed={Boolean(item.dibagikan)}
-                      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold transition ${
+                      disabled={!item.dibagikan && item.status !== "Tervalidasi"}
+                      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold transition disabled:cursor-not-allowed disabled:opacity-50 ${
                         item.dibagikan
                           ? "bg-emerald-100 text-emerald-800 hover:bg-emerald-200"
                           : "bg-slate-100 text-slate-600 hover:bg-slate-200"
@@ -157,6 +158,8 @@ export default function RiwayatPage() {
                       title={
                         item.dibagikan
                           ? "Sedang dibagikan. Klik untuk menariknya dari siswa."
+                          : item.status !== "Tervalidasi"
+                          ? "Validasi LKPD ini di Generator terlebih dahulu sebelum dibagikan ke siswa."
                           : "Belum dibagikan. Klik agar siswa bisa mengisi LKPD ini."
                       }
                       type="button"

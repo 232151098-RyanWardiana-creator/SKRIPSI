@@ -103,7 +103,8 @@ export async function saveHistoryEntry(entry: LkpdHistoryEntry): Promise<boolean
     level: entry.level,
     konten: entry.content,
     status: entry.status === "Tervalidasi" ? "validated" : "draft",
-    dibagikan: entry.dibagikan !== undefined ? entry.dibagikan : entry.status === "Tervalidasi",
+    // Human-in-the-loop: hanya LKPD yang sudah divalidasi guru yang boleh dibagikan.
+    dibagikan: entry.status === "Tervalidasi" && (entry.dibagikan ?? true),
     model: entry.model,
     is_fallback: entry.isFallback ?? false,
     divalidasi_pada: entry.validatedAt ?? null,
@@ -122,14 +123,17 @@ export async function deleteHistoryEntry(id: string): Promise<boolean> {
   return true;
 }
 
-/** Menandai LKPD dibagikan / ditarik dari siswa. */
+/** Menandai LKPD dibagikan / ditarik dari siswa. Membagikan hanya berlaku untuk LKPD tervalidasi. */
 export async function setLkpdDibagikan(id: string, dibagikan: boolean): Promise<boolean> {
   if (!isSupabaseConfigured) return false;
-  const { error } = await supabase
+  let query = supabase
     .from("lkpd_documents")
     .update({ dibagikan })
     .eq("id", ensureUUID(id));
+  if (dibagikan) query = query.eq("status", "validated");
+  const { data, error } = await query.select("id");
   if (error) return console.error("Gagal mengubah status bagikan:", error), false;
+  if (!data?.length) return console.error("LKPD belum divalidasi guru, tidak dapat dibagikan."), false;
   await refreshHistory();
   return true;
 }

@@ -27,13 +27,13 @@ export async function PUT(
     return NextResponse.json({ error: "Jawaban tidak valid." }, { status: 400 });
   }
 
-  // LKPD harus benar-benar dibagikan ke kelas siswa ini.
+  // LKPD harus sudah divalidasi guru dan benar-benar dibagikan ke kelas siswa ini.
   const { data: dokumen } = await supabaseAdmin
     .from("lkpd_documents")
-    .select("id,kelas_id,dibagikan")
+    .select("id,kelas_id,dibagikan,status")
     .eq("id", lkpdId)
     .maybeSingle();
-  if (!dokumen || dokumen.kelas_id !== sesi.kelasId || !dokumen.dibagikan) {
+  if (!dokumen || dokumen.kelas_id !== sesi.kelasId || !dokumen.dibagikan || dokumen.status !== "validated") {
     return NextResponse.json({ error: "LKPD tidak tersedia untuk kelasmu." }, { status: 404 });
   }
 

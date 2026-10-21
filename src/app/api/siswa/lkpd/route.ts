@@ -22,6 +22,7 @@ export async function GET() {
     .select("id,judul,materi,level,konten,soal,dibuat_pada,kelas_nama")
     .eq("kelas_id", sesi.kelasId)
     .eq("dibagikan", true)
+    .eq("status", "validated")
     .order("dibuat_pada", { ascending: false });
 
   // Siswa yang belum asesmen belum punya level: tampilkan semua yang dibagikan
