@@ -29,7 +29,7 @@ export const SOAL_PENELITIAN: SoalPenelitian[] = [
     pertanyaan: "Di kelas VII-A SMP Negeri 3 Tasikmalaya terdapat 15 siswa laki-laki dan 20 siswa perempuan. Perbandingan banyak siswa laki-laki terhadap banyak seluruh siswa di kelas tersebut dalam bentuk paling sederhana adalah ...",
     pilihan: { a: "3 : 4", b: "3 : 7", c: "4 : 7", d: "15 : 20" },
     jawaban_benar: "b",
-    pembahasan: "Seluruh siswa = 15 + 20 = 35, sehingga 15 : 35 = 3 : 7. Pengecoh: 3 : 4 dan 15 : 20 = tertukar bagian-bagian dengan bagian-keseluruhan; 4 : 7 = memakai banyak siswa perempuan.",
+    pembahasan: "Seluruh siswa = 15 + 20 = 35, sehingga 15 : 35 = 3 : 7. Pengecoh: 3 : 4 dan 15 : 20 = membandingkan bagian dengan bagian (laki-laki : perempuan), bukan bagian dengan keseluruhan; 4 : 7 = memakai banyak siswa perempuan.",
   },
   {
     id: "s2",
@@ -74,7 +74,7 @@ export const SOAL_PENELITIAN: SoalPenelitian[] = [
       d: "Kedua mobil sama cepat, yaitu 60 km/jam",
     },
     jawaban_benar: "d",
-    pembahasan: "150 : 2,5 = 60 km/jam dan 210 : 3,5 = 60 km/jam. Pengecoh a dan b = hanya memperhatikan satu besaran; c = penalaran aditif (membandingkan selisih).",
+    pembahasan: "150 : 2,5 = 60 km/jam dan 210 : 3,5 = 60 km/jam. Pengecoh: A dan B = hanya memperhatikan satu besaran; C = penalaran aditif (membandingkan selisih).",
   },
   {
     id: "s6",
@@ -89,7 +89,7 @@ export const SOAL_PENELITIAN: SoalPenelitian[] = [
       d: "Keduanya sama hemat karena mereknya sama",
     },
     jawaban_benar: "c",
-    pembahasan: "A = Rp35.000 : 2,5 = Rp14.000/kg; B = Rp67.500 : 5 = Rp13.500/kg, sehingga B lebih hemat. Pengecoh: a = membandingkan harga total; b = salah menghitung harga satuan; d = tidak menghitung rasio satuan.",
+    pembahasan: "A = Rp35.000 : 2,5 = Rp14.000/kg; B = Rp67.500 : 5 = Rp13.500/kg, sehingga B lebih hemat. Pengecoh: A = membandingkan harga total; B = salah menghitung harga satuan; D = tidak menghitung rasio satuan.",
   },
   {
     id: "s7",
