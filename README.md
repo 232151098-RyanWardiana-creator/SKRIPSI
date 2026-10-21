@@ -9,7 +9,8 @@ dan **gaya belajar VAK (Visual–Auditory–Kinestetik)**.
 - **Asesmen diagnostik** — guru membuat soal per indikator (IK-01 s.d. IK-05), siswa
   mengerjakan dengan timer, sistem menskor otomatis.
 - **Pemetaan TaRL berbasis skor** — level ditentukan dari skor total 10 butir soal penelitian
-  (< 60 Perlu Bimbingan, 60–79 Berkembang, ≥ 80 Mahir). Hasil per indikator tidak mengubah
+  (0–65 Perlu Bimbingan, 66–85 Berkembang, 86–100 Mahir; diadaptasi dari interval nilai
+  Panduan Pembelajaran dan Asesmen BSKAP 2022, hlm. 35). Hasil per indikator tidak mengubah
   level, tetapi dikirim ke AI sebagai indikator lemah tiap kelompok.
 - **Generator LKPD 3 level** — AI (via 9Router) menyusun LKPD per level dengan
   penyesuaian VAK dan target indikator lemah, plus fallback offline.

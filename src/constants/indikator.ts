@@ -9,7 +9,7 @@ export const INDIKATOR_KOMPETENSI: Record<Indikator, string> = {
 };
 
 export const KLASIFIKASI_LEVEL: Record<Level, { min: number; max: number; label: string; color: string }> = {
-  dasar: { min: 0, max: 59, label: "Perlu Bimbingan", color: "#dc2626" },
-  menengah: { min: 60, max: 79, label: "Berkembang", color: "#d97706" },
-  mahir: { min: 80, max: 100, label: "Mahir", color: "#1d4ed8" },
+  dasar: { min: 0, max: 65, label: "Perlu Bimbingan", color: "#dc2626" },
+  menengah: { min: 66, max: 85, label: "Berkembang", color: "#d97706" },
+  mahir: { min: 86, max: 100, label: "Mahir", color: "#1d4ed8" },
 };

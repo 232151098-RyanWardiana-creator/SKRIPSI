@@ -10,19 +10,19 @@ export const KESIAPAN_BELAJAR_LABELS: Record<Level, {
   dasar: {
     kategori: "Perlu Bimbingan",
     tier: "Tier 1",
-    rentang: "0 - 59 Poin (< 60%)",
+    rentang: "0 - 65 Poin (≤ 6 dari 10 butir benar)",
     rekomendasiLkpd: "LKPD Varian A (Scaffolding Tinggi & Terstruktur)"
   },
   menengah: {
     kategori: "Berkembang",
     tier: "Tier 2",
-    rentang: "60 - 79 Poin (60% s.d. 79%)",
+    rentang: "66 - 85 Poin (7–8 dari 10 butir benar)",
     rekomendasiLkpd: "LKPD Varian B (Fading Guidance & Latihan Kontekstual)"
   },
   mahir: {
     kategori: "Mahir",
     tier: "Tier 3",
-    rentang: "80 - 100 Poin (>= 80%)",
+    rentang: "86 - 100 Poin (9–10 dari 10 butir benar)",
     rekomendasiLkpd: "LKPD Varian C (Tantangan HOTS & Eksplorasi Mandiri)"
   }
 };

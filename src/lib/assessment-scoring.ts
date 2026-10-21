@@ -4,8 +4,12 @@ import { KESIAPAN_BELAJAR_LABELS } from "@/types";
 export const INDICATORS: Indikator[] = ["IK-01", "IK-02", "IK-03", "IK-04", "IK-05"];
 const MASTERY_THRESHOLD = 0.6;
 
-/** Level kesiapan ditentukan dari skor total saja: < 60 Perlu Bimbingan, 60–79 Berkembang, ≥ 80 Mahir. */
-export function scoreToLevel(score: number): Level { return score < 60 ? "dasar" : score < 80 ? "menengah" : "mahir"; }
+/**
+ * Level kesiapan dari skor total saja, diadaptasi dari interval nilai tes pada Panduan Pembelajaran
+ * dan Asesmen (BSKAP, 2022, hlm. 35): 0–65 belum tuntas (Perlu Bimbingan), 66–85 tuntas (Berkembang),
+ * 86–100 tuntas dengan pengayaan (Mahir).
+ */
+export function scoreToLevel(score: number): Level { return score <= 65 ? "dasar" : score <= 85 ? "menengah" : "mahir"; }
 export const getLevelFromScore = scoreToLevel;
 
 export function getReadinessInfo(score: number) {

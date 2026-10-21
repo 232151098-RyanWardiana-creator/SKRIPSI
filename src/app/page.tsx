@@ -102,7 +102,7 @@ export default function Home() {
 
   // Diagnostic Score Calculator Logic
   const getScoreInfo = (score: number) => {
-    if (score < 60) {
+    if (score <= 65) {
       return {
         level: "dasar",
         label: "Perlu Bimbingan",
@@ -110,7 +110,7 @@ export default function Home() {
         desc: "Perlu bimbingan konsep perbandingan dasar, rasio ekuivalen, dan representasi konkret (Tier 1).",
       };
     }
-    if (score < 80) {
+    if (score <= 85) {
       return {
         level: "menengah",
         label: "Berkembang",

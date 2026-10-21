@@ -9,7 +9,7 @@ export interface HasilGrupTaRL {
 }
 
 /**
- * Mengelompokkan siswa secara homogen berdasarkan kesiapan belajar TaRL (BSKAP 2024).
+ * Mengelompokkan siswa secara homogen berdasarkan kesiapan belajar TaRL (BSKAP, 2022).
  * Siswa dalam tier yang sama dikelompokkan bersama, dan 1 siswa pertama di setiap
  * kelompok ditugaskan sebagai Juru Tulis (pemegang device pengerjaan).
  */

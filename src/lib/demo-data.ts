@@ -1,5 +1,6 @@
 import type { AnswerKey, Indikator, IndicatorResult, Level } from "@/types";
 import { SOAL_PENELITIAN } from "@/constants/soal-penelitian";
+import { scoreToLevel } from "@/lib/assessment-scoring";
 
 /**
  * DATA SIMULASI TERINTEGRASI untuk materi Rasio & Perbandingan (SMP Kelas VII).
@@ -115,11 +116,7 @@ export const DEMO_SOAL: DemoSoal[] = SOAL_PENELITIAN.map(({ id, nomor, indikator
   pilihan: { ...pilihan },
 }));
 
-export function levelDariSkor(skor: number): Level {
-  if (skor >= 80) return "mahir";
-  if (skor >= 60) return "menengah";
-  return "dasar";
-}
+export const levelDariSkor: (skor: number) => Level = scoreToLevel;
 
 /** Menilai satu siswa dengan aturan yang sama seperti asesmen sungguhan. */
 export function nilaiDemoSiswa(pilihan: AnswerKey[]) {
