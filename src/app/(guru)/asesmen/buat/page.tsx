@@ -34,7 +34,6 @@ export default function BuatAsesmenPage() {
       tanggal_mulai: now,
       tanggal_selesai: now,
       status: "aktif",
-      kuesionerAktif: draft.kuesionerAktif,
       dibuat_pada: now,
       soal: draft.soal.map((item, index) => ({
         id: `${id}-q${index + 1}`,

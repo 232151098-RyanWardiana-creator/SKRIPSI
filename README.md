@@ -1,8 +1,8 @@
 # LKPD-AI — Generator LKPD Matematika Berdiferensiasi Berbantuan AI
 
 Web-app untuk menyusun Lembar Kerja Peserta Didik (LKPD) matematika SMP Kelas VII
-berbasis **Teaching at the Right Level (TaRL)**, terintegrasi **asesmen diagnostik**
-dan **gaya belajar VAK (Visual–Auditory–Kinestetik)**.
+berbasis **Teaching at the Right Level (TaRL)** yang terintegrasi dengan **asesmen diagnostik**
+kesiapan belajar.
 
 ## Fitur
 
@@ -13,7 +13,7 @@ dan **gaya belajar VAK (Visual–Auditory–Kinestetik)**.
   Panduan Pembelajaran dan Asesmen BSKAP 2022, hlm. 35). Hasil per indikator tidak mengubah
   level, tetapi dikirim ke AI sebagai indikator lemah tiap kelompok.
 - **Generator LKPD 3 level** — AI (via 9Router) menyusun LKPD per level dengan
-  penyesuaian VAK dan target indikator lemah, plus fallback offline.
+  target indikator lemah, plus fallback offline.
 - **Ekspor Word `.docx`** — persamaan matematika dikonversi ke **OMML** sehingga
   terbaca sebagai *Equation* native di Microsoft Word.
 - **Rekap CSV** — unduh nilai per indikator + level TaRL untuk pengolahan data Bab IV.

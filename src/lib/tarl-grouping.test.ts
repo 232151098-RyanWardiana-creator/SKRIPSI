@@ -9,7 +9,6 @@ function buatMockSiswa(id: string, nama: string, level: "dasar" | "menengah" | "
     nama,
     kelas_id: "kelas-1",
     no_absen: 1,
-    gaya_belajar: "visual",
     level,
     bergabung: "2026-10-04",
   };

@@ -13,12 +13,12 @@ export async function GET() {
   const [{ data: asesmen }, { data: milikSaya }] = await Promise.all([
     supabaseAdmin
       .from("assessments")
-      .select("id,judul,materi,durasi_menit,status,kuesioner_aktif,soal,tanggal_mulai,tanggal_selesai,deskripsi")
+      .select("id,judul,materi,durasi_menit,status,soal,tanggal_mulai,tanggal_selesai,deskripsi")
       .eq("kelas_id", sesi.kelasId)
       .order("dibuat_pada", { ascending: false }),
     supabaseAdmin
       .from("submissions")
-      .select("id,asesmen_id,skor_total,level,gaya_belajar,jawaban,detail_per_indikator,selesai,dikerjakan_pada")
+      .select("id,asesmen_id,skor_total,level,jawaban,detail_per_indikator,selesai,dikerjakan_pada")
       .eq("siswa_id", sesi.siswaId),
   ]);
 

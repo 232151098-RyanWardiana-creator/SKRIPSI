@@ -19,7 +19,6 @@ export interface AsesmenSiswa {
   materi: string;
   durasi_menit: number;
   status: AssessmentStatus;
-  kuesioner_aktif: boolean;
   soal: SoalSiswa[];
   tanggal_mulai: string | null;
   tanggal_selesai: string | null;
@@ -31,7 +30,6 @@ export interface HasilSiswa {
   asesmen_id: string;
   skor_total: number;
   level: Level;
-  gaya_belajar: string | null;
   jawaban: Record<string, AnswerKey>;
   detail_per_indikator: Record<string, IndicatorResult>;
   selesai: boolean;
@@ -45,7 +43,6 @@ export interface DataSiswa {
     nama: string;
     noAbsen: number | null;
     level: string | null;
-    gayaBelajar: string | null;
     kelasNama: string;
     kodeKelas: string;
     kelompok?: string | null;

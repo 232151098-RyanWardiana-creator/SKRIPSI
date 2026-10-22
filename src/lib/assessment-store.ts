@@ -26,7 +26,6 @@ const toRow = (item: Asesmen) => ({
   kode_kelas: item.kode_kelas,
   durasi_menit: item.durasi_menit,
   status: item.status,
-  kuesioner_aktif: item.kuesionerAktif ?? true,
   soal: item.soal,
   dibuat_pada: item.dibuat_pada ?? new Date().toISOString(),
   tanggal_mulai: item.tanggal_mulai,
@@ -61,7 +60,6 @@ export async function refreshAssessments(): Promise<Asesmen[]> {
         tanggal_selesai: row.tanggal_selesai ?? "",
         status: row.status,
         soal: row.soal ?? [],
-        kuesionerAktif: row.kuesioner_aktif,
         deskripsi: row.deskripsi ?? undefined,
         dibuat_pada: row.dibuat_pada,
       }) as Asesmen

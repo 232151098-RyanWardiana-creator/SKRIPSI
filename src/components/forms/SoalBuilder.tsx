@@ -12,7 +12,7 @@ import { SOAL_PENELITIAN } from "@/constants/soal-penelitian";
 
 type Difficulty = "mudah" | "sedang" | "sulit";
 export type SoalDraft = { id: number; pertanyaan: string; indikator: Indikator; pilihan: string[]; benar: number; pembahasan: string; diagram?: string; tingkat: Difficulty };
-export interface AsesmenDraft { judul: string; materi: string; durasi: number; soal: SoalDraft[]; kuesionerAktif: boolean }
+export interface AsesmenDraft { judul: string; materi: string; durasi: number; soal: SoalDraft[] }
 type AIQuestion = { pertanyaan:string; indikator_id:Indikator; pilihan:{A:string;B:string;C:string;D:string}; jawaban_benar:"A"|"B"|"C"|"D"; pembahasan:string; diagram?:string; tingkat_kesulitan:Difficulty };
 
 /** Soal default = 10 butir tes diagnostik penelitian (tetap; lihat constants/soal-penelitian.ts). */
@@ -36,7 +36,6 @@ export function SoalBuilder({ onDraftChange }: SoalBuilderProps) {
   const [judul, setJudul] = useState("Asesmen Kesiapan Belajar Rasio");
   const [durasi, setDurasi] = useState(30);
   const [soal, setSoal] = useState<SoalDraft[]>([]);
-  const [kuesionerAktif, setKuesionerAktif] = useState(true);
   const [materi, setMateri] = useState("Rasio (Perbandingan)");
   const [indikator, setIndikator] = useState<Indikator | "SEMUA">("SEMUA");
   const [jumlah, setJumlah] = useState(3);
@@ -58,7 +57,6 @@ export function SoalBuilder({ onDraftChange }: SoalBuilderProps) {
         if (typeof data.judul === "string") setJudul(data.judul);
         if (typeof data.durasi === "number") setDurasi(data.durasi);
         if (Array.isArray(data.soal)) setSoal(data.soal);
-        if (typeof data.kuesionerAktif === "boolean") setKuesionerAktif(data.kuesionerAktif);
         if (typeof data.materi === "string") setMateri(data.materi);
         if (typeof data.indikator === "string") setIndikator(data.indikator as Indikator | "SEMUA");
         if (typeof data.tingkat === "string") setTingkat(data.tingkat as Difficulty);
@@ -76,17 +74,17 @@ export function SoalBuilder({ onDraftChange }: SoalBuilderProps) {
   useEffect(() => {
     if (!hydrated) return;
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ judul, durasi, soal, kuesionerAktif, materi, indikator, tingkat }));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ judul, durasi, soal, materi, indikator, tingkat }));
       setSaved(true);
     } catch {
       // ignore
     }
-  }, [hydrated, judul, durasi, soal, kuesionerAktif, materi, indikator, tingkat]);
+  }, [hydrated, judul, durasi, soal, materi, indikator, tingkat]);
   /* eslint-enable react-hooks/set-state-in-effect */
 
   useEffect(() => {
-    if (hydrated) onDraftChange?.({ judul, materi, durasi, soal, kuesionerAktif });
-  }, [durasi, hydrated, judul, kuesionerAktif, materi, onDraftChange, soal]);
+    if (hydrated) onDraftChange?.({ judul, materi, durasi, soal });
+  }, [durasi, hydrated, judul, materi, onDraftChange, soal]);
 
   const update = (id: number, field: keyof SoalDraft, value: SoalDraft[keyof SoalDraft]) =>
     setSoal(list => list.map(item => item.id === id ? { ...item, [field]: value } : item));
@@ -104,7 +102,6 @@ export function SoalBuilder({ onDraftChange }: SoalBuilderProps) {
     setJudul("Asesmen Kesiapan Belajar Rasio");
     setDurasi(30);
     setSoal(salinSoalDefault());
-    setKuesionerAktif(true);
     setMateri("Rasio (Perbandingan)");
     setIndikator("SEMUA");
     setAiMessage("");
@@ -160,7 +157,7 @@ export function SoalBuilder({ onDraftChange }: SoalBuilderProps) {
         const nextSoal = [...list, ...generated];
         localStorage.setItem(
           STORAGE_KEY,
-          JSON.stringify({ judul, durasi, soal: nextSoal, kuesionerAktif, materi, indikator, tingkat })
+          JSON.stringify({ judul, durasi, soal: nextSoal, materi, indikator, tingkat })
         );
         return nextSoal;
       });

@@ -61,7 +61,6 @@ CREATE TABLE IF NOT EXISTS students (
     no_absen INTEGER,
     nisn TEXT,
     level TEXT CHECK (level IN ('dasar', 'menengah', 'mahir')),
-    gaya_belajar TEXT CHECK (gaya_belajar IN ('visual', 'auditory', 'kinestetik')),
     pin_hash TEXT,
     pin_diperbarui_pada TIMESTAMPTZ,
     bergabung TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL,
@@ -102,7 +101,6 @@ CREATE TABLE IF NOT EXISTS assessments (
     kode_kelas TEXT NOT NULL,
     durasi_menit INTEGER DEFAULT 30 NOT NULL,
     status TEXT DEFAULT 'aktif' CHECK (status IN ('draft', 'aktif', 'selesai')),
-    kuesioner_aktif BOOLEAN DEFAULT true,
     soal JSONB DEFAULT '[]'::jsonb NOT NULL,
     tanggal_mulai TEXT,
     tanggal_selesai TEXT,
@@ -114,7 +112,6 @@ CREATE TABLE IF NOT EXISTS assessments (
 ALTER TABLE assessments ADD COLUMN IF NOT EXISTS tanggal_mulai TEXT;
 ALTER TABLE assessments ADD COLUMN IF NOT EXISTS tanggal_selesai TEXT;
 ALTER TABLE assessments ADD COLUMN IF NOT EXISTS deskripsi TEXT;
-ALTER TABLE assessments ADD COLUMN IF NOT EXISTS kuesioner_aktif BOOLEAN DEFAULT true;
 
 -- ------------------------------------------------------------------------------
 -- 6. HASIL PENGERJAAN ASESMEN DIAGNOSTIK
@@ -127,7 +124,6 @@ CREATE TABLE IF NOT EXISTS submissions (
     nama_siswa TEXT NOT NULL,
     skor_total NUMERIC DEFAULT 0 NOT NULL,
     level TEXT NOT NULL CHECK (level IN ('dasar', 'menengah', 'mahir')),
-    gaya_belajar TEXT CHECK (gaya_belajar IN ('visual', 'auditory', 'kinestetik')),
     jawaban JSONB DEFAULT '{}'::jsonb NOT NULL,
     detail_per_indikator JSONB DEFAULT '{}'::jsonb NOT NULL,
     selesai BOOLEAN DEFAULT false,

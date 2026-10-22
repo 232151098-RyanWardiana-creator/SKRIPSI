@@ -35,7 +35,7 @@ export async function refreshClasses(): Promise<ClassStoreEntry[]> {
   if (!isSupabaseConfigured) return cache;
   const [{ data: classes, error }, { data: students }] = await Promise.all([
     supabase.from("classes").select("id,nama,tahun_ajaran,kode_undangan,guru_id,wali_kelas,jumlah_siswa"),
-    supabase.from("students").select("id,kelas_id,nama,no_absen,nisn,level,gaya_belajar,bergabung,punya_pin,kelompok,is_juru_tulis"),
+    supabase.from("students").select("id,kelas_id,nama,no_absen,nisn,level,bergabung,punya_pin,kelompok,is_juru_tulis"),
   ]);
   if (error || !classes) {
     if (error) console.warn("Supabase refreshClasses error:", error);
@@ -94,7 +94,6 @@ export async function saveClasses(classes: ClassStoreEntry[]): Promise<boolean> 
       no_absen: item.no_absen,
       nisn: item.nisn ?? null,
       level: (item as SiswaMock & { level?: Level }).level ?? null,
-      gaya_belajar: item.gaya_belajar,
       bergabung: item.bergabung,
       kelompok: item.kelompok ?? null,
       is_juru_tulis: Boolean(item.is_juru_tulis),
@@ -164,7 +163,6 @@ export async function updateStudent(
       no_absen: next.no_absen,
       nisn: next.nisn ?? null,
       level: (next as SiswaMock & { level?: Level }).level ?? null,
-      gaya_belajar: next.gaya_belajar,
     })
     .eq("id", studentId);
   if (error) return console.error("Gagal memperbarui siswa:", error), false;

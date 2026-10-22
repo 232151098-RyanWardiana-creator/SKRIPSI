@@ -42,7 +42,6 @@ export async function POST(request: Request) {
   const clean = {
     materi: body.materi.trim(),
     jumlahAktivitas: body.jumlahAktivitas,
-    gayaBelajar: body.gayaBelajar,
     indikatorLemah: body.indikatorLemah.map((item) => item.trim()),
     promptTambahan: body.promptTambahan?.trim(),
     modePengerjaan: body.modePengerjaan === "kelompok" ? ("kelompok" as const) : ("individu" as const),

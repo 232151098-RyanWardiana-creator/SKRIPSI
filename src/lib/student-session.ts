@@ -12,7 +12,6 @@ export interface SesiSiswa {
   nama: string;
   noAbsen: number | null;
   level: string | null;
-  gayaBelajar: string | null;
   kelasNama: string;
   kodeKelas: string;
   kelompok?: string | null;

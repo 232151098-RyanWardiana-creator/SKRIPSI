@@ -33,7 +33,6 @@ export interface StudentSession {
   nama: string;
   noAbsen: number | null;
   level: string | null;
-  gayaBelajar: string | null;
   kelasNama: string;
   kodeKelas: string;
   kelompok?: string | null;
@@ -51,14 +50,14 @@ export async function getStudentSession(): Promise<StudentSession | null> {
 
   let queryRes = await supabaseAdmin
     .from("student_sessions")
-    .select("siswa_id,kelas_id,kedaluwarsa_pada,students(nama,no_absen,level,gaya_belajar,kelompok,is_juru_tulis),classes(nama,kode_undangan)")
+    .select("siswa_id,kelas_id,kedaluwarsa_pada,students(nama,no_absen,level,kelompok,is_juru_tulis),classes(nama,kode_undangan)")
     .eq("token", token)
     .maybeSingle();
 
   if (queryRes.error) {
     queryRes = await supabaseAdmin
       .from("student_sessions")
-      .select("siswa_id,kelas_id,kedaluwarsa_pada,students(nama,no_absen,level,gaya_belajar),classes(nama,kode_undangan)")
+      .select("siswa_id,kelas_id,kedaluwarsa_pada,students(nama,no_absen,level),classes(nama,kode_undangan)")
       .eq("token", token)
       .maybeSingle();
   }
@@ -75,8 +74,6 @@ export async function getStudentSession(): Promise<StudentSession | null> {
     nama: string;
     no_absen: number | null;
     level: string | null;
-    gayaBelajar?: string | null;
-    gaya_belajar?: string | null;
     kelompok?: string | null;
     is_juru_tulis?: boolean;
   } | null;
@@ -89,7 +86,6 @@ export async function getStudentSession(): Promise<StudentSession | null> {
     nama: student.nama,
     noAbsen: student.no_absen,
     level: student.level,
-    gayaBelajar: student.gaya_belajar ?? null,
     kelasNama: kelas?.nama ?? "",
     kodeKelas: kelas?.kode_undangan ?? "",
     kelompok: student.kelompok ?? null,

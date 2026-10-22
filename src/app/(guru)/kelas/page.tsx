@@ -137,7 +137,6 @@ export default function KelasPage() {
       nama: formNamaSiswa.trim(),
       nisn: formNisn.trim() || `006${String(Date.now()).slice(-7)}`,
       bergabung: new Date().toISOString().split("T")[0],
-      gaya_belajar: null,
     };
 
     setDataStore(prev =>
@@ -169,7 +168,6 @@ export default function KelasPage() {
           nama: s.nama.trim(),
           nisn: s.nisn.trim() || `006${String(Date.now() + idx).slice(-7)}`,
           bergabung: new Date().toISOString().split("T")[0],
-          gaya_belajar: null,
         }));
 
         const updatedSiswa = [...item.siswa, ...importedList].sort(

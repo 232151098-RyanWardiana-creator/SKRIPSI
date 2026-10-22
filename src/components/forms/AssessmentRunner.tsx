@@ -16,10 +16,8 @@ interface HasilAkhir {
 
 export function AssessmentRunner({
   asesmenId,
-  kuesionerAktif = true,
 }: {
   asesmenId: string;
-  kuesionerAktif?: boolean;
 }) {
   const [memuat, setMemuat] = useState(true);
   const [pesan, setPesan] = useState<string | null>(null);

@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { GayaBelajar, Level } from "@/types";
+import type { Level } from "@/types";
 import { KESIAPAN_BELAJAR_LABELS } from "@/types";
 import { ensureFullLkpdStructure } from "./lkpd-utils";
 
@@ -54,7 +54,6 @@ export interface AIResult {
 
 export interface GenerateLKPDParams {
   level: Level;
-  gayaBelajar?: GayaBelajar;
   indikatorLemah: string[];
   materi: string;
   jumlahAktivitas: number;

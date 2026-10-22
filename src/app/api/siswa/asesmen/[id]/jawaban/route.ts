@@ -75,7 +75,6 @@ export async function POST(request: Request, ctx: { params: Promise<{ id: string
       nama_siswa: sesi.nama,
       skor_total: selesai ? nilai.score : 0,
       level: selesai ? nilai.level : "dasar",
-      gaya_belajar: sesi.gayaBelajar,
       jawaban,
       detail_per_indikator: selesai ? nilai.detail_per_indikator : {},
       selesai,

@@ -44,7 +44,6 @@ export async function refreshSubmissions(): Promise<AssessmentSubmission[]> {
         asesmen_id: row.asesmen_id,
         skor_total: Number(row.skor_total) || 0,
         level: row.level,
-        gaya_belajar: row.gaya_belajar ?? undefined,
         detail_per_indikator: row.detail_per_indikator ?? {},
         jawaban: row.jawaban ?? {},
         selesai: Boolean(row.selesai),
