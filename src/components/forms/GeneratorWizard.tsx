@@ -55,6 +55,13 @@ const labels: Record<Level, string> = {
   menengah: "Berkembang",
   mahir: "Mahir",
 };
+/** Draf cadangan bawaan aplikasi (AI tidak tersambung), bukan buatan AI. */
+function isFallbackDoc(doc: Pick<DocumentState, "status" | "source" | "isFallback"> | undefined) {
+  return Boolean(doc && (doc.status === "fallback" || doc.source === "mock" || doc.isFallback));
+}
+
+type AIState = "ok" | "no-model" | "down";
+
 function isLevel(value: unknown): value is Level {
   return levels.includes(value as Level);
 }
@@ -150,6 +157,24 @@ export function GeneratorWizard() {
   const [saved, setSaved] = useState(() => getInitial()?.saved ?? false);
   const [resetOpen, setResetOpen] = useState(false);
   const [copiedKey, setCopiedKey] = useState(false);
+  const [aiStatus, setAiStatus] = useState<{ model: string; state: AIState } | null>(null);
+  const [statusCheck, setStatusCheck] = useState(0);
+
+  // Cek koneksi 9Router sebelum generate supaya guru tahu apakah draf akan benar-benar dibuat AI.
+  useEffect(() => {
+    if (step !== 2 || aiProvider !== "9router") return;
+    let cancelled = false;
+    fetch(`/api/ai/status?model=${encodeURIComponent(aiModel)}`, { cache: "no-store" })
+      .then((res) => res.json() as Promise<{ connected?: boolean; reachable?: boolean }>)
+      .then((data) => {
+        if (!cancelled) setAiStatus({ model: aiModel, state: data.connected ? "ok" : data.reachable ? "no-model" : "down" });
+      })
+      .catch(() => {
+        if (!cancelled) setAiStatus({ model: aiModel, state: "down" });
+      });
+    return () => { cancelled = true; };
+  }, [step, aiProvider, aiModel, statusCheck]);
+  const aiState: AIState | "checking" = aiStatus?.model === aiModel ? aiStatus.state : "checking";
 
   // Sinkronkan state ke memori modul & sessionStorage (0% localStorage, aman F5 dan aman navigasi)
   useEffect(() => {
@@ -635,6 +660,37 @@ export function GeneratorWizard() {
                   Ganti Model
                 </button>
               </div>
+
+              {aiProvider === "9router" && (
+                <div
+                  role="status"
+                  className={cn(
+                    "flex items-start justify-between gap-3 rounded-xl border p-3.5 text-xs",
+                    aiState === "ok" && "border-emerald-200 bg-emerald-50 text-emerald-900",
+                    aiState === "checking" && "border-slate-200 bg-slate-50 text-slate-600",
+                    aiState === "no-model" && "border-amber-300 bg-amber-50 text-amber-900",
+                    aiState === "down" && "border-red-200 bg-red-50 text-red-800"
+                  )}
+                >
+                  <p className="leading-relaxed">
+                    {aiState === "checking" && "Memeriksa koneksi AI..."}
+                    {aiState === "ok" && <><strong>AI tersambung.</strong> Draf akan dibuat oleh AI.</>}
+                    {aiState === "no-model" && <><strong>9Router tersambung, tetapi model ini tidak tersedia.</strong> Pilih model lain lewat Ganti Model.</>}
+                    {aiState === "down" && (
+                      <><strong>AI belum tersambung.</strong> Nyalakan 9Router di laptop, lalu klik Cek Ulang. Jika tetap dibuat, aplikasi mencoba layanan AI online cadangan; bila itu juga gagal, yang muncul adalah LKPD contoh bawaan (bukan buatan AI) yang tidak dapat divalidasi.</>
+                    )}
+                  </p>
+                  {aiState !== "checking" && (
+                    <button
+                      type="button"
+                      onClick={() => { setAiStatus(null); setStatusCheck((n) => n + 1); }}
+                      className="shrink-0 rounded-lg border border-slate-300 bg-white px-2.5 py-1 font-bold text-slate-700 hover:bg-slate-50 cursor-pointer"
+                    >
+                      Cek Ulang
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
@@ -695,13 +751,16 @@ export function GeneratorWizard() {
                 <div className="grid grid-cols-3 gap-2 pt-1">
                   {levels.map((lvl, idx) => {
                     const isDone = documents[lvl]?.status === "success" || documents[lvl]?.status === "fallback";
+                    const isBackup = isFallbackDoc(documents[lvl]);
                     const isCurrent = progress?.level === lvl;
                     return (
                       <div
                         key={lvl}
                         className={cn(
                           "rounded-xl border py-2.5 px-2 text-xs font-bold transition-all text-center",
-                          isDone
+                          isDone && isBackup
+                            ? "border-amber-300 bg-amber-50 text-amber-800"
+                            : isDone
                             ? "border-emerald-200 bg-emerald-50 text-emerald-800"
                             : isCurrent
                             ? "border-[#2563EB] bg-blue-50 text-[#2563EB] shadow-xs ring-1 ring-[#2563EB]"
@@ -759,7 +818,9 @@ export function GeneratorWizard() {
                         >
                           <div className="flex items-center justify-between">
                             <span>LKPD {labels[level]}</span>
-                            {documents[level]?.validatedAt && <span className="text-[10px] text-emerald-700 font-bold">✓ Tervalidasi</span>}
+                            {isFallbackDoc(documents[level]) ? (
+                              <span className="text-[10px] text-amber-700 font-bold">Cadangan</span>
+                            ) : documents[level]?.validatedAt && <span className="text-[10px] text-emerald-700 font-bold">✓ Tervalidasi</span>}
                           </div>
                         </button>
                       );
@@ -819,6 +880,16 @@ export function GeneratorWizard() {
 
               {current ? (
                 <article className="space-y-5">
+                  {isFallbackDoc(current) && (
+                    <div role="alert" className="rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
+                      <p className="font-black">Ini LKPD contoh bawaan aplikasi, bukan buatan AI.</p>
+                      <p className="mt-1 leading-relaxed">
+                        AI tidak tersambung saat draf ini dibuat. Nyalakan 9Router, lalu klik <strong>Regenerasi Level Ini</strong>.
+                        Draf cadangan tidak dapat divalidasi sehingga tidak dapat dibagikan ke siswa.
+                      </p>
+                      {current.error && <p className="mt-1 text-xs text-amber-800/80">Detail: {current.error}</p>}
+                    </div>
+                  )}
                   {/* KONDISI TAMPILAN BERDASARKAN TAB AKTIF: DOKUMEN SISWA ATAU KUNCI JAWABAN */}
                   {docType === "siswa" ? (
                     /* CARD 1: Dokumen LKPD Siswa (Bebas Kunci Jawaban) */
@@ -867,7 +938,12 @@ export function GeneratorWizard() {
                         <Button variant="ghost" disabled={!current.content} onClick={() => patch(active, { draft: current.content, editing: true })}>
                           <Edit3 className="h-4 w-4" />Edit Draf
                         </Button>
-                        <Button variant="secondary" disabled={!current.content.trim() || current.editing} onClick={() => setValidationLevel(active)}>
+                        <Button
+                          variant="secondary"
+                          disabled={!current.content.trim() || current.editing || isFallbackDoc(current)}
+                          title={isFallbackDoc(current) ? "Draf cadangan tidak dapat divalidasi. Regenerasi setelah AI tersambung." : undefined}
+                          onClick={() => setValidationLevel(active)}
+                        >
                           <CheckCircle className="h-4 w-4" />{current.validatedAt ? "Validasi Ulang" : "Validasi LKPD"}
                         </Button>
                         <Button disabled={!studentContent} onClick={() => print(active, "siswa")}>
@@ -1004,6 +1080,10 @@ export function GeneratorWizard() {
               <Button autoFocus variant="ghost" onClick={() => setValidationLevel(null)}>Kembali periksa</Button>
               <Button
                 onClick={() => {
+                  if (isFallbackDoc(documents[validationLevel])) {
+                    setValidationLevel(null);
+                    return;
+                  }
                   const now = new Date().toISOString();
                   patch(validationLevel, { validatedAt: now });
                   const doc = documents[validationLevel];

@@ -26,6 +26,9 @@ interface ModelsResponse {
 
 export interface AIStatus {
   connected: boolean;
+  /** Gateway 9Router menjawab, terlepas dari ada/tidaknya model yang diminta. */
+  reachable: boolean;
+  modelFound?: boolean;
   model: string;
   debug?: {
     baseUrl: string;
@@ -818,11 +821,14 @@ Format setiap objek dalam array:
   return chatCompletion(messages, mockSoalContent(params), aiOptions);
 }
 
-export async function getAIStatus(): Promise<AIStatus> {
-  const { baseUrl, apiKey, model } = config();
+export async function getAIStatus(requestedModel?: string): Promise<AIStatus> {
+  const cfg = config();
+  const { baseUrl, apiKey } = cfg;
+  const model = requestedModel?.trim() || cfg.model;
   const isDevelopment = process.env.NODE_ENV === "development";
   if (!apiKey) return {
     connected: false,
+    reachable: false,
     model,
     ...(isDevelopment && { debug: { baseUrl, modelsOk: false, error: "API key is not configured" } }),
   };
@@ -843,12 +849,15 @@ export async function getAIStatus(): Promise<AIStatus> {
     }
     return {
       connected: response.ok && modelFound !== false,
+      reachable: response.ok,
+      modelFound,
       model,
       ...(isDevelopment && { debug: { baseUrl, modelsOk: response.ok, modelFound, status: response.status } }),
     };
   } catch (error) {
     return {
       connected: false,
+      reachable: false,
       model,
       ...(isDevelopment && { debug: { baseUrl, modelsOk: false, error: safeError(error) } }),
     };

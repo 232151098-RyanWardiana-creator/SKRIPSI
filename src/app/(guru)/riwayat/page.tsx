@@ -144,6 +144,11 @@ export default function RiwayatPage() {
                     >
                       {item.status}
                     </span>
+                    {item.isFallback && (
+                      <span className="ml-1.5 rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-800" title="LKPD contoh bawaan aplikasi, bukan buatan AI">
+                        Cadangan
+                      </span>
+                    )}
                   </td>
                   <td className="py-3.5 px-3.5 border-r border-slate-200">
                     <button
